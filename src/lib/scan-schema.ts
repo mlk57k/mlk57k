@@ -31,4 +31,6 @@ export type SkinAnalysis = z.infer<typeof skinAnalysisSchema>;
 export type StoredScan = SkinAnalysis & {
   id: string;
   created_at: string;
+  /** Déblocage de la routine — piloté par Stripe (étape 5). Faux par défaut. */
+  unlocked?: boolean;
 };
