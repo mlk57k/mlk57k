@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 38 33% 98%;       /* beige-50 */
+    --foreground: 20 14% 12%;       /* brun très foncé */
+    --card: 38 33% 98%;
+    --card-foreground: 20 14% 12%;
+    --popover: 38 33% 98%;
+    --popover-foreground: 20 14% 12%;
+    --primary: 13 100% 65%;         /* coral-500 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 25% 92%;        /* beige-200 */
+    --secondary-foreground: 20 14% 20%;
+    --muted: 30 20% 94%;
+    --muted-foreground: 20 10% 50%;
+    --accent: 13 100% 65%;
+    --accent-foreground: 0 0% 100%;
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 13 100% 65%;
+    --radius: 0.875rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-beige-50 text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Blur paywall */
+  .blur-paywall {
+    filter: blur(6px);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Gradient text corail */
+  .text-gradient-coral {
+    background: linear-gradient(135deg, #FF6B52, #ff9a85);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Score ring */
+  .score-ring {
+    background: conic-gradient(#FF6B52 var(--score-deg, 0deg), #EFE7DC var(--score-deg, 0deg));
+  }
+}
