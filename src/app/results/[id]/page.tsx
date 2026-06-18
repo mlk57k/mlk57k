@@ -19,7 +19,27 @@ export default function ResultsPage({
   const [scan, setScan] = useState<StoredScan | null | undefined>(undefined);
 
   useEffect(() => {
-    setScan(getScan(id));
+    const local = getScan(id);
+    if (local) {
+      setScan(local);
+      return;
+    }
+    // Scan absent du sessionStorage (ex : lien depuis le dashboard) → API
+    fetch(`/api/scans/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) { setScan(null); return; }
+        setScan({
+          id: data.id,
+          skin_score: data.skin_score,
+          skin_age: data.skin_age,
+          issues: data.issues ?? [],
+          routine: data.routine ?? [],
+          unlocked: data.unlocked ?? false,
+          created_at: data.created_at,
+        });
+      })
+      .catch(() => setScan(null));
   }, [id]);
 
   // Chargement
