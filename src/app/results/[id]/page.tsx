@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sparkles, Camera, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,9 @@ import type { StoredScan } from "@/lib/scan-schema";
 export default function ResultsPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
   const [scan, setScan] = useState<StoredScan | null | undefined>(undefined);
 
   useEffect(() => {

@@ -39,6 +39,7 @@ export function getScan(id: string): StoredScan | null {
       ...result.data,
       id: parsed.id ?? id,
       created_at: parsed.created_at ?? new Date().toISOString(),
+      unlocked: parsed.unlocked === true,
     };
   } catch {
     return null;
