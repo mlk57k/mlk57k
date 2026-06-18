@@ -56,3 +56,15 @@ export function setLastScanId(id: string): void {
 export function getLastScanId(): string | null {
   return sessionStorage.getItem(LAST_SCAN_KEY);
 }
+
+/** Met à jour un champ d'un scan existant (ex: unlocked après paiement). */
+export function patchScan(id: string, patch: Partial<StoredScan>): void {
+  const raw = sessionStorage.getItem(KEY_PREFIX + id);
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    sessionStorage.setItem(KEY_PREFIX + id, JSON.stringify({ ...parsed, ...patch }));
+  } catch {
+    // ignore
+  }
+}
