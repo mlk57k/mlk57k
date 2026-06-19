@@ -45,7 +45,10 @@ export async function POST(request: Request) {
     if (error instanceof InvalidImageError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    console.error("[analyze-skin] erreur:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errName = error instanceof Error ? error.constructor.name : typeof error;
+    const errStack = error instanceof Error ? error.stack?.slice(0, 500) : "";
+    console.error("[analyze-skin] erreur:", errName, errMsg, errStack);
     return NextResponse.json(
       { error: "L'analyse a échoué. Réessaie dans un instant." },
       { status: 500 }
