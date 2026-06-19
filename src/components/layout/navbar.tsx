@@ -1,20 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 function GlowyLogo() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 cursor-pointer">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="16" fill="url(#logo-gradient)"/>
-        <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontStyle="italic" fontFamily="Georgia, serif">G</text>
-        <defs>
-          <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#E8826A"/>
-            <stop offset="100%" stopColor="#dc6b51"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <span className="font-display italic text-xl font-bold text-gradient-coral">glowy</span>
+    <Link href="/" className="flex items-center cursor-pointer">
+      <Image
+        src="/logo.png"
+        alt="Glowy"
+        width={120}
+        height={48}
+        className="h-12 w-auto object-contain"
+        priority
+      />
     </Link>
   );
 }

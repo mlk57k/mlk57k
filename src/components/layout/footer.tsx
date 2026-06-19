@@ -1,20 +1,17 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Shield } from "lucide-react";
 
 function GlowyLogo() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 cursor-pointer">
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="16" fill="url(#footer-logo-gradient)"/>
-        <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="700" fontStyle="italic" fontFamily="Georgia, serif">G</text>
-        <defs>
-          <linearGradient id="footer-logo-gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#E8826A"/>
-            <stop offset="100%" stopColor="#dc6b51"/>
-          </linearGradient>
-        </defs>
-      </svg>
-      <span className="font-display italic text-lg font-bold text-gradient-coral">glowy</span>
+    <Link href="/" className="flex items-center cursor-pointer">
+      <Image
+        src="/logo.png"
+        alt="Glowy"
+        width={100}
+        height={40}
+        className="h-10 w-auto object-contain"
+      />
     </Link>
   );
 }

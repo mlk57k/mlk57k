@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ConsentStep } from "@/components/scan/consent-step";
 import { CaptureStep } from "@/components/scan/capture-step";
 import { PreviewStep } from "@/components/scan/preview-step";
@@ -45,8 +46,8 @@ export default function ScanPage() {
     <div className="min-h-screen bg-cream-50">
       {/* Header minimal */}
       <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="font-display italic text-xl font-bold text-gradient-coral">glowy</span>
+        <Link href="/">
+          <Image src="/logo.png" alt="Glowy" width={100} height={40} className="h-10 w-auto object-contain" />
         </Link>
       </header>
 

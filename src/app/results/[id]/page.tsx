@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Camera, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScoreHero } from "@/components/results/score-hero";
@@ -81,8 +82,8 @@ export default function ResultsPage({
     <div className="min-h-screen bg-cream-50">
       {/* Header */}
       <header className="sticky top-0 z-10 px-4 h-14 flex items-center justify-center border-b border-cream-200/60 bg-white/80 backdrop-blur-xl">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="font-display italic text-xl font-bold text-gradient-coral">glowy</span>
+        <Link href="/">
+          <Image src="/logo.png" alt="Glowy" width={100} height={40} className="h-10 w-auto object-contain" />
         </Link>
       </header>
 
