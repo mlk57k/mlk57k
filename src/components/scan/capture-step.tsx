@@ -192,7 +192,6 @@ export function CaptureStep({
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="user"
         className="hidden"
         onChange={onFileSelected}
       />
