@@ -1,10 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { skinAnalysisSchema, type SkinAnalysis } from "@/lib/scan-schema";
 
 const client = new Anthropic();
 
-// Modèle vision demandé explicitement pour ce projet.
 const MODEL = "claude-sonnet-4-6";
 
 const SUPPORTED_MEDIA_TYPES = [
@@ -16,11 +14,6 @@ const SUPPORTED_MEDIA_TYPES = [
 
 type SupportedMediaType = (typeof SUPPORTED_MEDIA_TYPES)[number];
 
-/**
- * Prompt système : cadre le rôle, impose un ton jeune et bienveillant, et
- * interdit STRICTEMENT tout vocabulaire médical. Positionnement cosmétique
- * et informatif uniquement.
- */
 const SYSTEM_PROMPT = `Tu es l'IA de "Glowy", une app beauté qui donne un aperçu cosmétique de la peau à partir d'une selfie.
 
 Ton rôle : analyser visuellement l'apparence de la peau et produire une estimation ludique et bienveillante.
@@ -40,13 +33,50 @@ Donne :
 
 Si l'image ne montre pas clairement un visage, donne quand même une estimation prudente et encourageante.`;
 
-/** Erreur métier renvoyée quand l'image est invalide / illisible. */
+const ANALYZE_TOOL: Anthropic.Tool = {
+  name: "analyze_skin",
+  description: "Retourne l'analyse cosmétique de la peau",
+  input_schema: {
+    type: "object",
+    properties: {
+      skin_score: {
+        type: "number",
+        description: "Score global d'éclat de la peau, de 0 à 100",
+      },
+      skin_age: {
+        type: "number",
+        description: "Âge estimé de la peau en années",
+      },
+      issues: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            severity: { type: "number", description: "0 (parfait) à 100 (à chouchouter)" },
+            description: { type: "string" },
+          },
+          required: ["name", "severity", "description"],
+        },
+      },
+      routine: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            category: { type: "string" },
+            reason: { type: "string" },
+          },
+          required: ["category", "reason"],
+        },
+      },
+    },
+    required: ["skin_score", "skin_age", "issues", "routine"],
+  },
+};
+
 export class InvalidImageError extends Error {}
 
-/**
- * Décode une data URL base64 (`data:image/png;base64,xxxx`) en media type +
- * données base64 nues, en validant le format.
- */
 function parseDataUrl(dataUrl: string): { mediaType: SupportedMediaType; data: string } {
   const match = /^data:(image\/[a-zA-Z+]+);base64,(.+)$/.exec(dataUrl);
   if (!match) {
@@ -59,24 +89,15 @@ function parseDataUrl(dataUrl: string): { mediaType: SupportedMediaType; data: s
   return { mediaType: mediaType as SupportedMediaType, data };
 }
 
-/**
- * Analyse une selfie et renvoie une estimation cosmétique structurée.
- * La sortie est contrainte par structured outputs (output_config.format) ET
- * validée par Zod via le helper, donc la valeur retournée est garantie conforme.
- *
- * L'image n'est PAS persistée : elle ne quitte cette fonction que vers l'API
- * Anthropic, le temps de l'appel.
- */
 export async function analyzeSkin(imageDataUrl: string): Promise<SkinAnalysis> {
   const { mediaType, data } = parseDataUrl(imageDataUrl);
 
-  const response = await client.messages.parse({
+  const response = await client.messages.create({
     model: MODEL,
     max_tokens: 1500,
     system: SYSTEM_PROMPT,
-    output_config: {
-      format: zodOutputFormat(skinAnalysisSchema),
-    },
+    tools: [ANALYZE_TOOL],
+    tool_choice: { type: "tool", name: "analyze_skin" },
     messages: [
       {
         role: "user",
@@ -94,9 +115,15 @@ export async function analyzeSkin(imageDataUrl: string): Promise<SkinAnalysis> {
     ],
   });
 
-  if (!response.parsed_output) {
+  const toolBlock = response.content.find((b) => b.type === "tool_use");
+  if (!toolBlock || toolBlock.type !== "tool_use") {
     throw new Error("L'analyse n'a pas pu être structurée correctement.");
   }
 
-  return response.parsed_output;
+  const parsed = skinAnalysisSchema.safeParse(toolBlock.input);
+  if (!parsed.success) {
+    throw new Error("Réponse inattendue de l'IA.");
+  }
+
+  return parsed.data;
 }
