@@ -48,10 +48,10 @@ function Success() {
   }, [searchParams, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-glowy flex flex-col items-center justify-center gap-3">
-      <Sparkles className="h-10 w-10 text-coral-500 animate-pulse" />
+    <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center gap-3">
+      <Sparkles className="h-10 w-10 text-coral-400 animate-pulse" />
       <p className="font-semibold">Paiement confirmé !</p>
-      <p className="text-sm text-muted-foreground">Débloquage de ta routine…</p>
+      <p className="text-sm text-stone-500">Débloquage de ta routine…</p>
     </div>
   );
 }

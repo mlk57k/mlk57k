@@ -31,9 +31,9 @@ function CustomTooltip({
   const { value } = payload[0];
   const label = payload[0].payload.label;
   return (
-    <div className="rounded-xl border border-beige-200 bg-white/90 px-3 py-2 shadow-md text-sm">
-      <p className="text-muted-foreground text-xs mb-0.5">{label}</p>
-      <p className="font-bold text-coral-500">{value} / 100</p>
+    <div className="rounded-xl border border-cream-200 bg-white px-3 py-2 shadow-md text-sm">
+      <p className="text-stone-400 text-xs mb-0.5">{label}</p>
+      <p className="font-bold text-coral-400">{value} / 100</p>
     </div>
   );
 }
@@ -44,8 +44,8 @@ export function ScoreChart({ data }: ScoreChartProps) {
       <AreaChart data={data} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
         <defs>
           <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#FF6B52" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#FF6B52" stopOpacity={0} />
+            <stop offset="5%" stopColor="#E8826A" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#E8826A" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#e5e0d9" vertical={false} />
@@ -66,11 +66,11 @@ export function ScoreChart({ data }: ScoreChartProps) {
         <Area
           type="monotone"
           dataKey="score"
-          stroke="#FF6B52"
+          stroke="#E8826A"
           strokeWidth={2.5}
           fill="url(#scoreGrad)"
-          dot={{ fill: "#FF6B52", strokeWidth: 0, r: 4 }}
-          activeDot={{ r: 6, fill: "#FF6B52", strokeWidth: 2, stroke: "#fff" }}
+          dot={{ fill: "#E8826A", strokeWidth: 0, r: 4 }}
+          activeDot={{ r: 6, fill: "#E8826A", strokeWidth: 2, stroke: "#fff" }}
         />
       </AreaChart>
     </ResponsiveContainer>

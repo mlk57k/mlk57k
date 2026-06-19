@@ -23,7 +23,7 @@ export function RoutinePaywall({
         )}
       </div>
 
-      <div className="relative rounded-2xl overflow-hidden border border-beige-200">
+      <div className="relative rounded-2xl overflow-hidden border border-cream-200">
         {/* Contenu routine — flouté tant que non débloqué */}
         <div
           className={
@@ -36,11 +36,11 @@ export function RoutinePaywall({
           {routine.map((item) => (
             <div key={item.category} className="flex gap-3">
               <div className="h-8 w-8 rounded-lg bg-coral-50 flex items-center justify-center shrink-0">
-                <Sparkles className="h-4 w-4 text-coral-500" />
+                <Sparkles className="h-4 w-4 text-coral-400" />
               </div>
               <div>
                 <p className="font-semibold text-sm">{item.category}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-stone-500 leading-relaxed">
                   {item.reason}
                 </p>
               </div>
@@ -51,13 +51,13 @@ export function RoutinePaywall({
         {/* Overlay paywall */}
         {!unlocked && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-white/40 to-white/90 p-6 text-center">
-            <div className="h-12 w-12 rounded-2xl bg-coral-500 flex items-center justify-center mb-3 shadow-lg shadow-coral-200">
+            <div className="h-12 w-12 rounded-2xl bg-coral-400 flex items-center justify-center mb-3 shadow-lg shadow-coral-200">
               <Lock className="h-6 w-6 text-white" />
             </div>
             <p className="font-bold text-base mb-1">
               Débloque ta routine personnalisée complète
             </p>
-            <p className="text-sm text-muted-foreground mb-5 max-w-xs">
+            <p className="text-sm text-stone-500 mb-5 max-w-xs">
               Les soins exacts adaptés à ta peau, étape par étape, pour booster
               ton score.
             </p>
@@ -67,7 +67,7 @@ export function RoutinePaywall({
                 Débloquer ma routine
               </Link>
             </Button>
-            <p className="text-xs text-muted-foreground mt-3">
+            <p className="text-xs text-stone-400 mt-3">
               Essai gratuit de 7 jours · Sans engagement
             </p>
           </div>

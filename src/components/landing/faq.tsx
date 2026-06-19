@@ -31,20 +31,20 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section id="faq" className="py-16 sm:py-24 bg-white/50">
+    <section id="faq" className="py-20 sm:py-28 bg-cream-50">
       <div className="mx-auto max-w-2xl px-4">
         <div className="text-center mb-12">
-          <p className="text-coral-500 font-semibold text-sm uppercase tracking-widest mb-3">
+          <p className="text-coral-400 font-semibold text-xs uppercase tracking-[0.2em] mb-4">
             On répond à tout
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold">Questions fréquentes</h2>
+          <h2 className="font-display text-4xl sm:text-5xl font-bold text-stone-900">Questions fréquentes</h2>
         </div>
 
         <div className="space-y-3">
           {faqs.map((faq, i) => (
             <div
               key={i}
-              className="rounded-2xl border border-beige-200 bg-white overflow-hidden"
+              className="rounded-2xl border border-cream-200 bg-white overflow-hidden"
             >
               <button
                 className="w-full flex items-center justify-between p-5 text-left font-semibold text-sm sm:text-base"
@@ -53,13 +53,13 @@ export function FAQ() {
                 {faq.q}
                 <ChevronDown
                   className={cn(
-                    "h-5 w-5 text-coral-500 shrink-0 transition-transform duration-200",
+                    "h-5 w-5 text-coral-400 shrink-0 transition-transform duration-200",
                     open === i && "rotate-180"
                   )}
                 />
               </button>
               {open === i && (
-                <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                <div className="px-5 pb-5 text-sm text-stone-500 leading-relaxed">
                   {faq.a}
                 </div>
               )}

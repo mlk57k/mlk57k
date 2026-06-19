@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -81,10 +81,10 @@ function AuthForm() {
   return (
     <div className="animate-fade-up">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">
+        <h1 className="font-display text-2xl font-bold mb-2">
           {mode === "login" ? "Content de te revoir 👋" : "Crée ton compte"}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-stone-500 text-sm">
           {mode === "login"
             ? "Connecte-toi pour débloquer ta routine et suivre tes progrès."
             : "Quelques secondes et c'est parti pour ta routine perso."}
@@ -104,25 +104,25 @@ function AuthForm() {
       </Button>
 
       <div className="flex items-center gap-3 my-6">
-        <div className="h-px flex-1 bg-beige-200" />
-        <span className="text-xs text-muted-foreground">ou</span>
-        <div className="h-px flex-1 bg-beige-200" />
+        <div className="h-px flex-1 bg-cream-200" />
+        <span className="text-xs text-stone-400">ou</span>
+        <div className="h-px flex-1 bg-cream-200" />
       </div>
 
       <form onSubmit={handleEmail} className="space-y-3">
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
           <input
             type="email"
             required
             placeholder="ton@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-12 pl-10 pr-4 rounded-xl border border-beige-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-coral-500"
+            className="w-full h-12 pl-10 pr-4 rounded-xl border border-cream-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-coral-400"
           />
         </div>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
           <input
             type="password"
             required
@@ -130,7 +130,7 @@ function AuthForm() {
             placeholder="Mot de passe"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-12 pl-10 pr-4 rounded-xl border border-beige-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-coral-500"
+            className="w-full h-12 pl-10 pr-4 rounded-xl border border-cream-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-coral-400"
           />
         </div>
 
@@ -156,7 +156,7 @@ function AuthForm() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground mt-6">
+      <p className="text-center text-sm text-stone-500 mt-6">
         {mode === "login" ? "Pas encore de compte ?" : "Déjà un compte ?"}{" "}
         <button
           onClick={() => {
@@ -164,7 +164,7 @@ function AuthForm() {
             setError(null);
             setMessage(null);
           }}
-          className="text-coral-500 font-semibold hover:underline"
+          className="text-coral-400 font-semibold hover:underline"
         >
           {mode === "login" ? "Inscris-toi" : "Connecte-toi"}
         </button>
@@ -208,11 +208,10 @@ function GoogleIcon() {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen bg-gradient-glowy">
-      <header className="px-4 h-14 flex items-center justify-center border-b border-beige-200/50">
+    <div className="min-h-screen bg-cream-50">
+      <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <Sparkles className="h-5 w-5 text-coral-500" />
-          <span className="text-gradient-coral">Glowy</span>
+          <span className="font-display italic text-xl font-bold text-gradient-coral">glowy</span>
         </Link>
       </header>
       <main className="mx-auto max-w-md px-4 py-10">

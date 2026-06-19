@@ -128,7 +128,7 @@ export function CaptureStep({
           </button>
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mb-4">
+        <p className="text-center text-sm text-stone-500 mb-4">
           Centre ton visage dans le cadre, lumière naturelle de préférence ☀️
         </p>
 
@@ -143,8 +143,8 @@ export function CaptureStep({
   return (
     <div className="animate-fade-up">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2">Prends ta selfie</h1>
-        <p className="text-muted-foreground text-sm">
+        <h1 className="font-display text-2xl font-bold mb-2">Prends ta selfie</h1>
+        <p className="text-stone-500 text-sm">
           Caméra ou galerie, comme tu préfères. On t&apos;analyse ça en
           quelques secondes.
         </p>
@@ -159,14 +159,14 @@ export function CaptureStep({
       <div className="space-y-3">
         <button
           onClick={startCamera}
-          className="w-full flex items-center gap-4 rounded-2xl bg-white border border-beige-200 p-5 text-left hover:border-coral-300 transition-colors active:scale-[0.99]"
+          className="w-full flex items-center gap-4 rounded-2xl bg-white border border-cream-200 p-5 text-left hover:border-coral-300 transition-colors active:scale-[0.99]"
         >
           <div className="h-12 w-12 rounded-xl bg-coral-50 flex items-center justify-center shrink-0">
-            <Camera className="h-6 w-6 text-coral-500" />
+            <Camera className="h-6 w-6 text-coral-400" />
           </div>
           <div>
             <p className="font-semibold">Prendre une photo</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-stone-500">
               Avec la caméra frontale de ton téléphone
             </p>
           </div>
@@ -174,14 +174,14 @@ export function CaptureStep({
 
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="w-full flex items-center gap-4 rounded-2xl bg-white border border-beige-200 p-5 text-left hover:border-coral-300 transition-colors active:scale-[0.99]"
+          className="w-full flex items-center gap-4 rounded-2xl bg-white border border-cream-200 p-5 text-left hover:border-coral-300 transition-colors active:scale-[0.99]"
         >
-          <div className="h-12 w-12 rounded-xl bg-beige-100 flex items-center justify-center shrink-0">
-            <ImageIcon className="h-6 w-6 text-beige-500" />
+          <div className="h-12 w-12 rounded-xl bg-cream-100 flex items-center justify-center shrink-0">
+            <ImageIcon className="h-6 w-6 text-cream-500" />
           </div>
           <div>
             <p className="font-semibold">Choisir depuis la galerie</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-stone-500">
               Uploade une photo existante
             </p>
           </div>
@@ -196,7 +196,7 @@ export function CaptureStep({
         onChange={onFileSelected}
       />
 
-      <p className="mt-6 text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
+      <p className="mt-6 text-center text-xs text-stone-400 flex items-center justify-center gap-1">
         <RefreshCw className="h-3 w-3" />
         Tu pourras reprendre la photo avant l&apos;analyse
       </p>

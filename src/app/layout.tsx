@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
 });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://glowy.app";
@@ -50,7 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${geistSans.variable} antialiased`}>{children}</body>
+      <body className={`${dmSans.variable} ${playfair.variable} antialiased`}>{children}</body>
     </html>
   );
 }

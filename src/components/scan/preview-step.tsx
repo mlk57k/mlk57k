@@ -33,13 +33,13 @@ export function PreviewStep({
   return (
     <div className="animate-fade-up">
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold mb-2">Ta photo est prête ?</h1>
-        <p className="text-muted-foreground text-sm">
+        <h1 className="font-display text-2xl font-bold mb-2">Ta photo est prête ?</h1>
+        <p className="text-stone-500 text-sm">
           Vérifie qu&apos;on voit bien ton visage, puis lance l&apos;analyse.
         </p>
       </div>
 
-      <div className="relative rounded-3xl overflow-hidden bg-beige-100 aspect-[3/4] mb-6 border border-beige-200">
+      <div className="relative rounded-3xl overflow-hidden bg-cream-100 aspect-[3/4] mb-6 border border-cream-200">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <Image
           src={imageDataUrl}

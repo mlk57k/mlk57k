@@ -10,16 +10,16 @@ export default function Icon() {
         style={{
           width: 32,
           height: 32,
-          borderRadius: 8,
-          background: "linear-gradient(135deg, #FF6B52 0%, #ff9a87 100%)",
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #E8826A 0%, #dc6b51 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           color: "white",
-          fontWeight: 800,
-          fontSize: 18,
-          fontFamily: "sans-serif",
-          letterSpacing: "-0.5px",
+          fontSize: 20,
+          fontWeight: 700,
+          fontStyle: "italic",
+          fontFamily: "Georgia, serif",
         }}
       >
         G

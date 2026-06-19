@@ -24,7 +24,7 @@ function SeverityBar({ severity, delay }: { severity: number; delay: number }) {
   }, [severity, delay]);
 
   return (
-    <div className="h-2 rounded-full bg-beige-200 overflow-hidden">
+    <div className="h-2 rounded-full bg-cream-200 overflow-hidden">
       <div
         className={`h-full rounded-full bg-gradient-to-r ${severityColor(
           severity
@@ -43,16 +43,16 @@ export function IssuesList({ issues }: { issues: Issue[] }) {
         {issues.map((issue, i) => (
           <div
             key={issue.name}
-            className="rounded-2xl bg-white border border-beige-200 p-4"
+            className="rounded-2xl bg-white border border-cream-200 p-4"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-semibold text-sm">{issue.name}</span>
-              <span className="text-xs font-medium text-muted-foreground">
+              <span className="text-xs font-medium text-stone-400">
                 {severityTag(issue.severity)}
               </span>
             </div>
             <SeverityBar severity={issue.severity} delay={200 + i * 120} />
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            <p className="text-sm text-stone-500 mt-2 leading-relaxed">
               {issue.description}
             </p>
           </div>

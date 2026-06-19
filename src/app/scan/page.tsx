@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { ConsentStep } from "@/components/scan/consent-step";
 import { CaptureStep } from "@/components/scan/capture-step";
 import { PreviewStep } from "@/components/scan/preview-step";
@@ -43,12 +42,11 @@ export default function ScanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-glowy">
+    <div className="min-h-screen bg-cream-50">
       {/* Header minimal */}
-      <header className="px-4 h-14 flex items-center justify-center border-b border-beige-200/50">
+      <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <Sparkles className="h-5 w-5 text-coral-500" />
-          <span className="text-gradient-coral">Glowy</span>
+          <span className="font-display italic text-xl font-bold text-gradient-coral">glowy</span>
         </Link>
       </header>
 
@@ -60,8 +58,8 @@ export default function ScanPage() {
               key={s}
               className={`h-1.5 rounded-full transition-all ${
                 step === s
-                  ? "w-8 bg-coral-500"
-                  : "w-1.5 bg-beige-300"
+                  ? "w-8 bg-coral-400"
+                  : "w-1.5 bg-cream-300"
               }`}
             />
           ))}

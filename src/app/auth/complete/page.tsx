@@ -45,9 +45,9 @@ function Complete() {
   }, [next, router]);
 
   return (
-    <div className="min-h-screen bg-gradient-glowy flex flex-col items-center justify-center gap-3">
-      <Sparkles className="h-8 w-8 text-coral-500 animate-pulse" />
-      <p className="text-muted-foreground text-sm">On prépare ton espace…</p>
+    <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center gap-3">
+      <Sparkles className="h-8 w-8 text-coral-400 animate-pulse" />
+      <p className="text-stone-500 text-sm">On prépare ton espace…</p>
     </div>
   );
 }

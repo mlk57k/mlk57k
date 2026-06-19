@@ -29,10 +29,10 @@ export function ScoreHero({
 
   return (
     <div className="text-center">
-      <p className="text-coral-500 font-semibold text-sm uppercase tracking-widest mb-1">
+      <p className="text-coral-400 font-semibold text-xs uppercase tracking-[0.2em] mb-1">
         Ton aperçu de peau
       </p>
-      <p className="text-muted-foreground text-sm mb-6">
+      <p className="text-stone-500 text-sm mb-6">
         {scoreLabel(score)}
       </p>
 
@@ -42,22 +42,22 @@ export function ScoreHero({
           className="score-ring h-full w-full rounded-full transition-all duration-1000 ease-out"
           style={{ ["--score-deg" as string]: `${deg}deg` }}
         />
-        <div className="absolute inset-3 rounded-full bg-beige-50 flex flex-col items-center justify-center">
-          <span className="text-6xl font-bold text-gradient-coral leading-none">
+        <div className="absolute inset-3 rounded-full bg-white flex flex-col items-center justify-center">
+          <span className="text-6xl font-display font-bold text-gradient-coral leading-none">
             {score}
           </span>
-          <span className="text-xs text-muted-foreground mt-1">/ 100</span>
-          <span className="text-[11px] text-muted-foreground mt-0.5">
+          <span className="text-xs text-stone-400 mt-1">/ 100</span>
+          <span className="text-[11px] text-stone-400 mt-0.5">
             score de peau
           </span>
         </div>
       </div>
 
       {/* Âge estimé */}
-      <div className="inline-flex items-baseline gap-2 rounded-2xl bg-white border border-beige-200 px-6 py-3 shadow-sm">
-        <span className="text-sm text-muted-foreground">Âge estimé de ta peau</span>
-        <span className="text-3xl font-bold">{age}</span>
-        <span className="text-sm font-medium text-coral-500">ans</span>
+      <div className="inline-flex items-baseline gap-2 rounded-2xl bg-white border border-cream-200 px-6 py-3 shadow-sm">
+        <span className="text-sm text-stone-500">Âge estimé de ta peau</span>
+        <span className="text-3xl font-display font-bold text-stone-900">{age}</span>
+        <span className="text-sm font-medium text-coral-400">ans</span>
       </div>
     </div>
   );
