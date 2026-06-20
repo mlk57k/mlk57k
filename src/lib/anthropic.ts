@@ -1,8 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { skinAnalysisSchema, type SkinAnalysis } from "@/lib/scan-schema";
 
-const client = new Anthropic();
-
 const MODEL = "claude-3-5-sonnet-20241022";
 
 const SUPPORTED_MEDIA_TYPES = [
@@ -89,7 +87,8 @@ function parseDataUrl(dataUrl: string): { mediaType: SupportedMediaType; data: s
   return { mediaType: mediaType as SupportedMediaType, data };
 }
 
-export async function analyzeSkin(imageDataUrl: string): Promise<SkinAnalysis> {
+export async function analyzeSkin(imageDataUrl: string, apiKey: string): Promise<SkinAnalysis> {
+  const client = new Anthropic({ apiKey });
   const { mediaType, data } = parseDataUrl(imageDataUrl);
 
   const response = await client.messages.create({

@@ -9,7 +9,16 @@ export const dynamic = "force-dynamic";
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // ~8 Mo
 
 export async function POST(request: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const apiKey =
+    process.env.ANTHROPIC_API_KEY ||
+    process.env.ANTHROPIC_API_Key ||
+    process.env.anthropic_api_key;
+
+  if (!apiKey) {
+    const available = Object.keys(process.env)
+      .filter((k) => k.toLowerCase().includes("anthropic"))
+      .join(", ");
+    console.error("[analyze-skin] clé API manquante. Variables anthropic trouvées:", available || "aucune");
     return NextResponse.json(
       { error: "Service indisponible pour le moment." },
       { status: 503 }
@@ -39,7 +48,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const analysis = await analyzeSkin(image);
+    const analysis = await analyzeSkin(image, apiKey);
     // On ne renvoie QUE le résultat — l'image n'est jamais stockée.
     return NextResponse.json(analysis, { status: 200 });
   } catch (error) {
