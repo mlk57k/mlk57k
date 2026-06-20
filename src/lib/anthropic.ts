@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { skinAnalysisSchema, type SkinAnalysis } from "@/lib/scan-schema";
 
-const MODEL = "claude-3-5-sonnet-20241022";
+const MODEL = "claude-sonnet-4-6";
 
 const SUPPORTED_MEDIA_TYPES = [
   "image/jpeg",

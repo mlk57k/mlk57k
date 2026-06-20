@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const errStack = error instanceof Error ? error.stack?.slice(0, 500) : "";
     console.error("[analyze-skin] erreur:", errName, errMsg, errStack);
     return NextResponse.json(
-      { error: `Erreur: ${errName} — ${errMsg}` },
+      { error: "L'analyse a échoué. Réessaie dans un instant." },
       { status: 500 }
     );
   }
