@@ -3,32 +3,42 @@
 import { useEffect, useState } from "react";
 import type { Issue } from "@/lib/scan-schema";
 
-/** Couleur de la barre selon la sévérité (vert = top, corail = à chouchouter). */
-function severityColor(severity: number): string {
-  if (severity <= 30) return "from-green-400 to-green-500";
-  if (severity <= 60) return "from-amber-400 to-amber-500";
-  return "from-coral-400 to-coral-500";
-}
-
-function severityTag(severity: number): string {
-  if (severity <= 30) return "Au top";
-  if (severity <= 60) return "Correct";
-  return "À chouchouter";
+function severityMeta(severity: number) {
+  if (severity <= 30)
+    return {
+      border: "border-l-emerald-400",
+      bar: "bg-emerald-400",
+      label: "Au top",
+      labelClass: "text-emerald-700 bg-emerald-50",
+    };
+  if (severity <= 60)
+    return {
+      border: "border-l-amber-400",
+      bar: "bg-amber-400",
+      label: "Correct",
+      labelClass: "text-amber-700 bg-amber-50",
+    };
+  return {
+    border: "border-l-coral-400",
+    bar: "bg-coral-400",
+    label: "À chouchouter",
+    labelClass: "text-coral-700 bg-coral-50",
+  };
 }
 
 function SeverityBar({ severity, delay }: { severity: number; delay: number }) {
   const [width, setWidth] = useState(0);
+  const meta = severityMeta(severity);
+
   useEffect(() => {
     const t = setTimeout(() => setWidth(severity), delay);
     return () => clearTimeout(t);
   }, [severity, delay]);
 
   return (
-    <div className="h-2 rounded-full bg-cream-200 overflow-hidden">
+    <div className="h-1.5 rounded-full bg-cream-100 overflow-hidden">
       <div
-        className={`h-full rounded-full bg-gradient-to-r ${severityColor(
-          severity
-        )} transition-all duration-700 ease-out`}
+        className={`h-full rounded-full ${meta.bar} transition-all duration-700 ease-out`}
         style={{ width: `${width}%` }}
       />
     </div>
@@ -38,25 +48,34 @@ function SeverityBar({ severity, delay }: { severity: number; delay: number }) {
 export function IssuesList({ issues }: { issues: Issue[] }) {
   return (
     <section>
-      <h2 className="text-lg font-bold mb-4">Ce que l&apos;IA a remarqué</h2>
-      <div className="space-y-4">
-        {issues.map((issue, i) => (
-          <div
-            key={issue.name}
-            className="rounded-2xl bg-white border border-cream-200 p-4"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-semibold text-sm">{issue.name}</span>
-              <span className="text-xs font-medium text-stone-400">
-                {severityTag(issue.severity)}
-              </span>
+      <h2 className="font-display text-xl font-bold text-stone-900 mb-4">
+        Ce que l&apos;IA a remarqué
+      </h2>
+      <div className="space-y-3">
+        {issues.map((issue, i) => {
+          const meta = severityMeta(issue.severity);
+          return (
+            <div
+              key={issue.name}
+              className={`rounded-2xl bg-white border border-cream-200 border-l-4 ${meta.border} p-4`}
+            >
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="font-semibold text-sm text-stone-900">
+                  {issue.name}
+                </span>
+                <span
+                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${meta.labelClass}`}
+                >
+                  {meta.label}
+                </span>
+              </div>
+              <SeverityBar severity={issue.severity} delay={250 + i * 120} />
+              <p className="text-sm text-stone-500 mt-2.5 leading-relaxed">
+                {issue.description}
+              </p>
             </div>
-            <SeverityBar severity={issue.severity} delay={200 + i * 120} />
-            <p className="text-sm text-stone-500 mt-2 leading-relaxed">
-              {issue.description}
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

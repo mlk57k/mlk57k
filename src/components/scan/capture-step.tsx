@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, ImageIcon, RefreshCw, X } from "lucide-react";
+import { Camera, ImageIcon, RefreshCw, Sun, X } from "lucide-react";
 
 type Mode = "choice" | "camera";
 
@@ -128,8 +128,9 @@ export function CaptureStep({
           </button>
         </div>
 
-        <p className="text-center text-sm text-stone-500 mb-4">
-          Centre ton visage dans le cadre, lumière naturelle de préférence ☀️
+        <p className="text-center text-sm text-stone-500 mb-4 flex items-center justify-center gap-1.5">
+          <Sun className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          Centre ton visage dans le cadre, lumière naturelle de préférence
         </p>
 
         <Button size="lg" className="w-full" onClick={takePhoto}>

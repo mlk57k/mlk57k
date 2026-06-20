@@ -3,8 +3,8 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Mail, Lock, Loader2 } from "lucide-react";
+import { GlowyLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -48,7 +48,7 @@ function AuthForm() {
           window.location.assign(completeUrl);
         } else {
           setMessage(
-            "Vérifie tes emails pour confirmer ton compte, puis reviens te connecter ✨"
+            "Vérifie tes emails pour confirmer ton compte, puis reviens te connecter."
           );
           setLoading(false);
         }
@@ -83,7 +83,7 @@ function AuthForm() {
     <div className="animate-fade-up">
       <div className="text-center mb-8">
         <h1 className="font-display text-2xl font-bold mb-2">
-          {mode === "login" ? "Content de te revoir 👋" : "Crée ton compte"}
+          {mode === "login" ? "Content de te revoir" : "Crée ton compte"}
         </h1>
         <p className="text-stone-500 text-sm">
           {mode === "login"
@@ -212,7 +212,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-cream-50">
       <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60">
         <Link href="/">
-          <Image src="/logo.png" alt="Glowy" width={100} height={40} className="h-10 w-auto object-contain" />
+          <GlowyLogo size="md" />
         </Link>
       </header>
       <main className="mx-auto max-w-md px-4 py-10">

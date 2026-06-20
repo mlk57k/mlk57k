@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Lock, Sparkles } from "lucide-react";
 
 export function Hero() {
   return (
@@ -97,8 +97,9 @@ export function Hero() {
           </div>
 
           {/* Label sous la carte */}
-          <p className="mt-4 text-center text-xs text-stone-400 font-medium">
-            🔒 Routine débloquée après analyse
+          <p className="mt-4 text-center text-xs text-stone-400 font-medium flex items-center justify-center gap-1.5">
+            <Lock className="h-3 w-3" />
+            Routine débloquée après analyse
           </p>
         </div>
       </div>

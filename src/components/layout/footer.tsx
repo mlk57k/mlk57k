@@ -1,20 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Shield } from "lucide-react";
-
-function GlowyLogo() {
-  return (
-    <Link href="/" className="flex items-center cursor-pointer">
-      <Image
-        src="/logo.png"
-        alt="Glowy"
-        width={100}
-        height={40}
-        className="h-10 w-auto object-contain"
-      />
-    </Link>
-  );
-}
+import { GlowyLogo } from "@/components/ui/logo";
 
 export function Footer() {
   return (
@@ -22,17 +8,33 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
           <div>
-            <GlowyLogo />
+            <GlowyLogo size="md" />
             <p className="text-xs text-stone-400 max-w-xs mt-3 leading-relaxed">
-              Aperçu cosmétique de ta peau par IA. Usage informatif uniquement, pas un avis médical.
+              Aperçu cosmétique de ta peau par IA. Usage informatif uniquement,
+              pas un avis médical.
             </p>
           </div>
 
           <div className="flex gap-12 text-sm text-stone-500">
             <div className="flex flex-col gap-2.5">
-              <Link href="/privacy" className="hover:text-stone-900 transition-colors duration-150">Confidentialité</Link>
-              <Link href="/terms" className="hover:text-stone-900 transition-colors duration-150">CGU</Link>
-              <Link href="mailto:hello@glowy.app" className="hover:text-stone-900 transition-colors duration-150">Contact</Link>
+              <Link
+                href="/privacy"
+                className="hover:text-stone-900 transition-colors duration-150"
+              >
+                Confidentialité
+              </Link>
+              <Link
+                href="/terms"
+                className="hover:text-stone-900 transition-colors duration-150"
+              >
+                CGU
+              </Link>
+              <Link
+                href="mailto:hello@glowy.app"
+                className="hover:text-stone-900 transition-colors duration-150"
+              >
+                Contact
+              </Link>
             </div>
           </div>
         </div>

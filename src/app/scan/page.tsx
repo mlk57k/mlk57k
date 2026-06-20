@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { ConsentStep } from "@/components/scan/consent-step";
 import { CaptureStep } from "@/components/scan/capture-step";
 import { PreviewStep } from "@/components/scan/preview-step";
+import { GlowyLogo } from "@/components/ui/logo";
 import { skinAnalysisSchema } from "@/lib/scan-schema";
 import { saveScan, setLastScanId } from "@/lib/scan-storage";
 
@@ -44,10 +44,9 @@ export default function ScanPage() {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      {/* Header minimal */}
-      <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60">
+      <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60 bg-white/80 backdrop-blur-xl">
         <Link href="/">
-          <Image src="/logo.png" alt="Glowy" width={100} height={40} className="h-10 w-auto object-contain" />
+          <GlowyLogo size="md" />
         </Link>
       </header>
 
@@ -57,10 +56,8 @@ export default function ScanPage() {
           {(["consent", "capture", "preview"] as Step[]).map((s) => (
             <div
               key={s}
-              className={`h-1.5 rounded-full transition-all ${
-                step === s
-                  ? "w-8 bg-coral-400"
-                  : "w-1.5 bg-cream-300"
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                step === s ? "w-8 bg-coral-400" : "w-1.5 bg-cream-300"
               }`}
             />
           ))}

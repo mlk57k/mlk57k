@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { redirect } from "next/navigation";
+import { GlowyLogo } from "@/components/ui/logo";
 import { Camera, Lock, TrendingUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
@@ -65,14 +65,14 @@ export default async function DashboardPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 px-4 h-14 flex items-center justify-center border-b border-cream-200/60 bg-white/80 backdrop-blur-xl">
         <Link href="/">
-          <Image src="/logo.png" alt="Glowy" width={100} height={40} className="h-10 w-auto object-contain" />
+          <GlowyLogo size="md" />
         </Link>
       </header>
 
       <main className="mx-auto max-w-md px-4 py-8 space-y-8">
         {/* Greeting */}
         <div>
-          <h1 className="font-display text-2xl font-bold">Bonjour, {firstName} ✨</h1>
+          <h1 className="font-display text-2xl font-bold">Bonjour, {firstName}</h1>
           <p className="text-sm text-stone-500 mt-1">
             {scanList.length === 0
               ? "Lance ton premier scan pour voir ton score."
