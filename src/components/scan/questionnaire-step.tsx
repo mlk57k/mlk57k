@@ -163,7 +163,7 @@ export function QuestionnaireStep({ onComplete }: QuestionnaireStepProps) {
             <h2 className="font-display text-2xl font-bold mb-2">
               Quel est ton type de peau ?
             </h2>
-            <p className="text-stone-500 text-sm">Choisis l'option qui te correspond le mieux.</p>
+            <p className="text-stone-500 text-sm">Choisis l&apos;option qui te correspond le mieux.</p>
           </div>
           <div className="space-y-3 mb-8">
             {SKIN_TYPES.map((type) => (
@@ -204,7 +204,7 @@ export function QuestionnaireStep({ onComplete }: QuestionnaireStepProps) {
             <h2 className="font-display text-2xl font-bold mb-2">
               Tes préoccupations principales ?
             </h2>
-            <p className="text-stone-500 text-sm">Sélectionne jusqu'à 3 préoccupations.</p>
+            <p className="text-stone-500 text-sm">Sélectionne jusqu&apos;à 3 préoccupations.</p>
           </div>
           <div className="flex flex-wrap gap-3 mb-3">
             {CONCERNS.map((concern) => {

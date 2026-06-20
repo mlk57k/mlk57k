@@ -84,7 +84,7 @@ export function AnalysisProgressStep({ imageDataUrl, skinProfile, onComplete, on
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, [imageDataUrl, onComplete, onError]);
+  }, [imageDataUrl, skinProfile, onComplete, onError]);
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
