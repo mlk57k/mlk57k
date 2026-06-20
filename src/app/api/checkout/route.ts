@@ -56,31 +56,31 @@ async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
 }
 
 export async function POST(request: Request) {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return NextResponse.json({ error: "Stripe non configuré." }, { status: 503 });
-  }
-
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
-  }
-
-  let plan: "monthly" | "annual" | undefined;
   try {
-    ({ plan } = await request.json());
-  } catch {
-    return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
-  }
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: "Stripe non configuré." }, { status: 503 });
+    }
 
-  if (plan !== "monthly" && plan !== "annual") {
-    return NextResponse.json({ error: "Plan invalide." }, { status: 400 });
-  }
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  try {
+    if (!user) {
+      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    }
+
+    let plan: "monthly" | "annual" | undefined;
+    try {
+      ({ plan } = await request.json());
+    } catch {
+      return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
+    }
+
+    if (plan !== "monthly" && plan !== "annual") {
+      return NextResponse.json({ error: "Plan invalide." }, { status: 400 });
+    }
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mlk57k.vercel.app";
 
     const { data: profile } = await supabase
@@ -93,7 +93,6 @@ export async function POST(request: Request) {
     let customerId: string | undefined = profile?.stripe_customer_id ?? undefined;
 
     if (customerId) {
-      // Vérifie que le customer existe encore dans Stripe (la clé a peut-être changé)
       try {
         await stripe.customers.retrieve(customerId);
       } catch {
@@ -131,8 +130,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erreur Stripe inconnue.";
-    console.error("[checkout]", message);
-    return NextResponse.json({ error: `Erreur de paiement : ${message}` }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[/api/checkout]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
