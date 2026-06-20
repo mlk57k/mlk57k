@@ -5,6 +5,109 @@ import { useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
+function FaceIllustration({ variant }: { variant: "before" | "after" }) {
+  const id = variant;
+  const skinLight = variant === "before" ? "#D4906A" : "#E8A882";
+  const skinMid   = variant === "before" ? "#C07850" : "#D08C6A";
+  const hairColor = "#261008";
+
+  return (
+    <svg
+      viewBox="0 0 400 300"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-full h-full"
+      style={{ display: "block" }}
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id={`skin-${id}`} cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stopColor={skinLight} />
+          <stop offset="100%" stopColor={skinMid} />
+        </radialGradient>
+        {variant === "after" && (
+          <radialGradient id="glow" cx="50%" cy="35%" r="45%">
+            <stop offset="0%" stopColor="rgba(255,230,210,0.55)" />
+            <stop offset="100%" stopColor="rgba(255,230,210,0)" />
+          </radialGradient>
+        )}
+      </defs>
+
+      {/* Neck */}
+      <rect x="165" y="278" width="70" height="30" rx="6" fill={`url(#skin-${id})`} />
+
+      {/* Face oval */}
+      <ellipse cx="200" cy="168" rx="92" ry="118" fill={`url(#skin-${id})`} />
+
+      {/* AVANT — imperfections */}
+      {variant === "before" && (
+        <>
+          <ellipse cx="148" cy="195" rx="28" ry="22" fill="#B85040" opacity="0.32" />
+          <ellipse cx="254" cy="200" rx="25" ry="20" fill="#B85040" opacity="0.28" />
+          <circle cx="138" cy="173" r="4"   fill="#8B3020" opacity="0.68" />
+          <circle cx="152" cy="215" r="3"   fill="#8B3020" opacity="0.58" />
+          <circle cx="260" cy="185" r="3.5" fill="#8B3020" opacity="0.62" />
+          <circle cx="244" cy="222" r="2.5" fill="#8B3020" opacity="0.52" />
+          <circle cx="180" cy="148" r="2.5" fill="#8B3020" opacity="0.50" />
+          <circle cx="220" cy="240" r="3"   fill="#8B3020" opacity="0.55" />
+          <ellipse cx="200" cy="168" rx="92" ry="118" fill="#60180000" opacity="0.06" />
+        </>
+      )}
+
+      {/* APRÈS — éclat */}
+      {variant === "after" && (
+        <>
+          <ellipse cx="200" cy="130" rx="72" ry="85" fill="url(#glow)" />
+          <ellipse cx="145" cy="208" rx="28" ry="22" fill="#E89080" opacity="0.18" />
+          <ellipse cx="255" cy="208" rx="28" ry="22" fill="#E89080" opacity="0.18" />
+        </>
+      )}
+
+      {/* Ears */}
+      <ellipse cx="108" cy="168" rx="14" ry="19" fill={skinMid} />
+      <ellipse cx="292" cy="168" rx="14" ry="19" fill={skinMid} />
+
+      {/* Hair */}
+      <path
+        d="M108 140 Q115 28 200 14 Q285 28 292 140 Q262 60 200 65 Q138 60 108 140Z"
+        fill={hairColor}
+      />
+
+      {/* Left brow */}
+      <path d="M148 118 Q168 106 190 113" stroke={hairColor} strokeWidth="4" strokeLinecap="round" fill="none" />
+      {/* Right brow */}
+      <path d="M210 113 Q232 106 252 118" stroke={hairColor} strokeWidth="4" strokeLinecap="round" fill="none" />
+
+      {/* Left eye */}
+      <ellipse cx="170" cy="141" rx="20" ry="13" fill="white" />
+      <circle  cx="170" cy="141" r="9"  fill="#5A3018" />
+      <circle  cx="170" cy="141" r="5"  fill="#120800" />
+      <circle  cx="174" cy="137" r="2.8" fill="white" />
+      <path d="M150 141 Q170 132 190 141" stroke="#180800" strokeWidth="1.8" fill="none" opacity="0.5" />
+
+      {/* Right eye */}
+      <ellipse cx="230" cy="141" rx="20" ry="13" fill="white" />
+      <circle  cx="230" cy="141" r="9"  fill="#5A3018" />
+      <circle  cx="230" cy="141" r="5"  fill="#120800" />
+      <circle  cx="234" cy="137" r="2.8" fill="white" />
+      <path d="M210 141 Q230 132 250 141" stroke="#180800" strokeWidth="1.8" fill="none" opacity="0.5" />
+
+      {/* Nose */}
+      <path d="M196 162 Q190 192 180 202 Q196 210 220 202 Q228 192 204 162" fill={skinMid} opacity="0.45" />
+      <ellipse cx="183" cy="201" rx="7" ry="5" fill={skinMid} opacity="0.7" />
+      <ellipse cx="217" cy="201" rx="7" ry="5" fill={skinMid} opacity="0.7" />
+
+      {/* Lips */}
+      <path d="M168 242 Q186 234 200 237 Q214 234 232 242 Q214 248 200 245 Q186 248 168 242Z" fill="#C86060" />
+      <path d="M168 242 Q186 258 200 260 Q214 258 232 242 Q214 248 200 245 Q186 248 168 242Z" fill="#B05050" />
+      <path d="M176 236 Q190 229 200 232 Q210 229 224 236" stroke="#944040" strokeWidth="1.2" fill="none" opacity="0.6" />
+
+      {/* Chin highlight */}
+      <ellipse cx="200" cy="278" rx="28" ry="8" fill={skinLight} opacity="0.4" />
+    </svg>
+  );
+}
+
 function BeforeAfterSlider() {
   const [position, setPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,66 +151,38 @@ function BeforeAfterSlider() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        aria-label="Comparaison avant/après — glissez pour comparer"
+        aria-label="Comparaison avant/après Glowy — glissez pour comparer"
       >
-        {/* AVANT panel (left, always full) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-100 to-amber-200">
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-30">
-            {[
-              { top: "28%", left: "38%", size: 3 },
-              { top: "42%", left: "55%", size: 2 },
-              { top: "35%", left: "62%", size: 2.5 },
-              { top: "55%", left: "44%", size: 2 },
-              { top: "48%", left: "36%", size: 3.5 },
-              { top: "33%", left: "48%", size: 2 },
-            ].map((dot, i) => (
-              <div
-                key={i}
-                className="absolute rounded-full bg-amber-600"
-                style={{
-                  top: dot.top,
-                  left: dot.left,
-                  width: `${dot.size * 3}px`,
-                  height: `${dot.size * 3}px`,
-                }}
-              />
-            ))}
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-amber-200/40 to-transparent" />
+        {/* SANS GLOWY panel */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-amber-200">
+          <FaceIllustration variant="before" />
           <div className="absolute bottom-4 left-4">
-            <span className="inline-flex items-center rounded-full bg-black/25 backdrop-blur-sm px-3 py-1 text-[11px] font-semibold text-white tracking-wide uppercase">
-              Avant
+            <span className="inline-flex items-center rounded-full bg-black/30 backdrop-blur-sm px-3 py-1 text-[11px] font-semibold text-white tracking-wide">
+              Sans Glowy
             </span>
           </div>
         </div>
 
-        {/* APRÈS panel (right, clipped) */}
+        {/* AVEC GLOWY panel */}
         <div
-          className="absolute inset-0 bg-gradient-to-br from-rose-50 via-pink-50 to-rose-100"
+          className="absolute inset-0 bg-gradient-to-br from-rose-50 via-cream-50 to-coral-50"
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-rose-200/30" />
-          <div className="absolute inset-0">
-            <div
-              className="absolute rounded-full bg-coral-200/40 blur-2xl"
-              style={{ top: "20%", left: "30%", width: "50%", height: "50%" }}
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-rose-100/40 to-transparent" />
+          <FaceIllustration variant="after" />
           <div className="absolute bottom-4 right-4">
-            <span className="inline-flex items-center rounded-full bg-coral-400 px-3 py-1 text-[11px] font-semibold text-white tracking-wide uppercase">
-              4 semaines
+            <span className="inline-flex items-center rounded-full bg-coral-400 px-3 py-1 text-[11px] font-semibold text-white tracking-wide">
+              Avec Glowy
             </span>
           </div>
         </div>
 
-        {/* Divider line */}
+        {/* Divider */}
         <div
-          className="absolute top-0 bottom-0 w-px bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+          className="absolute top-0 bottom-0 w-px bg-white/90 shadow-[0_0_8px_rgba(255,255,255,0.8)]"
           style={{ left: `${position}%` }}
         />
 
-        {/* Drag handle */}
+        {/* Handle */}
         <div
           className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg shadow-black/20 ring-1 ring-black/5"
           style={{ left: `${position}%` }}
@@ -159,7 +234,7 @@ export function Hero() {
               <ArrowRight className="h-5 w-5 ml-1" />
             </Link>
           </Button>
-          <p className="text-sm text-stone-400 font-medium">Gratuit · Aucun compte requis</p>
+          <p className="text-sm text-stone-400 font-medium">Gratuit · Résultats en 10 secondes</p>
         </div>
 
         <div className="mt-16 mx-auto max-w-xs">

@@ -21,8 +21,8 @@ const PLANS: Plan[] = [
   {
     id: "monthly",
     label: "Mensuel",
-    price: "7,99",
-    priceNum: "7,99",
+    price: "24,80",
+    priceNum: "24,80",
     period: "/ mois",
     detail: null,
     badge: null,
@@ -30,11 +30,11 @@ const PLANS: Plan[] = [
   {
     id: "annual",
     label: "Annuel",
-    price: "3,25",
-    priceNum: "3,25",
+    price: "14,90",
+    priceNum: "14,90",
     period: "/ mois",
-    detail: "39 € facturés une fois par an",
-    badge: "ÉCO",
+    detail: "178,80 € facturés une fois par an · économise 40 %",
+    badge: "−40 %",
   },
 ];
 
@@ -203,7 +203,7 @@ export default function CheckoutPage() {
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                "Commencer 7 jours gratuits"
+                "Choisir"
               )}
             </button>
 

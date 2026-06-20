@@ -16,10 +16,10 @@ async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
   // Cherche des prix Glowy existants dans Stripe
   const existing = await stripe.prices.list({ limit: 100, active: true });
   const monthly = existing.data.find(
-    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "monthly"
+    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "monthly" && p.metadata?.version === "2"
   );
   const annual = existing.data.find(
-    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "annual"
+    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "annual" && p.metadata?.version === "2"
   );
 
   if (monthly && annual) {
@@ -38,19 +38,19 @@ async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
   const [monthlyPrice, annualPrice] = await Promise.all([
     stripe.prices.create({
       product: product.id,
-      unit_amount: 799,
+      unit_amount: 2480,
       currency: "eur",
       recurring: { interval: "month" },
-      nickname: "Mensuel",
-      metadata: { app: "glowy", plan: "monthly" },
+      nickname: "Mensuel — 24,80 €/mois",
+      metadata: { app: "glowy", plan: "monthly", version: "2" },
     }),
     stripe.prices.create({
       product: product.id,
-      unit_amount: 3900,
+      unit_amount: 17880,
       currency: "eur",
       recurring: { interval: "year" },
-      nickname: "Annuel",
-      metadata: { app: "glowy", plan: "annual" },
+      nickname: "Annuel — 14,90 €/mois (178,80 €/an)",
+      metadata: { app: "glowy", plan: "annual", version: "2" },
     }),
   ]);
 
@@ -115,7 +115,6 @@ export async function POST(request: Request) {
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
     subscription_data: {
-      trial_period_days: 7,
       metadata: { user_id: user.id },
     },
     success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
