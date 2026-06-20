@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Check, Loader2, ShieldCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlowyLogo } from "@/components/ui/logo";
 
 const PLANS = [
   {
@@ -90,7 +90,7 @@ export default function CheckoutPage() {
       {/* Header */}
       <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60 bg-white/80 backdrop-blur-xl">
         <Link href="/">
-          <Image src="/logo.png" alt="Glowy" width={100} height={40} className="h-10 w-auto object-contain" />
+          <GlowyLogo size="md" />
         </Link>
       </header>
 
