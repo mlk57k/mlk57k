@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, Loader2, ShieldCheck } from "lucide-react";
-import { GlowyLogo } from "@/components/ui/logo";
 
 type PlanId = "monthly" | "annual";
 
