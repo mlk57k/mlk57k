@@ -1,14 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { AuthModal } from "@/components/landing/auth-modal";
 
 function FaceIllustration({ variant }: { variant: "before" | "after" }) {
   const id = variant;
-  const skinLight = variant === "before" ? "#D4906A" : "#E8A882";
-  const skinMid   = variant === "before" ? "#C07850" : "#D08C6A";
+  const skinLight = variant === "before" ? "#D4906A" : "#F0B490";
+  const skinMid   = variant === "before" ? "#C07850" : "#D89870";
   const hairColor = "#261008";
 
   return (
@@ -26,8 +28,8 @@ function FaceIllustration({ variant }: { variant: "before" | "after" }) {
           <stop offset="100%" stopColor={skinMid} />
         </radialGradient>
         {variant === "after" && (
-          <radialGradient id="glow" cx="50%" cy="35%" r="45%">
-            <stop offset="0%" stopColor="rgba(255,230,210,0.55)" />
+          <radialGradient id="glow-after" cx="50%" cy="30%" r="55%">
+            <stop offset="0%" stopColor="rgba(255,230,210,0.75)" />
             <stop offset="100%" stopColor="rgba(255,230,210,0)" />
           </radialGradient>
         )}
@@ -42,24 +44,43 @@ function FaceIllustration({ variant }: { variant: "before" | "after" }) {
       {/* AVANT — imperfections */}
       {variant === "before" && (
         <>
-          <ellipse cx="148" cy="195" rx="28" ry="22" fill="#B85040" opacity="0.32" />
-          <ellipse cx="254" cy="200" rx="25" ry="20" fill="#B85040" opacity="0.28" />
-          <circle cx="138" cy="173" r="4"   fill="#8B3020" opacity="0.68" />
-          <circle cx="152" cy="215" r="3"   fill="#8B3020" opacity="0.58" />
-          <circle cx="260" cy="185" r="3.5" fill="#8B3020" opacity="0.62" />
-          <circle cx="244" cy="222" r="2.5" fill="#8B3020" opacity="0.52" />
-          <circle cx="180" cy="148" r="2.5" fill="#8B3020" opacity="0.50" />
-          <circle cx="220" cy="240" r="3"   fill="#8B3020" opacity="0.55" />
-          <ellipse cx="200" cy="168" rx="92" ry="118" fill="#60180000" opacity="0.06" />
+          {/* Large red patches */}
+          <ellipse cx="148" cy="195" rx="32" ry="26" fill="#B85040" opacity="0.38" />
+          <ellipse cx="254" cy="200" rx="29" ry="24" fill="#B85040" opacity="0.34" />
+          <ellipse cx="192" cy="230" rx="18" ry="14" fill="#B85040" opacity="0.22" />
+          {/* Spots */}
+          <circle cx="138" cy="173" r="4"   fill="#8B3020" opacity="0.72" />
+          <circle cx="152" cy="215" r="3"   fill="#8B3020" opacity="0.65" />
+          <circle cx="260" cy="185" r="3.5" fill="#8B3020" opacity="0.68" />
+          <circle cx="244" cy="222" r="2.5" fill="#8B3020" opacity="0.60" />
+          <circle cx="180" cy="148" r="2.5" fill="#8B3020" opacity="0.56" />
+          <circle cx="220" cy="240" r="3"   fill="#8B3020" opacity="0.60" />
+          <circle cx="165" cy="232" r="2"   fill="#8B3020" opacity="0.52" />
+          <circle cx="235" cy="158" r="2.5" fill="#8B3020" opacity="0.55" />
+          <circle cx="193" cy="185" r="2"   fill="#8B3020" opacity="0.48" />
+          <circle cx="145" cy="245" r="2"   fill="#8B3020" opacity="0.45" />
+          {/* Dull overlay */}
+          <ellipse cx="200" cy="168" rx="92" ry="118" fill="rgba(60,30,10,0.08)" />
+          {/* Dark circles under eyes */}
+          <ellipse cx="170" cy="158" rx="16" ry="7" fill="#7A3830" opacity="0.25" />
+          <ellipse cx="230" cy="158" rx="16" ry="7" fill="#7A3830" opacity="0.25" />
         </>
       )}
 
       {/* APRÈS — éclat */}
       {variant === "after" && (
         <>
-          <ellipse cx="200" cy="130" rx="72" ry="85" fill="url(#glow)" />
-          <ellipse cx="145" cy="208" rx="28" ry="22" fill="#E89080" opacity="0.18" />
-          <ellipse cx="255" cy="208" rx="28" ry="22" fill="#E89080" opacity="0.18" />
+          {/* Strong glow on upper face */}
+          <ellipse cx="200" cy="120" rx="85" ry="100" fill="url(#glow-after)" />
+          {/* Soft cheek flush */}
+          <ellipse cx="145" cy="208" rx="30" ry="24" fill="#F0A090" opacity="0.20" />
+          <ellipse cx="255" cy="208" rx="30" ry="24" fill="#F0A090" opacity="0.20" />
+          {/* Cheekbone highlights */}
+          <ellipse cx="152" cy="192" rx="14" ry="7" fill="rgba(255,240,220,0.6)" />
+          <ellipse cx="248" cy="192" rx="14" ry="7" fill="rgba(255,240,220,0.6)" />
+          {/* Eye shimmer */}
+          <ellipse cx="170" cy="152" rx="8" ry="4" fill="white" opacity="0.25" />
+          <ellipse cx="230" cy="152" rx="8" ry="4" fill="white" opacity="0.25" />
         </>
       )}
 
@@ -144,6 +165,10 @@ function BeforeAfterSlider() {
 
   return (
     <div className="space-y-3">
+      <p className="text-sm font-semibold text-stone-400 uppercase tracking-widest mb-4">
+        La différence Glowy
+      </p>
+
       <div
         ref={containerRef}
         className="relative overflow-hidden rounded-3xl shadow-2xl shadow-stone-200/60 select-none cursor-col-resize touch-none aspect-[4/3]"
@@ -153,26 +178,38 @@ function BeforeAfterSlider() {
         onPointerCancel={onPointerUp}
         aria-label="Comparaison avant/après Glowy — glissez pour comparer"
       >
-        {/* SANS GLOWY panel */}
+        {/* AVANT panel */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-amber-200">
           <FaceIllustration variant="before" />
-          <div className="absolute bottom-4 left-4">
-            <span className="inline-flex items-center rounded-full bg-black/30 backdrop-blur-sm px-3 py-1 text-[11px] font-semibold text-white tracking-wide">
-              Sans Glowy
+          {/* Score badge */}
+          <div className="absolute bottom-10 left-4">
+            <span className="inline-flex items-center rounded-full bg-black/50 backdrop-blur-sm px-3 py-1 text-[11px] font-bold text-white tracking-wide">
+              Score 48
             </span>
+          </div>
+          {/* Label */}
+          <div className="absolute bottom-4 left-4 flex flex-col items-start bg-black/40 backdrop-blur-sm rounded-xl px-3 py-1.5">
+            <span className="text-[12px] font-bold text-white leading-tight">Avant</span>
+            <span className="text-[10px] text-white/70 leading-tight">Sans Glowy</span>
           </div>
         </div>
 
-        {/* AVEC GLOWY panel */}
+        {/* APRÈS panel */}
         <div
           className="absolute inset-0 bg-gradient-to-br from-rose-50 via-cream-50 to-coral-50"
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         >
           <FaceIllustration variant="after" />
-          <div className="absolute bottom-4 right-4">
-            <span className="inline-flex items-center rounded-full bg-coral-400 px-3 py-1 text-[11px] font-semibold text-white tracking-wide">
-              Avec Glowy
+          {/* Score badge */}
+          <div className="absolute bottom-10 right-4">
+            <span className="inline-flex items-center rounded-full bg-coral-400 px-3 py-1 text-[11px] font-bold text-white tracking-wide">
+              Score 87 ✨
             </span>
+          </div>
+          {/* Label */}
+          <div className="absolute bottom-4 right-4 flex flex-col items-end bg-black/40 backdrop-blur-sm rounded-xl px-3 py-1.5">
+            <span className="text-[12px] font-bold text-white leading-tight">Après 4 semaines</span>
+            <span className="text-[10px] text-white/70 leading-tight">Avec Glowy</span>
           </div>
         </div>
 
@@ -200,6 +237,23 @@ function BeforeAfterSlider() {
 }
 
 export function Hero() {
+  const router = useRouter();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  async function handleScanClick() {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      router.push("/scan");
+      return;
+    }
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      router.push("/scan");
+    } else {
+      setShowAuthModal(true);
+    }
+  }
+
   return (
     <section className="relative overflow-hidden bg-white pt-16 pb-24 sm:pt-24 sm:pb-32">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white via-cream-50 to-coral-50/30" />
@@ -225,22 +279,22 @@ export function Hero() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button
-            asChild
             size="lg"
             className="rounded-full bg-coral-400 hover:bg-coral-500 text-white border-none shadow-xl shadow-coral-200/50 px-8 h-14 text-base font-semibold"
+            onClick={handleScanClick}
           >
-            <Link href="/scan">
-              Scanner ma peau
-              <ArrowRight className="h-5 w-5 ml-1" />
-            </Link>
+            Scanner ma peau
+            <ArrowRight className="h-5 w-5 ml-1" />
           </Button>
           <p className="text-sm text-stone-400 font-medium">Gratuit · Résultats en 10 secondes</p>
         </div>
 
-        <div className="mt-16 mx-auto max-w-xs">
+        <div className="mt-16 mx-auto max-w-[400px]">
           <BeforeAfterSlider />
         </div>
       </div>
+
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </section>
   );
 }

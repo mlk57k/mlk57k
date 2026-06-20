@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { analyzeSkin, InvalidImageError } from "@/lib/anthropic";
+import { type SkinProfile } from "@/lib/scan-schema";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -47,8 +48,10 @@ export async function POST(request: Request) {
     );
   }
 
+  const skinProfile = (body as { image?: unknown; skinProfile?: unknown })?.skinProfile as SkinProfile | undefined;
+
   try {
-    const analysis = await analyzeSkin(image, apiKey);
+    const analysis = await analyzeSkin(image, apiKey, skinProfile);
     // On ne renvoie QUE le résultat — l'image n'est jamais stockée.
     return NextResponse.json(analysis, { status: 200 });
   } catch (error) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import { skinAnalysisSchema, type SkinAnalysis } from "@/lib/scan-schema";
+import { skinAnalysisSchema, type SkinAnalysis, type SkinProfile } from "@/lib/scan-schema";
 
 const STEPS = [
   "Cartographie des repères cutanés",
@@ -23,11 +23,12 @@ const CIRC = 2 * Math.PI * RADIUS;
 
 interface Props {
   imageDataUrl: string;
+  skinProfile?: SkinProfile;
   onComplete: (data: SkinAnalysis) => void;
   onError: (msg: string) => void;
 }
 
-export function AnalysisProgressStep({ imageDataUrl, onComplete, onError }: Props) {
+export function AnalysisProgressStep({ imageDataUrl, skinProfile, onComplete, onError }: Props) {
   const [visibleCount, setVisibleCount] = useState(0);
   const [done, setDone] = useState(false);
   const calledRef = useRef(false);
@@ -53,7 +54,7 @@ export function AnalysisProgressStep({ imageDataUrl, onComplete, onError }: Prop
         const res = await fetch("/api/analyze-skin", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: imageDataUrl }),
+          body: JSON.stringify({ image: imageDataUrl, skinProfile }),
         });
 
         if (!res.ok) {

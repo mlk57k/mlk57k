@@ -27,6 +27,14 @@ export type Issue = z.infer<typeof issueSchema>;
 export type RoutineItem = z.infer<typeof routineItemSchema>;
 export type SkinAnalysis = z.infer<typeof skinAnalysisSchema>;
 
+/** Profil peau renseigné par l'utilisateur avant le scan — enrichit l'analyse IA. */
+export type SkinProfile = {
+  skinType: "normale" | "seche" | "grasse" | "mixte" | "sensible";
+  concerns: string[];
+  ageRange: "18-25" | "26-35" | "36-45" | "46-55" | "55+";
+  routine: "aucune" | "basique" | "quelques" | "complete";
+};
+
 /** Résultat tel que stocké côté client, avec un id temporaire + horodatage. */
 export type StoredScan = SkinAnalysis & {
   id: string;

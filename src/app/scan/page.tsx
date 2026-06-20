@@ -4,17 +4,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ConsentStep } from "@/components/scan/consent-step";
+import { QuestionnaireStep } from "@/components/scan/questionnaire-step";
 import { Scan3DStep } from "@/components/scan/scan-3d-step";
 import { AnalysisProgressStep } from "@/components/scan/analysis-progress-step";
 import { GlowyLogo } from "@/components/ui/logo";
-import { type SkinAnalysis } from "@/lib/scan-schema";
+import { type SkinAnalysis, type SkinProfile } from "@/lib/scan-schema";
 import { saveScan, setLastScanId } from "@/lib/scan-storage";
 
-type Step = "consent" | "scanning" | "analyzing";
+type Step = "consent" | "questionnaire" | "scanning" | "analyzing";
 
 export default function ScanPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("consent");
+  const [skinProfile, setSkinProfile] = useState<SkinProfile | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
@@ -35,11 +37,16 @@ export default function ScanPage() {
     setStep("consent");
   }
 
+  function handleQuestionnaireComplete(profile: SkinProfile) {
+    setSkinProfile(profile);
+    setStep("scanning");
+  }
+
   if (step === "scanning") {
     return (
       <Scan3DStep
         onCapture={handleCapture}
-        onCancel={() => setStep("consent")}
+        onCancel={() => setStep("questionnaire")}
       />
     );
   }
@@ -48,11 +55,17 @@ export default function ScanPage() {
     return (
       <AnalysisProgressStep
         imageDataUrl={imageDataUrl}
+        skinProfile={skinProfile ?? undefined}
         onComplete={handleAnalysisComplete}
         onError={handleAnalysisError}
       />
     );
   }
+
+  // Progress dots config per step
+  // consent:       dot 1 active (wide), dots 2-3 empty
+  // questionnaire: dot 1 done (wide), dot 2 active (wide), dot 3 empty
+  const dotStepIndex = step === "consent" ? 0 : 1;
 
   return (
     <div className="min-h-screen bg-cream-50">
@@ -64,8 +77,16 @@ export default function ScanPage() {
 
       <main className="mx-auto max-w-md px-4 py-8">
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="h-1.5 w-8 rounded-full bg-coral-400" />
-          <div className="h-1.5 w-1.5 rounded-full bg-cream-300" />
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className={
+                i <= dotStepIndex
+                  ? "h-1.5 w-8 rounded-full bg-coral-400 transition-all duration-300"
+                  : "h-1.5 w-1.5 rounded-full bg-cream-300 transition-all duration-300"
+              }
+            />
+          ))}
         </div>
 
         {analysisError && (
@@ -74,7 +95,13 @@ export default function ScanPage() {
           </div>
         )}
 
-        <ConsentStep onAccept={() => setStep("scanning")} />
+        {step === "consent" && (
+          <ConsentStep onAccept={() => setStep("questionnaire")} />
+        )}
+
+        {step === "questionnaire" && (
+          <QuestionnaireStep onComplete={handleQuestionnaireComplete} />
+        )}
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { skinAnalysisSchema, type SkinAnalysis } from "@/lib/scan-schema";
+import { skinAnalysisSchema, type SkinAnalysis, type SkinProfile } from "@/lib/scan-schema";
 
 const MODEL = "claude-sonnet-4-6";
 
@@ -87,9 +87,34 @@ function parseDataUrl(dataUrl: string): { mediaType: SupportedMediaType; data: s
   return { mediaType: mediaType as SupportedMediaType, data };
 }
 
-export async function analyzeSkin(imageDataUrl: string, apiKey: string): Promise<SkinAnalysis> {
+export async function analyzeSkin(imageDataUrl: string, apiKey: string, skinProfile?: SkinProfile): Promise<SkinAnalysis> {
   const client = new Anthropic({ apiKey });
   const { mediaType, data } = parseDataUrl(imageDataUrl);
+
+  const userContent: Anthropic.MessageParam["content"] = [
+    { type: "image", source: { type: "base64", media_type: mediaType, data } },
+    { type: "text", text: "Voici ma selfie. Donne-moi mon aperçu de peau Glowy." },
+  ];
+
+  if (skinProfile) {
+    const skinTypeLabels: Record<string, string> = {
+      normale: "normale",
+      seche: "sèche / avec inconfort",
+      grasse: "grasse / brillante",
+      mixte: "mixte (zone T)",
+      sensible: "sensible / réactive",
+    };
+    const routineLabels: Record<string, string> = {
+      aucune: "aucune routine",
+      basique: "routine basique (nettoyant)",
+      quelques: "quelques produits",
+      complete: "routine complète",
+    };
+    userContent.push({
+      type: "text",
+      text: `Profil renseigné par l'utilisateur : peau ${skinTypeLabels[skinProfile.skinType] ?? skinProfile.skinType}, préoccupations principales : ${skinProfile.concerns.join(", ")}, tranche d'âge : ${skinProfile.ageRange} ans, routine actuelle : ${routineLabels[skinProfile.routine] ?? skinProfile.routine}. Utilise ces informations pour affiner et personnaliser ton analyse.`,
+    });
+  }
 
   const response = await client.messages.create({
     model: MODEL,
@@ -100,16 +125,7 @@ export async function analyzeSkin(imageDataUrl: string, apiKey: string): Promise
     messages: [
       {
         role: "user",
-        content: [
-          {
-            type: "image",
-            source: { type: "base64", media_type: mediaType, data },
-          },
-          {
-            type: "text",
-            text: "Voici ma selfie. Donne-moi mon aperçu de peau Glowy.",
-          },
-        ],
+        content: userContent,
       },
     ],
   });
