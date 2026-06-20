@@ -3,6 +3,7 @@ import { analyzeSkin, InvalidImageError } from "@/lib/anthropic";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 // Limite de taille brute (data URL base64) pour éviter les abus / timeouts.
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // ~8 Mo
