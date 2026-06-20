@@ -72,9 +72,6 @@ export function RoutinePaywall({
                   <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Link>
               </Button>
-              <p className="text-xs text-stone-400 mt-3">
-                7 jours gratuits · Sans engagement
-              </p>
             </div>
           </div>
         )}

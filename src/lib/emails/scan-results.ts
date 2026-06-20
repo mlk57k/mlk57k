@@ -68,7 +68,7 @@ export function scanResultsEmail({
               Débloquer ma routine →
             </a>
             <p style="margin:16px 0 0;font-size:12px;color:#9ca3af;">
-              7 jours gratuits · Sans engagement · Annule à tout moment
+              Paiement sécurisé · Résilie à tout moment
             </p>
           </td>
         </tr>
