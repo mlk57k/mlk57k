@@ -44,16 +44,6 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
 
   async function handleCheckout() {
-    const priceId =
-      selected === "monthly"
-        ? process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY
-        : process.env.NEXT_PUBLIC_STRIPE_PRICE_ANNUAL;
-
-    if (!priceId) {
-      setError("Configuration Stripe manquante. Reviens plus tard !");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
@@ -61,7 +51,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ plan: selected }),
       });
 
       if (res.status === 401) {

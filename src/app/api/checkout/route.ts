@@ -1,8 +1,62 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
+import type Stripe from "stripe";
 
 export const runtime = "nodejs";
+
+// ─── Cache en mémoire des price IDs (recréé au cold start si nécessaire) ──────
+let _prices: { monthly: string; annual: string } | null = null;
+
+async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
+  if (_prices) return _prices;
+
+  const stripe = getStripe();
+
+  // Cherche des prix Glowy existants dans Stripe
+  const existing = await stripe.prices.list({ limit: 100, active: true });
+  const monthly = existing.data.find(
+    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "monthly"
+  );
+  const annual = existing.data.find(
+    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "annual"
+  );
+
+  if (monthly && annual) {
+    _prices = { monthly: monthly.id, annual: annual.id };
+    return _prices;
+  }
+
+  // Aucun prix trouvé → création du produit + 2 prix
+  const product = await stripe.products.create({
+    name: "Glowy — Routine personnalisée",
+    description:
+      "Accès à ta routine de soin personnalisée par IA, suivi de score et historique des scans.",
+    metadata: { app: "glowy" },
+  });
+
+  const [monthlyPrice, annualPrice] = await Promise.all([
+    stripe.prices.create({
+      product: product.id,
+      unit_amount: 799,
+      currency: "eur",
+      recurring: { interval: "month" },
+      nickname: "Mensuel",
+      metadata: { app: "glowy", plan: "monthly" },
+    }),
+    stripe.prices.create({
+      product: product.id,
+      unit_amount: 3900,
+      currency: "eur",
+      recurring: { interval: "year" },
+      nickname: "Annuel",
+      metadata: { app: "glowy", plan: "annual" },
+    }),
+  ]);
+
+  _prices = { monthly: monthlyPrice.id, annual: annualPrice.id };
+  return _prices;
+}
 
 export async function POST(request: Request) {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -18,15 +72,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
   }
 
-  let priceId: string | undefined;
+  let plan: "monthly" | "annual" | undefined;
   try {
-    ({ priceId } = await request.json());
+    ({ plan } = await request.json());
   } catch {
     return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
   }
 
-  if (!priceId) {
-    return NextResponse.json({ error: "Plan requis." }, { status: 400 });
+  if (plan !== "monthly" && plan !== "annual") {
+    return NextResponse.json({ error: "Plan invalide." }, { status: 400 });
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mlk57k.vercel.app";
@@ -38,6 +92,7 @@ export async function POST(request: Request) {
     .eq("id", user.id)
     .single();
 
+  const stripe = getStripe();
   let customerId: string | undefined = profile?.stripe_customer_id ?? undefined;
 
   if (!customerId) {
@@ -52,6 +107,9 @@ export async function POST(request: Request) {
       .eq("id", user.id);
   }
 
+  const priceIds = await getPriceIds();
+  const priceId = plan === "monthly" ? priceIds.monthly : priceIds.annual;
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
@@ -64,7 +122,7 @@ export async function POST(request: Request) {
     cancel_url: `${appUrl}/checkout`,
     allow_promotion_codes: true,
     metadata: { user_id: user.id },
-  });
+  } as Stripe.Checkout.SessionCreateParams);
 
   return NextResponse.json({ url: session.url });
 }
