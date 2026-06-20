@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 
 function AuthForm() {
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/checkout";
+  const next = searchParams.get("next") ?? "/scan";
 
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");

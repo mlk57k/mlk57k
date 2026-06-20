@@ -36,8 +36,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protège /dashboard : redirige vers /auth si non connecté.
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  // Routes nécessitant un compte — redirige vers /auth si non connecté.
+  const protectedPaths = ["/scan", "/results", "/dashboard", "/checkout"];
+  if (!user && protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p))) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
