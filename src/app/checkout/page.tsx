@@ -85,7 +85,15 @@ export default function CheckoutPage() {
         return;
       }
 
-      const data = await res.json() as { error?: string; url?: string };
+      let data: { error?: string; url?: string };
+      try {
+        data = await res.json() as { error?: string; url?: string };
+      } catch {
+        const text = await res.text().catch(() => "(vide)");
+        setError(`Erreur serveur ${res.status} — ${text.slice(0, 120)}`);
+        return;
+      }
+
       if (!res.ok) {
         setError(data.error ?? "Une erreur est survenue.");
         return;
@@ -94,8 +102,9 @@ export default function CheckoutPage() {
       if (data.url) {
         window.location.href = data.url;
       }
-    } catch {
-      setError("Impossible de contacter le serveur. Réessaie.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Erreur réseau : ${msg}`);
     } finally {
       setLoading(false);
     }
