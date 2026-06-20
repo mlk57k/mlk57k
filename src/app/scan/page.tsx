@@ -7,17 +7,19 @@ import { ConsentStep } from "@/components/scan/consent-step";
 import { QuestionnaireStep } from "@/components/scan/questionnaire-step";
 import { Scan3DStep } from "@/components/scan/scan-3d-step";
 import { AnalysisProgressStep } from "@/components/scan/analysis-progress-step";
+import { RevealStep } from "@/components/scan/reveal-step";
 import { GlowyLogo } from "@/components/ui/logo";
 import { type SkinAnalysis, type SkinProfile } from "@/lib/scan-schema";
 import { saveScan, setLastScanId } from "@/lib/scan-storage";
 
-type Step = "consent" | "questionnaire" | "scanning" | "analyzing";
+type Step = "consent" | "questionnaire" | "scanning" | "analyzing" | "reveal";
 
 export default function ScanPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("consent");
   const [skinProfile, setSkinProfile] = useState<SkinProfile | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [analysisData, setAnalysisData] = useState<SkinAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   function handleCapture(dataUrl: string) {
@@ -26,7 +28,13 @@ export default function ScanPage() {
   }
 
   function handleAnalysisComplete(data: SkinAnalysis) {
-    const id = saveScan(data);
+    setAnalysisData(data);
+    setStep("reveal");
+  }
+
+  function handleRevealContinue() {
+    if (!analysisData) return;
+    const id = saveScan(analysisData);
     setLastScanId(id);
     router.push(`/results/${id}`);
   }
@@ -58,6 +66,16 @@ export default function ScanPage() {
         skinProfile={skinProfile ?? undefined}
         onComplete={handleAnalysisComplete}
         onError={handleAnalysisError}
+      />
+    );
+  }
+
+  if (step === "reveal" && imageDataUrl && analysisData) {
+    return (
+      <RevealStep
+        imageDataUrl={imageDataUrl}
+        analysis={analysisData}
+        onContinue={handleRevealContinue}
       />
     );
   }
