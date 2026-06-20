@@ -61,15 +61,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Stripe non configuré." }, { status: 503 });
     }
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
-    }
-
     let plan: "monthly" | "annual" | undefined;
     try {
       ({ plan } = await request.json());
@@ -82,6 +73,36 @@ export async function POST(request: Request) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mlk57k.vercel.app";
+    const stripe = getStripe();
+    const priceIds = await getPriceIds();
+    const priceId = plan === "monthly" ? priceIds.monthly : priceIds.annual;
+
+    // Si Supabase n'est pas configuré (déploiement preview sans env vars),
+    // on crée une session Stripe anonyme pour permettre de tester le flux.
+    const isSupabaseConfigured = !!(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
+
+    if (!isSupabaseConfigured) {
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/checkout`,
+        allow_promotion_codes: true,
+      } as Stripe.Checkout.SessionCreateParams);
+      return NextResponse.json({ url: session.url });
+    }
+
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    }
 
     const { data: profile } = await supabase
       .from("profiles")
@@ -89,7 +110,6 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single();
 
-    const stripe = getStripe();
     let customerId: string | undefined = profile?.stripe_customer_id ?? undefined;
 
     if (customerId) {
@@ -111,9 +131,6 @@ export async function POST(request: Request) {
         .update({ stripe_customer_id: customerId })
         .eq("id", user.id);
     }
-
-    const priceIds = await getPriceIds();
-    const priceId = plan === "monthly" ? priceIds.monthly : priceIds.annual;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

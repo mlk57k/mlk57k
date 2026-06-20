@@ -20,6 +20,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "session_id manquant." }, { status: 400 });
   }
 
+  const isSupabaseConfigured = !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+
+  // Sans Supabase (preview sans env vars) : vérifie juste le paiement Stripe
+  if (!isSupabaseConfigured) {
+    try {
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      const isPaid = session.payment_status === "paid" || session.status === "complete";
+      return NextResponse.json({ success: isPaid, scan_id: null });
+    } catch {
+      return NextResponse.json({ success: false });
+    }
+  }
+
   const supabase = createClient();
   const {
     data: { user },
