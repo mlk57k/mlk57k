@@ -92,6 +92,15 @@ export async function POST(request: Request) {
     const stripe = getStripe();
     let customerId: string | undefined = profile?.stripe_customer_id ?? undefined;
 
+    if (customerId) {
+      // Vérifie que le customer existe encore dans Stripe (la clé a peut-être changé)
+      try {
+        await stripe.customers.retrieve(customerId);
+      } catch {
+        customerId = undefined;
+      }
+    }
+
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
