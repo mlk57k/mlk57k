@@ -5,7 +5,6 @@ import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-// ─── Cache en mémoire des price IDs (recréé au cold start si nécessaire) ──────
 let _prices: { monthly: string; annual: string } | null = null;
 
 async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
@@ -13,7 +12,6 @@ async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
 
   const stripe = getStripe();
 
-  // Cherche des prix Glowy existants dans Stripe
   const existing = await stripe.prices.list({ limit: 100, active: true });
   const monthly = existing.data.find(
     (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "monthly" && p.metadata?.version === "2"
@@ -27,7 +25,6 @@ async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
     return _prices;
   }
 
-  // Aucun prix trouvé → création du produit + 2 prix
   const product = await stripe.products.create({
     name: "Glowy — Routine personnalisée",
     description:
@@ -83,45 +80,50 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Plan invalide." }, { status: 400 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mlk57k.vercel.app";
+  try {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mlk57k.vercel.app";
 
-  // Récupère ou crée le customer Stripe
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("stripe_customer_id")
-    .eq("id", user.id)
-    .single();
-
-  const stripe = getStripe();
-  let customerId: string | undefined = profile?.stripe_customer_id ?? undefined;
-
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: user.email ?? undefined,
-      metadata: { user_id: user.id },
-    });
-    customerId = customer.id;
-    await supabase
+    const { data: profile } = await supabase
       .from("profiles")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", user.id);
-  }
+      .select("stripe_customer_id")
+      .eq("id", user.id)
+      .single();
 
-  const priceIds = await getPriceIds();
-  const priceId = plan === "monthly" ? priceIds.monthly : priceIds.annual;
+    const stripe = getStripe();
+    let customerId: string | undefined = profile?.stripe_customer_id ?? undefined;
 
-  const session = await stripe.checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    line_items: [{ price: priceId, quantity: 1 }],
-    subscription_data: {
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: user.email ?? undefined,
+        metadata: { user_id: user.id },
+      });
+      customerId = customer.id;
+      await supabase
+        .from("profiles")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", user.id);
+    }
+
+    const priceIds = await getPriceIds();
+    const priceId = plan === "monthly" ? priceIds.monthly : priceIds.annual;
+
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: "subscription",
+      line_items: [{ price: priceId, quantity: 1 }],
+      subscription_data: {
+        metadata: { user_id: user.id },
+      },
+      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/checkout`,
+      allow_promotion_codes: true,
       metadata: { user_id: user.id },
-    },
-    success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/checkout`,
-    allow_promotion_codes: true,
-    metadata: { user_id: user.id },
-  } as Stripe.Checkout.SessionCreateParams);
+    } as Stripe.Checkout.SessionCreateParams);
 
-  return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Erreur Stripe inconnue.";
+    console.error("[checkout]", message);
+    return NextResponse.json({ error: `Erreur de paiement : ${message}` }, { status: 500 });
+  }
 }
