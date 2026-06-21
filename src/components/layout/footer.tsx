@@ -30,6 +30,12 @@ export function Footer() {
                 CGU
               </Link>
               <Link
+                href="/mentions-legales"
+                className="hover:text-stone-900 transition-colors duration-150"
+              >
+                Mentions légales
+              </Link>
+              <Link
                 href="mailto:hello@glowy.app"
                 className="hover:text-stone-900 transition-colors duration-150"
               >
