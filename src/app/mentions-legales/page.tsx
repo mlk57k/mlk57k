@@ -18,8 +18,6 @@ export default function MentionsLegalesPage() {
       </p>
       <ul>
         <li><strong>Dénomination sociale :</strong> Glowy</li>
-        <li><strong>Forme juridique :</strong> Entrepreneur individuel / SAS (à compléter)</li>
-        <li><strong>Adresse :</strong> France</li>
         <li>
           <strong>Adresse e-mail :</strong>{" "}
           <a href="mailto:hello@glowy.app">hello@glowy.app</a>
@@ -28,10 +26,6 @@ export default function MentionsLegalesPage() {
           <strong>Directeur de la publication :</strong> Le représentant légal de Glowy
         </li>
       </ul>
-      <p className="text-sm text-stone-500 italic">
-        * Pour obtenir les informations complètes (SIRET, adresse postale), contactez-nous
-        à hello@glowy.app.
-      </p>
 
       <h2>2. Hébergeur</h2>
       <p>Le site est hébergé par :</p>
