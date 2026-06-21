@@ -134,30 +134,25 @@ export function Scan3DStep({ onCapture, onCancel }: Props) {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      if (w === 0 || h === 0) return;
 
-      ctx.save();
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.restore();
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
 
       const landmarks = results.multiFaceLandmarks?.[0];
 
-      if (!landmarks) {
-        stableFramesRef.current = 0;
-        setStableProgress(0);
-        setPhase("detecting");
-        return;
-      }
+      // Draw video + landmarks together inside the mirror transform so the
+      // mesh overlay aligns with the mirrored selfie view.
+      ctx.save();
+      ctx.translate(w, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, w, h);
 
-      if (!capturedRef.current) {
-        setPhase("stable");
-        stableFramesRef.current += 1;
-        const progress = Math.min(stableFramesRef.current / STABLE_FRAME_TARGET, 1);
-        setStableProgress(progress);
-
+      if (landmarks && !capturedRef.current) {
         if (
           typeof window.drawConnectors === "function" &&
           window.FACEMESH_TESSELATION
@@ -183,6 +178,22 @@ export function Scan3DStep({ onCapture, onCancel }: Props) {
             lineWidth: 1.5,
           });
         }
+      }
+
+      ctx.restore();
+
+      if (!landmarks) {
+        stableFramesRef.current = 0;
+        setStableProgress(0);
+        setPhase("detecting");
+        return;
+      }
+
+      if (!capturedRef.current) {
+        setPhase("stable");
+        stableFramesRef.current += 1;
+        const progress = Math.min(stableFramesRef.current / STABLE_FRAME_TARGET, 1);
+        setStableProgress(progress);
 
         if (stableFramesRef.current >= STABLE_FRAME_TARGET) {
           capture();
