@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Lock, Sparkles, Check, ArrowRight, Tag, Loader2 } from "lucide-react";
 import type { RoutineItem } from "@/lib/scan-schema";
@@ -15,6 +16,7 @@ export function RoutinePaywall({
   unlocked?: boolean;
   onUnlock?: () => void;
 }) {
+  const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [showPromo, setShowPromo] = useState(false);
 
@@ -170,7 +172,7 @@ export function RoutinePaywall({
                       size="lg"
                       className="w-full max-w-xs rounded-full bg-coral-400 hover:bg-coral-500"
                     >
-                      <Link href={`/auth?next=${typeof window !== "undefined" ? window.location.pathname : "/results"}`}>
+                      <Link href={`/auth?next=${pathname}`}>
                         Se connecter pour débloquer
                         <ArrowRight className="h-4 w-4 ml-1.5" />
                       </Link>
