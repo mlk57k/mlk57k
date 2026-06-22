@@ -11,7 +11,7 @@ export async function GET() {
     return NextResponse.json({ error: "STRIPE_SECRET_KEY not set." }, { status: 500 });
   }
 
-  const stripe = new Stripe(secretKey, { apiVersion: "2025-04-30.basil" });
+  const stripe = new Stripe(secretKey, { apiVersion: "2026-05-27.dahlia" });
 
   try {
     // Check if the promo code already exists
@@ -32,9 +32,9 @@ export async function GET() {
       max_redemptions: 3,
     });
 
-    // Create the BEESSAP promotion code tied to that coupon
+    // Create the BEESSAP promotion code tied to that coupon (Stripe v22 API)
     const promoCode = await stripe.promotionCodes.create({
-      coupon: coupon.id,
+      promotion: { type: "coupon", coupon: coupon.id },
       code: "BEESSAP",
       max_redemptions: 3,
     });
