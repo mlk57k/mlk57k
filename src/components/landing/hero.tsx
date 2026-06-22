@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { AuthModal } from "@/components/landing/auth-modal";
 
 const DOTS: [number, number][] = [
   // forehead
@@ -158,7 +156,6 @@ function ScanPhoneMockup() {
 
 export function Hero() {
   const router = useRouter();
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   async function handleScanClick() {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -172,7 +169,7 @@ export function Hero() {
     if (user) {
       router.push("/scan");
     } else {
-      setShowAuthModal(true);
+      router.push("/auth?next=/scan");
     }
   }
 
@@ -224,7 +221,6 @@ export function Hero() {
         </div>
       </div>
 
-      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </section>
   );
 }
