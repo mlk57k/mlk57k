@@ -162,13 +162,17 @@ export function Hero() {
       router.push("/auth?next=/scan");
       return;
     }
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      router.push("/scan");
-    } else {
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        router.push("/scan");
+      } else {
+        router.push("/auth?next=/scan");
+      }
+    } catch {
       router.push("/auth?next=/scan");
     }
   }
