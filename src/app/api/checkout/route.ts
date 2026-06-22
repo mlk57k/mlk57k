@@ -6,6 +6,31 @@ import type Stripe from "stripe";
 export const runtime = "nodejs";
 
 let _prices: { monthly: string; annual: string } | null = null;
+let _promoEnsured = false;
+
+async function ensureBeessapPromo(): Promise<void> {
+  if (_promoEnsured) return;
+  try {
+    const stripe = getStripe();
+    const existing = await stripe.promotionCodes.list({ code: "BEESSAP", limit: 1 });
+    if (existing.data.length === 0) {
+      const coupon = await stripe.coupons.create({
+        percent_off: 100,
+        duration: "forever",
+        name: "Accès à vie Glowy — beessap",
+        max_redemptions: 3,
+      });
+      await stripe.promotionCodes.create({
+        promotion: { type: "coupon", coupon: coupon.id },
+        code: "BEESSAP",
+        max_redemptions: 3,
+      });
+    }
+    _promoEnsured = true;
+  } catch {
+    // Non-fatal: Stripe key may not be available yet
+  }
+}
 
 async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
   if (_prices) return _prices;
@@ -60,6 +85,9 @@ export async function POST(request: Request) {
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json({ error: "Stripe non configuré." }, { status: 503 });
     }
+
+    // Fire-and-forget: ensure BEESSAP promo exists in Stripe
+    void ensureBeessapPromo();
 
     let plan: "monthly" | "annual" | undefined;
     try {
