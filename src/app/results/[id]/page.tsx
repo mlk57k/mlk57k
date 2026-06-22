@@ -92,7 +92,11 @@ export default function ResultsPage({
 
         <IssuesList issues={scan.issues} />
 
-        <RoutinePaywall routine={scan.routine} unlocked={scan.unlocked ?? false} />
+        <RoutinePaywall
+          routine={scan.routine}
+          unlocked={scan.unlocked ?? false}
+          onUnlock={() => setScan((s) => s ? { ...s, unlocked: true } : s)}
+        />
 
         {/* Rescan + réassurance */}
         <div className="space-y-4 pt-2">

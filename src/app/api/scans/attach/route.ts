@@ -36,6 +36,14 @@ export async function POST(request: Request) {
 
   const { skin_score, skin_age, issues, routine } = parsed.data;
 
+  // Unlock immediately if the user has lifetime access via promo code
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("lifetime_access")
+    .eq("id", user.id)
+    .single();
+  const shouldUnlock = profile?.lifetime_access === true;
+
   const { data, error } = await supabase
     .from("scans")
     .insert({
@@ -44,7 +52,7 @@ export async function POST(request: Request) {
       skin_age,
       issues,
       routine,
-      unlocked: false,
+      unlocked: shouldUnlock,
     })
     .select("id")
     .single();
