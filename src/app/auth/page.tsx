@@ -19,7 +19,6 @@ function AuthForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient();
   const completeUrl = `/auth/complete?next=${encodeURIComponent(next)}`;
 
   const handleEmail = async (e: React.FormEvent) => {
@@ -29,6 +28,7 @@ function AuthForm() {
     setMessage(null);
 
     try {
+      const supabase = createClient();
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -42,8 +42,6 @@ function AuthForm() {
           password,
         });
         if (error) throw error;
-        // Selon la config Supabase, la session peut être immédiate ou nécessiter
-        // une confirmation par email.
         if (data.session) {
           window.location.assign(completeUrl);
         } else {
@@ -66,14 +64,17 @@ function AuthForm() {
   const handleGoogle = async () => {
     setLoading(true);
     setError(null);
-    const origin = window.location.origin;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
-    });
-    if (error) {
+    try {
+      const supabase = createClient();
+      const origin = window.location.origin;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      if (error) throw error;
+    } catch {
       setError("Connexion Google impossible pour le moment.");
       setLoading(false);
     }
