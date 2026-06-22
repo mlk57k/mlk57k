@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Lock, Sparkles, Check, ArrowRight, Tag, Loader2 } from "lucide-react";
@@ -15,7 +15,15 @@ export function RoutinePaywall({
   unlocked?: boolean;
   onUnlock?: () => void;
 }) {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [showPromo, setShowPromo] = useState(false);
+
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) { setIsLoggedIn(false); return; }
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      createClient().auth.getUser().then(({ data: { user } }) => setIsLoggedIn(!!user));
+    }).catch(() => setIsLoggedIn(false));
+  }, []);
   const [promoCode, setPromoCode] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -153,56 +161,79 @@ export function RoutinePaywall({
                 <p className="text-sm text-stone-500 mb-5 max-w-[240px] leading-snug">
                   Les soins exacts pour ta peau, étape par étape.
                 </p>
-                <Button
-                  asChild
-                  size="lg"
-                  className="w-full max-w-xs rounded-full"
-                >
-                  <Link href="/checkout">
-                    Voir ma routine complète
-                    <ArrowRight className="h-4 w-4 ml-1.5" />
-                  </Link>
-                </Button>
 
-                {/* Promo code section */}
-                {!showPromo ? (
-                  <button
-                    onClick={() => setShowPromo(true)}
-                    className="mt-3 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2 transition-colors flex items-center gap-1"
-                  >
-                    <Tag className="h-3 w-3" />
-                    J&apos;ai un code promo
-                  </button>
-                ) : promoSuccess ? (
-                  <p className="mt-3 text-xs font-semibold text-emerald-600 flex items-center gap-1">
-                    <Check className="h-3.5 w-3.5" />
-                    Code activé ! Accès débloqué à vie.
-                  </p>
+                {isLoggedIn === false ? (
+                  /* Not logged in → prompt to sign in */
+                  <>
+                    <Button
+                      asChild
+                      size="lg"
+                      className="w-full max-w-xs rounded-full bg-coral-400 hover:bg-coral-500"
+                    >
+                      <Link href={`/auth?next=${typeof window !== "undefined" ? window.location.pathname : "/results"}`}>
+                        Se connecter pour débloquer
+                        <ArrowRight className="h-4 w-4 ml-1.5" />
+                      </Link>
+                    </Button>
+                    <p className="mt-2 text-xs text-stone-400">
+                      Gratuit · Connexion en 10 secondes
+                    </p>
+                  </>
                 ) : (
-                  <form onSubmit={handlePromoSubmit} className="mt-3 w-full max-w-xs flex flex-col gap-1.5">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value)}
-                        placeholder="Code promo"
-                        autoFocus
-                        className="flex-1 min-w-0 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-xs text-stone-800 placeholder:text-stone-400 outline-none focus:border-coral-400 focus:ring-1 focus:ring-coral-200 transition"
-                      />
+                  /* Logged in → checkout + promo */
+                  <>
+                    <Button
+                      asChild
+                      size="lg"
+                      className="w-full max-w-xs rounded-full"
+                    >
+                      <Link href="/checkout">
+                        Voir ma routine complète
+                        <ArrowRight className="h-4 w-4 ml-1.5" />
+                      </Link>
+                    </Button>
+
+                    {/* Promo code section */}
+                    {!showPromo ? (
                       <button
-                        type="submit"
-                        disabled={promoLoading || !promoCode.trim()}
-                        className="shrink-0 rounded-full bg-coral-400 text-white text-xs font-semibold px-3 py-1.5 hover:bg-coral-500 disabled:opacity-50 transition flex items-center gap-1"
+                        onClick={() => setShowPromo(true)}
+                        className="mt-3 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2 transition-colors flex items-center gap-1"
                       >
-                        {promoLoading ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : "Appliquer"}
+                        <Tag className="h-3 w-3" />
+                        J&apos;ai un code promo
                       </button>
-                    </div>
-                    {promoError && (
-                      <p className="text-xs text-red-500 text-center">{promoError}</p>
+                    ) : promoSuccess ? (
+                      <p className="mt-3 text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                        <Check className="h-3.5 w-3.5" />
+                        Code activé ! Accès débloqué à vie.
+                      </p>
+                    ) : (
+                      <form onSubmit={handlePromoSubmit} className="mt-3 w-full max-w-xs flex flex-col gap-1.5">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={promoCode}
+                            onChange={(e) => setPromoCode(e.target.value)}
+                            placeholder="Code promo"
+                            autoFocus
+                            className="flex-1 min-w-0 rounded-full border border-cream-300 bg-white px-3 py-1.5 text-xs text-stone-800 placeholder:text-stone-400 outline-none focus:border-coral-400 focus:ring-1 focus:ring-coral-200 transition"
+                          />
+                          <button
+                            type="submit"
+                            disabled={promoLoading || !promoCode.trim()}
+                            className="shrink-0 rounded-full bg-coral-400 text-white text-xs font-semibold px-3 py-1.5 hover:bg-coral-500 disabled:opacity-50 transition flex items-center gap-1"
+                          >
+                            {promoLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : "Appliquer"}
+                          </button>
+                        </div>
+                        {promoError && (
+                          <p className="text-xs text-red-500 text-center">{promoError}</p>
+                        )}
+                      </form>
                     )}
-                  </form>
+                  </>
                 )}
               </div>
             </div>
