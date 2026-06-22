@@ -19,10 +19,14 @@ export default function ResultsPage({
   const { id } = params;
   const [scan, setScan] = useState<StoredScan | null | undefined>(undefined);
 
+  const promoUnlocked =
+    typeof window !== "undefined" &&
+    localStorage.getItem("glowy_promo") === "unlocked";
+
   useEffect(() => {
     const local = getScan(id);
     if (local) {
-      setScan(local);
+      setScan(promoUnlocked ? { ...local, unlocked: true } : local);
       return;
     }
     // Scan absent du sessionStorage (ex : lien depuis le dashboard) → API
@@ -36,12 +40,12 @@ export default function ResultsPage({
           skin_age: data.skin_age,
           issues: data.issues ?? [],
           routine: data.routine ?? [],
-          unlocked: data.unlocked ?? false,
+          unlocked: (data.unlocked ?? false) || promoUnlocked,
           created_at: data.created_at,
         });
       })
       .catch(() => setScan(null));
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Chargement
   if (scan === undefined) {

@@ -42,6 +42,7 @@ export function RoutinePaywall({
       if (!res.ok) {
         setPromoError(json.error ?? "Code invalide.");
       } else {
+        localStorage.setItem("glowy_promo", "unlocked");
         setPromoSuccess(true);
         setTimeout(() => onUnlock?.(), 600);
       }
