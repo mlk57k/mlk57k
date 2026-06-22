@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { skinAnalysisSchema } from "@/lib/scan-schema";
 import { getResend } from "@/lib/resend";
 import { scanResultsEmail } from "@/lib/emails/scan-results";
+
+function getAdminClient() {
+  return createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export const runtime = "nodejs";
 
@@ -36,6 +44,18 @@ export async function POST(request: Request) {
 
   const { skin_score, skin_age, issues, routine } = parsed.data;
 
+  // Vérifier si l'utilisateur a un accès à vie (code promo ou paiement)
+  let hasLifetimeAccess = false;
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const admin = getAdminClient();
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("lifetime_access")
+      .eq("id", user.id)
+      .single();
+    hasLifetimeAccess = profile?.lifetime_access ?? false;
+  }
+
   const { data, error } = await supabase
     .from("scans")
     .insert({
@@ -44,7 +64,7 @@ export async function POST(request: Request) {
       skin_age,
       issues,
       routine,
-      unlocked: false,
+      unlocked: hasLifetimeAccess,
     })
     .select("id")
     .single();
