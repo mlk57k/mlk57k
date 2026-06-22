@@ -65,6 +65,9 @@ function AuthForm() {
     setLoading(true);
     setError(null);
     try {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        throw new Error("config");
+      }
       const supabase = createClient();
       const origin = window.location.origin;
       const { error } = await supabase.auth.signInWithOAuth({
@@ -74,8 +77,15 @@ function AuthForm() {
         },
       });
       if (error) throw error;
-    } catch {
-      setError("Connexion Google impossible pour le moment.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === "config" || msg.includes("URL") || msg.includes("key")) {
+        setError("L'authentification n'est pas encore configurée sur ce serveur.");
+      } else if (msg.toLowerCase().includes("provider") || msg.toLowerCase().includes("google")) {
+        setError("Google n'est pas activé — active-le dans ton dashboard Supabase (Auth → Providers).");
+      } else {
+        setError("Connexion Google impossible : " + (msg || "erreur inconnue"));
+      }
       setLoading(false);
     }
   };
