@@ -159,7 +159,7 @@ export function Hero() {
 
   async function handleScanClick() {
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      router.push("/scan");
+      router.push("/auth?next=/scan");
       return;
     }
     const supabase = createClient();
