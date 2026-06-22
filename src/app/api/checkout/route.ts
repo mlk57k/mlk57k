@@ -100,7 +100,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Plan invalide." }, { status: 400 });
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://mlk57k.vercel.app";
+    // Use request origin so success/cancel URLs always match the current domain
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ??
+      new URL(request.url).origin;
     const stripe = getStripe();
     const priceIds = await getPriceIds();
     const priceId = plan === "monthly" ? priceIds.monthly : priceIds.annual;
