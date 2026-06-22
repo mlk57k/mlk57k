@@ -5,7 +5,6 @@ import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-// Client admin (service role) pour contourner la RLS dans le webhook
 function getAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,9 +12,16 @@ function getAdminClient() {
   );
 }
 
-async function unlockUserScans(userId: string) {
+async function updateSubscriptionStatus(
+  userId: string,
+  status: string,
+  subscriptionId?: string
+) {
   const admin = getAdminClient();
-  await admin.from("scans").update({ unlocked: true }).eq("user_id", userId);
+  await admin
+    .from("profiles")
+    .update({ subscription_status: status, subscription_id: subscriptionId ?? null })
+    .eq("id", userId);
 }
 
 async function getUserIdFromCustomer(customerId: string): Promise<string | null> {
@@ -50,21 +56,44 @@ export async function POST(request: Request) {
 
   try {
     switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.user_id;
-        if (userId) await unlockUserScans(userId);
-        break;
-      }
-
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
         const userId =
           sub.metadata?.user_id ??
           (await getUserIdFromCustomer(sub.customer as string));
-        if (userId && (sub.status === "active" || sub.status === "trialing")) {
-          await unlockUserScans(userId);
+
+        if (userId) {
+          let status: string;
+          if (sub.status === "active") status = "active";
+          else if (sub.status === "trialing") status = "trial";
+          else if (sub.status === "canceled") status = "cancelled";
+          else if (sub.status === "past_due") status = "past_due";
+          else status = sub.status;
+
+          await updateSubscriptionStatus(userId, status, sub.id);
+        }
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object as Stripe.Subscription;
+        const userId =
+          sub.metadata?.user_id ??
+          (await getUserIdFromCustomer(sub.customer as string));
+
+        if (userId) {
+          await updateSubscriptionStatus(userId, "cancelled", sub.id);
+        }
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerId = invoice.customer as string;
+        const userId = await getUserIdFromCustomer(customerId);
+        if (userId) {
+          await updateSubscriptionStatus(userId, "past_due");
         }
         break;
       }

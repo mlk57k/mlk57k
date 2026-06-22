@@ -1,62 +1,48 @@
 import type { Metadata } from "next";
-import { DM_Sans, Playfair_Display } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://glowy.app";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://libero.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: {
-    default: "Glowy — Découvre l'âge réel de ta peau",
-    template: "%s · Glowy",
+    default: "Libero — Coach IA pour se libérer des addictions",
+    template: "%s · Libero",
   },
   description:
-    "Analyse ta peau par IA en 10 secondes. Score, âge estimé de ta peau, routine personnalisée. Gratuit et sans compte.",
-  keywords: ["soin peau", "analyse peau", "routine beauté", "score peau", "skincare IA"],
+    "Coach IA cliniquement informé pour surmonter le cannabis et la pornographie. Techniques TCC, suivi de streak, journal des déclencheurs, plan personnalisé.",
+  keywords: [
+    "sevrage cannabis",
+    "arrêter pornographie",
+    "coach addiction IA",
+    "TCC addiction",
+    "streak sevrage",
+  ],
   openGraph: {
-    title: "Glowy — Découvre l'âge réel de ta peau",
-    description: "Analyse ta peau par IA en 10 secondes. Score, âge estimé et routine personnalisée.",
+    title: "Libero — Coach IA pour se libérer des addictions",
+    description:
+      "Coach IA basé sur des techniques cliniques validées pour surmonter le cannabis et la pornographie.",
     type: "website",
     locale: "fr_FR",
-    siteName: "Glowy",
+    siteName: "Libero",
     url: appUrl,
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Glowy — Découvre l'âge réel de ta peau",
-    description: "Analyse ta peau par IA en 10 secondes.",
-    creator: "@glowy_app",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true },
-  },
-  alternates: {
-    canonical: appUrl,
-  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr">
-      <body className={`${dmSans.variable} ${playfair.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} antialiased`}>{children}</body>
     </html>
   );
 }

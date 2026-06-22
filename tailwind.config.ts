@@ -10,26 +10,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        coral: {
-          50:  "#fdf4f1",
-          100: "#fbe5de",
-          200: "#f6c9bc",
-          300: "#eea593",
-          400: "#e8826a",
-          500: "#dc6b51",
-          600: "#c4523a",
-          700: "#a3402d",
-          800: "#873628",
-          900: "#6f2e23",
-        },
-        cream: {
-          50:  "#FAFAF8",
-          100: "#F5F0EC",
-          200: "#EDE4DB",
-          300: "#E0D3C8",
-          400: "#C8B5A5",
-          500: "#A89080",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -63,11 +43,6 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "Georgia", "serif"],
-      },
-      backgroundImage: {
-        "gradient-glowy": "linear-gradient(160deg, #FFFFFF 0%, #FDF4F1 60%, #FAFAF8 100%)",
-        "gradient-coral": "linear-gradient(135deg, #dc6b51 0%, #e8826a 100%)",
       },
       animation: {
         "fade-up": "fadeUp 0.5s ease-out",

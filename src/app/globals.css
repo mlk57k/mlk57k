@@ -5,23 +5,25 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 20 14% 10%;
-    --card: 30 20% 98%;
-    --card-foreground: 20 14% 10%;
+    --foreground: 224 71% 4%;
+    --card: 220 20% 98%;
+    --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 14% 10%;
-    --primary: 16 60% 67%;        /* coral-400 */
+    --popover-foreground: 224 71% 4%;
+    --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 30 25% 95%;
-    --secondary-foreground: 20 14% 20%;
-    --muted: 30 20% 95%;
-    --muted-foreground: 25 10% 47%;
-    --accent: 16 60% 67%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 71% 4%;
+    --muted: 220 14% 95%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 152 69% 42%;
     --accent-foreground: 0 0% 100%;
-    --border: 25 20% 88%;
-    --input: 25 20% 88%;
-    --ring: 16 60% 67%;
-    --radius: 1rem;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 243 75% 59%;
+    --radius: 0.75rem;
   }
 }
 
@@ -35,9 +37,8 @@
     line-height: 1.65;
   }
   h1, h2, h3 {
-    font-family: var(--font-display), Georgia, serif;
     @apply font-bold tracking-tight;
-    line-height: 1.15;
+    line-height: 1.2;
   }
   h4, h5, h6 {
     @apply font-semibold tracking-tight;
@@ -48,24 +49,22 @@
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
 
-  .blur-paywall {
-    filter: blur(8px);
-    user-select: none;
-    pointer-events: none;
-  }
-
-  .text-gradient-coral {
-    background: linear-gradient(135deg, #dc6b51, #e8826a, #eea593);
+  .text-gradient-indigo {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed, #6366f1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .score-ring {
-    background: conic-gradient(#E8826A var(--score-deg, 0deg), #F5F0EC var(--score-deg, 0deg));
+  .streak-flame {
+    filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.6));
   }
 
-  .font-display {
-    font-family: var(--font-display), Georgia, serif;
+  .chat-bubble-user {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-sm;
+  }
+
+  .chat-bubble-assistant {
+    @apply bg-secondary text-secondary-foreground rounded-2xl rounded-bl-sm;
   }
 }

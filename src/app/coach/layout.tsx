@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 
 export const metadata: Metadata = {
-  title: "Tableau de bord",
+  title: "Mon coach",
   robots: { index: false, follow: false },
 };
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function CoachLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <AppSidebar />
