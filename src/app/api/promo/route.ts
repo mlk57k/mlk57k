@@ -4,7 +4,9 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
-const VALID_CODES = new Set(["beessap"]);
+const CODE_LIMITS: Record<string, number> = {
+  beessap: 3,
+};
 
 function getAdminClient() {
   return createAdminClient(
@@ -31,16 +33,17 @@ export async function POST(request: Request) {
   }
 
   const code = typeof body.code === "string" ? body.code.trim().toLowerCase() : "";
-  if (!VALID_CODES.has(code)) {
+  const maxRedemptions = CODE_LIMITS[code];
+  if (!maxRedemptions) {
     return NextResponse.json({ error: "Code promo invalide." }, { status: 400 });
   }
 
   const admin = getAdminClient();
 
-  // Check if already activated (idempotent)
+  // Check if this user already activated the code (idempotent)
   const { data: profile } = await admin
     .from("profiles")
-    .select("lifetime_access")
+    .select("lifetime_access, promo_code_used")
     .eq("id", user.id)
     .single();
 
@@ -48,10 +51,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   }
 
-  // Grant lifetime access on the profile (via service role to bypass RLS)
+  // Count how many users have already redeemed this specific code
+  const { count } = await admin
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("promo_code_used", code);
+
+  if ((count ?? 0) >= maxRedemptions) {
+    return NextResponse.json(
+      { error: "Ce code promo a atteint son nombre maximum d'utilisations." },
+      { status: 400 }
+    );
+  }
+
+  // Grant lifetime access (via service role to bypass RLS)
   const { error: profileError } = await admin
     .from("profiles")
-    .upsert({ id: user.id, lifetime_access: true }, { onConflict: "id" });
+    .upsert(
+      { id: user.id, lifetime_access: true, promo_code_used: code },
+      { onConflict: "id" }
+    );
 
   if (profileError) {
     console.error("[promo] profile update error:", profileError);
