@@ -32,7 +32,13 @@ export function RoutinePaywall({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: promoCode.trim() }),
       });
-      const json = await res.json();
+      let json: { error?: string; success?: boolean } = {};
+      try {
+        json = await res.json();
+      } catch {
+        setPromoError("Erreur serveur. Réessaie dans quelques secondes.");
+        return;
+      }
       if (!res.ok) {
         setPromoError(json.error ?? "Code invalide.");
       } else {
@@ -40,7 +46,7 @@ export function RoutinePaywall({
         setTimeout(() => onUnlock?.(), 600);
       }
     } catch {
-      setPromoError("Erreur réseau. Réessaie.");
+      setPromoError("Connexion impossible. Vérifie ta connexion internet.");
     } finally {
       setPromoLoading(false);
     }
