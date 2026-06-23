@@ -31,11 +31,12 @@ function Success() {
           const localId = getLastScanId();
           if (localId) patchScan(localId, { unlocked: true });
 
-          // Redirige vers les résultats si on a un scan en base, sinon le dashboard
-          if (data.scan_id) {
-            router.replace(`/results/${localId ?? data.scan_id}`);
+          // Redirige vers les résultats (local ou DB), sinon le scan
+          const targetId = localId ?? data.scan_id;
+          if (targetId) {
+            router.replace(`/results/${targetId}`);
           } else {
-            router.replace("/dashboard");
+            router.replace("/scan");
           }
           return;
         }
