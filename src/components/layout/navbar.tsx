@@ -60,6 +60,30 @@ export function Navbar() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
+          {isLoggedIn === true && (
+            <>
+              <Button
+                asChild
+                size="sm"
+                variant="ghost"
+                className="rounded-full px-4 text-stone-600 hover:text-stone-900"
+              >
+                <Link href="/dashboard">Mon compte</Link>
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="rounded-full px-4 text-stone-500 hover:text-stone-900"
+                onClick={async () => {
+                  const { createClient } = await import("@/lib/supabase/client");
+                  await createClient().auth.signOut();
+                  window.location.assign("/");
+                }}
+              >
+                Se déconnecter
+              </Button>
+            </>
+          )}
           {isLoggedIn === false && (
             <Button
               asChild
