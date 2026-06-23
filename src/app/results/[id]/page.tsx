@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ScoreHero } from "@/components/results/score-hero";
 import { IssuesList } from "@/components/results/issues-list";
 import { RoutinePaywall } from "@/components/results/routine-paywall";
+import { ProductRecommendations } from "@/components/results/product-recommendations";
 import { getScan } from "@/lib/scan-storage";
 import type { StoredScan } from "@/lib/scan-schema";
 
@@ -101,6 +102,11 @@ export default function ResultsPage({
           unlocked={scan.unlocked ?? false}
           onUnlock={() => setScan((s) => s ? { ...s, unlocked: true } : s)}
         />
+
+        {/* SoftSkin, IntenseSkin, Support — visibles uniquement après déblocage */}
+        {(scan.unlocked ?? false) && (
+          <ProductRecommendations routine={scan.routine} />
+        )}
 
         {/* Rescan + réassurance */}
         <div className="space-y-4 pt-2">
