@@ -85,9 +85,13 @@ DROP POLICY IF EXISTS "streaks_own" ON streaks;
 DROP POLICY IF EXISTS "journal_entries_own" ON journal_entries;
 DROP POLICY IF EXISTS "plans_own" ON plans;
 
+DROP POLICY IF EXISTS "messages_own" ON messages;
 CREATE POLICY "messages_own" ON messages FOR ALL USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "streaks_own" ON streaks;
 CREATE POLICY "streaks_own" ON streaks FOR ALL USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "journal_entries_own" ON journal_entries;
 CREATE POLICY "journal_entries_own" ON journal_entries FOR ALL USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "plans_own" ON plans;
 CREATE POLICY "plans_own" ON plans FOR ALL USING (auth.uid() = user_id);
 
 CREATE OR REPLACE FUNCTION handle_new_user()
