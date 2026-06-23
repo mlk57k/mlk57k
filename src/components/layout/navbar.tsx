@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { GlowyLogo } from "@/components/ui/logo";
 
@@ -18,7 +19,16 @@ async function getUser() {
 }
 
 export function Navbar() {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  function handleScanClick() {
+    if (isLoggedIn) {
+      router.push("/scan");
+    } else {
+      router.push("/auth?next=/scan");
+    }
+  }
 
   useEffect(() => {
     getUser().then((u) => setIsLoggedIn(!!u));
@@ -61,11 +71,11 @@ export function Navbar() {
             </Button>
           )}
           <Button
-            asChild
             size="sm"
             className="rounded-full px-5 bg-coral-400 hover:bg-coral-500 text-white border-none shadow-md shadow-coral-200"
+            onClick={handleScanClick}
           >
-            <Link href="/scan">Scanner ma peau</Link>
+            Scanner ma peau
           </Button>
         </div>
       </div>
