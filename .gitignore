@@ -37,3 +37,9 @@ next-env.d.ts
 
 # claude worktrees (temporary agent workspaces)
 .claude/worktrees/
+
+# hyperframes agent tooling (auto-installed skills) + scaffold
+.agents/
+.claude/skills/
+skills-lock.json
+videos/
