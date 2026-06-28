@@ -1,47 +1,51 @@
-import "./index.css";
-import { Composition } from "remotion";
-import { HelloWorld, myCompSchema } from "./HelloWorld";
-import { Logo, myCompSchema2 } from "./HelloWorld/Logo";
+import React from 'react';
+import { Composition, Series } from 'remotion';
+import { Hook }    from './compositions/Hook';
+import { Problem } from './compositions/Problem';
+import { Demo }    from './compositions/Demo';
+import { Result }  from './compositions/Result';
+import { CTA }     from './compositions/CTA';
 
-// Each <Composition> is an entry in the sidebar!
+// ─── Séquence maître (15s @ 30fps = 450 frames) ───────────────────────────
+const GlowyTikTok: React.FC = () => (
+  <Series>
+    <Series.Sequence durationInFrames={60}>
+      <Hook />
+    </Series.Sequence>
+    <Series.Sequence durationInFrames={60}>
+      <Problem />
+    </Series.Sequence>
+    <Series.Sequence durationInFrames={150}>
+      <Demo />
+    </Series.Sequence>
+    <Series.Sequence durationInFrames={120}>
+      <Result />
+    </Series.Sequence>
+    <Series.Sequence durationInFrames={60}>
+      <CTA />
+    </Series.Sequence>
+  </Series>
+);
 
-export const RemotionRoot: React.FC = () => {
-  return (
-    <>
-      <Composition
-        // You can take the "id" to render a video:
-        // npx remotion render HelloWorld
-        id="HelloWorld"
-        component={HelloWorld}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-        // You can override these props for each render:
-        // https://www.remotion.dev/docs/parametrized-rendering
-        schema={myCompSchema}
-        defaultProps={{
-          titleText: "Welcome to Remotion",
-          titleColor: "#000000",
-          logoColor1: "#91EAE4",
-          logoColor2: "#86A8E7",
-        }}
-      />
+// ─── Config 9:16 TikTok ───────────────────────────────────────────────────
+const W = 1080;
+const H = 1920;
+const FPS = 30;
 
-      {/* Mount any React component to make it show up in the sidebar and work on it individually! */}
-      <Composition
-        id="OnlyLogo"
-        component={Logo}
-        durationInFrames={150}
-        fps={30}
-        width={1920}
-        height={1080}
-        schema={myCompSchema2}
-        defaultProps={{
-          logoColor1: "#91dAE2" as const,
-          logoColor2: "#86A8E7" as const,
-        }}
-      />
-    </>
-  );
-};
+export const RemotionRoot: React.FC = () => (
+  <>
+    <Composition
+      id="GlowyTikTok"
+      component={GlowyTikTok}
+      durationInFrames={450}
+      fps={FPS}
+      width={W}
+      height={H}
+    />
+    <Composition id="Hook"    component={Hook}    durationInFrames={60}  fps={FPS} width={W} height={H} />
+    <Composition id="Problem" component={Problem} durationInFrames={60}  fps={FPS} width={W} height={H} />
+    <Composition id="Demo"    component={Demo}    durationInFrames={150} fps={FPS} width={W} height={H} />
+    <Composition id="Result"  component={Result}  durationInFrames={120} fps={FPS} width={W} height={H} />
+    <Composition id="CTA"     component={CTA}     durationInFrames={60}  fps={FPS} width={W} height={H} />
+  </>
+);
