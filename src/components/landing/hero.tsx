@@ -187,7 +187,7 @@ export function Hero() {
             </h1>
 
             <p className="mx-auto lg:mx-0 max-w-lg text-lg sm:text-xl text-stone-500 mb-8 text-pretty leading-relaxed animate-fade-up animation-delay-200">
-              Prends une selfie. Notre IA analyse ta peau en quelques secondes
+              Prends un selfie. Notre IA analyse ta peau en quelques secondes
               et te donne ton score, ton âge cutané, et une routine sur-mesure.
             </p>
 

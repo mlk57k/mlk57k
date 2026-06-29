@@ -43,7 +43,7 @@ export function PreviewStep({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <Image
           src={imageDataUrl}
-          alt="Aperçu de ta selfie"
+          alt="Aperçu de ton selfie"
           fill
           unoptimized
           className="object-cover"

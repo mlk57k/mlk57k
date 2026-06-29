@@ -4,7 +4,7 @@ const steps = [
   {
     icon: Camera,
     number: "01",
-    title: "Prends ta selfie",
+    title: "Prends ton selfie",
     description: "Caméra frontale ou galerie photo. Lumière naturelle pour un meilleur résultat.",
   },
   {
@@ -30,7 +30,7 @@ export function HowItWorks() {
             Comment ça marche
           </p>
           <h2 className="font-display text-4xl sm:text-5xl font-bold text-stone-900">
-            Simple comme une <span className="text-gradient-coral italic">selfie</span>
+            Simple comme un <span className="text-gradient-coral italic">selfie</span>
           </h2>
         </div>
 

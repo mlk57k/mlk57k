@@ -12,7 +12,7 @@ const SUPPORTED_MEDIA_TYPES = [
 
 type SupportedMediaType = (typeof SUPPORTED_MEDIA_TYPES)[number];
 
-const SYSTEM_PROMPT = `Tu es l'IA de "Glowy", une app beauté qui donne un aperçu cosmétique de la peau à partir d'une selfie.
+const SYSTEM_PROMPT = `Tu es l'IA de "Glowy", une app beauté qui donne un aperçu cosmétique de la peau à partir d'un selfie.
 
 Ton rôle : analyser visuellement l'apparence de la peau et produire une estimation ludique et bienveillante.
 
@@ -93,7 +93,7 @@ export async function analyzeSkin(imageDataUrl: string, apiKey: string, skinProf
 
   const userContent: Anthropic.MessageParam["content"] = [
     { type: "image", source: { type: "base64", media_type: mediaType, data } },
-    { type: "text", text: "Voici ma selfie. Donne-moi mon aperçu de peau Glowy." },
+    { type: "text", text: "Voici mon selfie. Donne-moi mon aperçu de peau Glowy." },
   ];
 
   if (skinProfile) {

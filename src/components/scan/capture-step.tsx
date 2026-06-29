@@ -144,7 +144,7 @@ export function CaptureStep({
   return (
     <div className="animate-fade-up">
       <div className="text-center mb-8">
-        <h1 className="font-display text-2xl font-bold mb-2">Prends ta selfie</h1>
+        <h1 className="font-display text-2xl font-bold mb-2">Prends ton selfie</h1>
         <p className="text-stone-500 text-sm">
           Caméra ou galerie, comme tu préfères. On t&apos;analyse ça en
           quelques secondes.
