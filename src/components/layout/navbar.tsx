@@ -23,11 +23,9 @@ export function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   function handleScanClick() {
-    if (isLoggedIn) {
-      router.push("/scan");
-    } else {
-      router.push("/auth?next=/scan");
-    }
+    // On va toujours vers /scan : le middleware redirige vers /auth si l'utilisateur
+    // n'est pas connecté, et laisse passer s'il l'est. Pas de course à l'état client.
+    router.push("/scan");
   }
 
   useEffect(() => {
@@ -84,7 +82,7 @@ export function Navbar() {
               </Button>
             </>
           )}
-          {isLoggedIn === false && (
+          {isLoggedIn !== true && (
             <Button
               asChild
               size="sm"

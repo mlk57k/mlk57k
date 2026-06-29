@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 const DOTS: [number, number][] = [
   // forehead
@@ -157,24 +156,10 @@ function ScanPhoneMockup() {
 export function Hero() {
   const router = useRouter();
 
-  async function handleScanClick() {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      router.push("/auth?next=/scan");
-      return;
-    }
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        router.push("/scan");
-      } else {
-        router.push("/auth?next=/scan");
-      }
-    } catch {
-      router.push("/auth?next=/scan");
-    }
+  function handleScanClick() {
+    // On va toujours vers /scan : le middleware redirige vers /auth si besoin,
+    // et laisse passer l'utilisateur déjà connecté. Robuste et instantané.
+    router.push("/scan");
   }
 
   return (
