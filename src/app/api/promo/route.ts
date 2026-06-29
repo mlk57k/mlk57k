@@ -64,10 +64,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Activer l'accès à vie sur le profil
+    // Activer l'accès à vie sur le profil. subscription_status = 'promo' protège
+    // cet accès contre toute révocation par le webhook Stripe.
     await admin
       .from("profiles")
-      .update({ lifetime_access: true, promo_code_used: code })
+      .update({
+        lifetime_access: true,
+        promo_code_used: code,
+        subscription_status: "promo",
+      })
       .eq("id", user.id);
 
     // Débloquer tous les scans existants de cet utilisateur

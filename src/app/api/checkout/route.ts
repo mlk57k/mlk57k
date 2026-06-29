@@ -135,17 +135,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
+    // maybeSingle : pas d'erreur si le profil n'existe pas encore (compte créé
+    // avant le trigger de signup, par exemple).
     const { data: profile } = await supabase
       .from("profiles")
       .select("stripe_customer_id")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     let customerId: string | undefined = profile?.stripe_customer_id ?? undefined;
 
     if (customerId) {
       try {
-        await stripe.customers.retrieve(customerId);
+        const existing = await stripe.customers.retrieve(customerId);
+        if ((existing as { deleted?: boolean }).deleted) customerId = undefined;
       } catch {
         customerId = undefined;
       }
@@ -157,10 +160,13 @@ export async function POST(request: Request) {
         metadata: { user_id: user.id },
       });
       customerId = customer.id;
+      // upsert : crée le profil s'il manque, sinon met à jour le customer_id.
       await supabase
         .from("profiles")
-        .update({ stripe_customer_id: customerId })
-        .eq("id", user.id);
+        .upsert(
+          { id: user.id, email: user.email ?? null, stripe_customer_id: customerId },
+          { onConflict: "id" }
+        );
     }
 
     const session = await stripe.checkout.sessions.create({
