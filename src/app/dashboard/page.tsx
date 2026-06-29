@@ -63,7 +63,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-cream-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 px-4 h-14 flex items-center justify-center border-b border-cream-200/60 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 px-4 h-14 flex items-center justify-center border-b border-cream-200/50 glass">
         <Link href="/">
           <GlowyLogo size="md" />
         </Link>
@@ -71,8 +71,8 @@ export default async function DashboardPage() {
 
       <main className="mx-auto max-w-md px-4 py-8 space-y-8">
         {/* Greeting */}
-        <div>
-          <h1 className="font-display text-2xl font-bold">Bonjour, {firstName}</h1>
+        <div className="animate-fade-up">
+          <h1 className="font-display text-2xl font-bold">Bonjour, <span className="text-gradient-coral italic">{firstName}</span></h1>
           <p className="text-sm text-stone-500 mt-1">
             {scanList.length === 0
               ? "Lance ton premier scan pour voir ton score."
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
 
         {/* Score summary card */}
         {latest && (
-          <div className="rounded-2xl bg-white border border-cream-200 p-5 flex items-center gap-4">
+          <div className="rounded-3xl bg-white border border-cream-200 p-5 flex items-center gap-4 shadow-lift">
             <div
               className={`h-16 w-16 rounded-2xl ${scoreBg(latest.skin_score)} flex flex-col items-center justify-center shrink-0`}
             >
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
               <TrendingUp className="h-4 w-4 text-coral-400" />
               <h2 className="font-semibold text-sm">Évolution de ton score</h2>
             </div>
-            <div className="rounded-2xl bg-white border border-cream-200 p-4">
+            <div className="rounded-3xl bg-white border border-cream-200 p-4 shadow-soft">
               <ScoreChart data={chartData} />
             </div>
           </section>
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
                 <li key={scan.id}>
                   <Link
                     href={`/results/${scan.id}`}
-                    className="flex items-center gap-3 rounded-2xl bg-white border border-cream-200 px-4 py-3 hover:border-coral-300 transition-colors"
+                    className="flex items-center gap-3 rounded-2xl bg-white border border-cream-200 px-4 py-3 shadow-soft hover:border-coral-300 hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300"
                   >
                     {/* Score bubble */}
                     <div
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
         )}
 
         {/* CTA */}
-        <Button asChild className="w-full bg-coral-400 hover:bg-coral-500 text-white h-12">
+        <Button asChild size="lg" className="w-full">
           <Link href="/scan">
             <Camera className="h-5 w-5" />
             Nouveau scan

@@ -64,8 +64,8 @@ const LINES: [[number, number], [number, number]][] = [
 
 function ScanPhoneMockup() {
   return (
-    <div className="relative mx-auto" style={{ maxWidth: 220 }}>
-      <div className="absolute inset-0 rounded-[44px] bg-coral-300/25 blur-3xl scale-110 -z-10" />
+    <div className="relative mx-auto animate-float" style={{ maxWidth: 230 }}>
+      <div className="absolute inset-0 rounded-[44px] bg-coral-300/30 blur-3xl scale-110 -z-10 animate-glow-pulse" />
       <svg
         viewBox="0 0 280 560"
         fill="none"
@@ -137,17 +137,17 @@ function ScanPhoneMockup() {
       </svg>
 
       {/* Score badge flottant */}
-      <div className="absolute top-[18%] -right-6 bg-white rounded-2xl shadow-xl shadow-black/10 px-3 py-2 flex items-center gap-2 border border-cream-100">
+      <div className="absolute top-[16%] -right-8 glass rounded-2xl shadow-premium px-3.5 py-2.5 flex items-center gap-2 border border-white/60 animate-float-delayed">
         <span className="text-xl">✨</span>
         <div>
-          <p className="text-[10px] text-stone-400 leading-none">Score cutané</p>
+          <p className="text-[10px] text-stone-400 leading-none mb-0.5">Score cutané</p>
           <p className="text-base font-bold text-stone-900 leading-tight">87/100</p>
         </div>
       </div>
 
       {/* Age cutané badge */}
-      <div className="absolute bottom-[22%] -left-8 bg-white rounded-2xl shadow-xl shadow-black/10 px-3 py-2 border border-cream-100">
-        <p className="text-[10px] text-stone-400 leading-none">Âge cutané</p>
+      <div className="absolute bottom-[20%] -left-10 glass rounded-2xl shadow-premium px-3.5 py-2.5 border border-white/60 animate-float">
+        <p className="text-[10px] text-stone-400 leading-none mb-0.5">Âge cutané</p>
         <p className="text-base font-bold text-stone-900 leading-tight">24 ans</p>
       </div>
     </div>
@@ -178,35 +178,38 @@ export function Hero() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-white pt-16 pb-24 sm:pt-24 sm:pb-32">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white via-cream-50 to-coral-50/30" />
-      <div className="pointer-events-none absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-coral-50/60 blur-[120px] -translate-y-1/2 translate-x-1/3" />
-      <div className="pointer-events-none absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-cream-100/80 blur-[100px] translate-y-1/2 -translate-x-1/4" />
+    <section className="grain relative overflow-hidden bg-white pt-16 pb-24 sm:pt-24 sm:pb-32">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white via-cream-50 to-coral-50/40" />
+      <div className="pointer-events-none absolute top-0 right-0 w-[640px] h-[640px] rounded-full bg-coral-100/50 blur-[130px] -translate-y-1/3 translate-x-1/3 animate-glow-pulse" />
+      <div className="pointer-events-none absolute bottom-0 left-0 w-[440px] h-[440px] rounded-full bg-champagne-100/60 blur-[110px] translate-y-1/2 -translate-x-1/4" />
 
       <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left — texte + CTA */}
           <div className="text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-coral-50 border border-coral-200 px-4 py-1.5 text-sm font-medium text-coral-600 mb-8">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 rounded-full glass border border-coral-200/70 px-4 py-1.5 text-sm font-medium text-coral-600 mb-8 shadow-soft animate-fade-up shine">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-coral-400 opacity-75 animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-coral-500" />
+              </span>
               <span>+12 000 analyses cette semaine</span>
             </div>
 
-            <h1 className="font-display text-5xl sm:text-6xl font-bold text-balance text-stone-900 mb-6">
+            <h1 className="font-display text-5xl sm:text-6xl font-bold text-balance text-stone-900 mb-6 animate-fade-up animation-delay-100">
               Découvre l&apos;âge réel
               <br />
-              <span className="text-gradient-coral italic">de ta peau</span>
+              <span className="text-gradient-glow italic">de ta peau</span>
             </h1>
 
-            <p className="mx-auto lg:mx-0 max-w-lg text-lg sm:text-xl text-stone-500 mb-10 text-pretty leading-relaxed">
+            <p className="mx-auto lg:mx-0 max-w-lg text-lg sm:text-xl text-stone-500 mb-8 text-pretty leading-relaxed animate-fade-up animation-delay-200">
               Prends une selfie. Notre IA analyse ta peau en quelques secondes
               et te donne ton score, ton âge cutané, et une routine sur-mesure.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-4 animate-fade-up animation-delay-300">
               <Button
                 size="lg"
-                className="rounded-full bg-coral-400 hover:bg-coral-500 text-white border-none shadow-xl shadow-coral-200/50 px-8 h-14 text-base font-semibold"
+                className="px-8 h-14 text-base"
                 onClick={handleScanClick}
               >
                 Scanner ma peau
@@ -216,10 +219,33 @@ export function Hero() {
                 Gratuit · Résultats en 10 secondes
               </p>
             </div>
+
+            {/* Trust row */}
+            <div className="mt-10 flex items-center justify-center lg:justify-start gap-4 animate-fade-up animation-delay-400">
+              <div className="flex -space-x-2.5">
+                {["#e8826a", "#D4B27A", "#eea593", "#C09A5E", "#dc6b51"].map((c, i) => (
+                  <span
+                    key={i}
+                    className="h-8 w-8 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-bold text-white"
+                    style={{ background: `linear-gradient(135deg, ${c}, ${c}cc)` }}
+                  >
+                    {["A", "M", "L", "C", "I"][i]}
+                  </span>
+                ))}
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Sparkles key={i} className="h-3 w-3 fill-champagne-400 text-champagne-400" />
+                  ))}
+                </div>
+                <p className="text-xs text-stone-400 mt-0.5">Noté 4,9/5 par +3 000 utilisatrices</p>
+              </div>
+            </div>
           </div>
 
           {/* Right — mockup téléphone scan */}
-          <div className="flex justify-center lg:justify-end">
+          <div className="flex justify-center lg:justify-end animate-scale-in animation-delay-200">
             <ScanPhoneMockup />
           </div>
         </div>

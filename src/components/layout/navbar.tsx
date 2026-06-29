@@ -46,16 +46,16 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-cream-200/60">
+    <header className="sticky top-0 z-50 w-full glass border-b border-cream-200/50">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="cursor-pointer">
+        <Link href="/" className="cursor-pointer transition-transform duration-200 hover:scale-[1.03]">
           <GlowyLogo size="md" />
         </Link>
         <nav className="hidden sm:flex items-center gap-8 text-sm font-medium text-stone-500">
-          <Link href="#how" className="hover:text-stone-900 transition-colors duration-150">
+          <Link href="#how" className="relative hover:text-stone-900 transition-colors duration-150 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-coral-400 after:transition-all hover:after:w-full">
             Comment ça marche
           </Link>
-          <Link href="#faq" className="hover:text-stone-900 transition-colors duration-150">
+          <Link href="#faq" className="relative hover:text-stone-900 transition-colors duration-150 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-coral-400 after:transition-all hover:after:w-full">
             FAQ
           </Link>
         </nav>

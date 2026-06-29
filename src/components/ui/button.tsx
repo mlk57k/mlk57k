@@ -4,16 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-400/60 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97]",
   {
     variants: {
       variant: {
         default:
-          "bg-coral-400 text-white shadow-md hover:bg-coral-500 hover:shadow-lg",
+          "bg-gradient-to-br from-coral-400 to-coral-500 text-white shadow-glow-coral hover:shadow-[0_14px_44px_-10px_rgba(232,130,106,0.6)] hover:-translate-y-0.5",
+        champagne:
+          "bg-gradient-champagne text-stone-900 shadow-soft hover:shadow-lift hover:-translate-y-0.5",
         secondary:
-          "bg-cream-100 text-foreground hover:bg-cream-200",
+          "bg-white text-foreground border border-cream-200 shadow-soft hover:border-coral-200 hover:shadow-lift",
         outline:
-          "border-2 border-coral-400 text-coral-400 bg-transparent hover:bg-coral-50",
+          "border-2 border-coral-400 text-coral-500 bg-transparent hover:bg-coral-50",
         ghost:
           "text-foreground hover:bg-cream-100",
         link:

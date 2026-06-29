@@ -61,11 +61,99 @@
     background-clip: text;
   }
 
+  /* Gradient texte animé (coral → champagne → coral) pour les accents premium */
+  .text-gradient-glow {
+    background: linear-gradient(110deg, #dc6b51, #e8826a, #D4B27A, #e8826a, #dc6b51);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 8s ease infinite;
+  }
+
   .score-ring {
     background: conic-gradient(#E8826A var(--score-deg, 0deg), #F5F0EC var(--score-deg, 0deg));
   }
 
   .font-display {
     font-family: var(--font-display), Georgia, serif;
+  }
+
+  /* Surface en verre dépoli — navbar, modales, cartes flottantes */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+  .glass-dark {
+    background: rgba(24, 18, 16, 0.55);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+
+  /* Texture grain subtile pour casser les aplats */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  /* Carte premium réutilisable : fond clair, bord doux, ombre soft, lift au survol */
+  .card-premium {
+    @apply rounded-3xl border border-cream-200/80 bg-white shadow-soft transition-all duration-300;
+  }
+  .card-premium:hover {
+    @apply shadow-lift border-coral-200/70 -translate-y-1;
+  }
+
+  /* Bord dégradé (coral → champagne) via masque */
+  .border-gradient {
+    position: relative;
+    background-clip: padding-box;
+  }
+  .border-gradient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(232,130,106,0.6), rgba(212,178,122,0.5));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Effet brillance qui traverse (boutons / badges) */
+  .shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
+    background-size: 220% 100%;
+    animation: shimmer 3s linear infinite;
+    pointer-events: none;
+  }
+
+  .animation-delay-100 { animation-delay: 0.1s; }
+  .animation-delay-200 { animation-delay: 0.2s; }
+  .animation-delay-300 { animation-delay: 0.3s; }
+  .animation-delay-400 { animation-delay: 0.4s; }
+  .animation-delay-500 { animation-delay: 0.5s; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

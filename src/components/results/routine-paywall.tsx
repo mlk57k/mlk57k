@@ -80,7 +80,7 @@ export function RoutinePaywall({
         )}
       </div>
 
-      <div className="relative rounded-2xl overflow-hidden border border-cream-200">
+      <div className="relative rounded-2xl overflow-hidden border border-cream-200 shadow-soft">
         {/* First item always visible */}
         {firstItem && (
           <div className="bg-white px-5 pt-5 pb-3">
@@ -154,7 +154,7 @@ export function RoutinePaywall({
             {/* Paywall overlay */}
             <div className="absolute inset-0 flex flex-col items-end justify-end bg-gradient-to-b from-transparent via-white/60 to-white p-5 text-center">
               <div className="w-full flex flex-col items-center pt-4">
-                <div className="h-12 w-12 rounded-2xl bg-coral-400 flex items-center justify-center mb-3 shadow-lg shadow-coral-200">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-coral-400 to-coral-500 flex items-center justify-center mb-3 shadow-glow-coral">
                   <Lock className="h-5 w-5 text-white" />
                 </div>
                 <p className="font-display font-bold text-lg text-stone-900 mb-1">

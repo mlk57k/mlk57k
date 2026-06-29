@@ -24,9 +24,10 @@ export function ScoreHero({ score, age }: { score: number; age: number }) {
   const offset = animated ? CIRC * (1 - score / 100) : CIRC;
 
   return (
-    <div className="rounded-3xl bg-gradient-to-b from-cream-50 to-white border border-cream-200 p-8 text-center shadow-sm">
+    <div className="grain relative overflow-hidden rounded-3xl bg-gradient-to-b from-cream-50 to-white border border-cream-200 p-8 text-center shadow-lift">
+      <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full bg-coral-100/50 blur-[70px]" />
       {/* Badge */}
-      <div className="inline-flex items-center gap-1.5 rounded-full bg-coral-50 border border-coral-100 px-3 py-1 mb-6">
+      <div className="relative inline-flex items-center gap-1.5 rounded-full glass border border-coral-100 px-3 py-1 mb-6 shadow-soft">
         <Sparkles className="h-3 w-3 text-coral-400" />
         <span className="text-coral-500 font-semibold text-[11px] uppercase tracking-[0.15em]">
           Ton aperçu de peau
@@ -87,7 +88,7 @@ export function ScoreHero({ score, age }: { score: number; age: number }) {
       </p>
 
       {/* Age badge */}
-      <div className="inline-flex items-center gap-3 rounded-2xl bg-white border border-cream-200 px-6 py-3.5 shadow-sm">
+      <div className="relative inline-flex items-center gap-3 rounded-2xl bg-white border border-cream-200 px-6 py-3.5 shadow-soft">
         <span className="text-sm text-stone-500">Âge estimé de ta peau</span>
         <div className="h-4 w-px bg-cream-300" />
         <div className="flex items-baseline gap-1">

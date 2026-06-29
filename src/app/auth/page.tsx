@@ -220,16 +220,19 @@ function GoogleIcon() {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen bg-cream-50">
-      <header className="px-4 h-14 flex items-center justify-center border-b border-cream-200/60">
+    <div className="grain relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-cream-50 to-coral-50/30">
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full bg-coral-100/40 blur-[120px]" />
+      <header className="relative px-4 h-14 flex items-center justify-center border-b border-cream-200/50 glass">
         <Link href="/">
           <GlowyLogo size="md" />
         </Link>
       </header>
-      <main className="mx-auto max-w-md px-4 py-10">
-        <Suspense fallback={null}>
-          <AuthForm />
-        </Suspense>
+      <main className="relative mx-auto max-w-md px-4 py-12">
+        <div className="card-premium hover:translate-y-0 hover:shadow-soft p-7 sm:p-8">
+          <Suspense fallback={null}>
+            <AuthForm />
+          </Suspense>
+        </div>
       </main>
     </div>
   );

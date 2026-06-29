@@ -57,7 +57,7 @@ export function IssuesList({ issues }: { issues: Issue[] }) {
           return (
             <div
               key={issue.name}
-              className={`rounded-2xl bg-white border border-cream-200 border-l-4 ${meta.border} p-4`}
+              className={`rounded-2xl bg-white border border-cream-200 border-l-4 ${meta.border} p-4 shadow-soft transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5`}
             >
               <div className="flex items-center justify-between mb-2.5">
                 <span className="font-semibold text-sm text-stone-900">

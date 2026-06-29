@@ -56,7 +56,7 @@ export function ProductRecommendations({ routine }: { routine: RoutineItem[] }) 
   return (
     <div className="space-y-6">
       {/* SoftSkin */}
-      <section className="rounded-2xl overflow-hidden border border-blue-100 bg-white">
+      <section className="rounded-3xl overflow-hidden border border-blue-100 bg-white shadow-soft">
         <div className="flex items-center gap-2 px-5 pt-5 pb-3">
           <Droplets className="h-4 w-4 text-blue-500" />
           <h2 className="font-display text-base font-bold text-stone-900">
@@ -87,7 +87,7 @@ export function ProductRecommendations({ routine }: { routine: RoutineItem[] }) 
       </section>
 
       {/* IntenseSkin */}
-      <section className="rounded-2xl overflow-hidden border border-coral-100 bg-white">
+      <section className="rounded-3xl overflow-hidden border border-coral-100 bg-white shadow-soft">
         <div className="flex items-center gap-2 px-5 pt-5 pb-3">
           <Zap className="h-4 w-4 text-coral-400" />
           <h2 className="font-display text-base font-bold text-stone-900">
@@ -118,7 +118,7 @@ export function ProductRecommendations({ routine }: { routine: RoutineItem[] }) 
       </section>
 
       {/* Support prioritaire */}
-      <section className="rounded-2xl border border-cream-200 bg-white px-5 py-4 flex items-start gap-3">
+      <section className="rounded-3xl border border-cream-200 bg-white px-5 py-4 flex items-start gap-3 shadow-soft">
         <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
           <Headphones className="h-4 w-4 text-emerald-500" />
         </div>

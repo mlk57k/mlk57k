@@ -11,8 +11,8 @@ export function ConsentStep({ onAccept }: { onAccept: () => void }) {
   return (
     <div className="animate-fade-up">
       <div className="text-center mb-8">
-        <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-coral-50 flex items-center justify-center">
-          <ShieldCheck className="h-7 w-7 text-coral-400" />
+        <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-gradient-to-br from-coral-50 to-cream-100 border border-cream-200 shadow-soft flex items-center justify-center">
+          <ShieldCheck className="h-7 w-7 text-coral-500" />
         </div>
         <h1 className="font-display text-2xl font-bold mb-2">Avant de commencer</h1>
         <p className="text-stone-500 text-sm">
@@ -38,7 +38,7 @@ export function ConsentStep({ onAccept }: { onAccept: () => void }) {
           return (
             <div
               key={item.title}
-              className="flex gap-3 rounded-2xl bg-white border border-cream-200 p-4"
+              className="flex gap-3 rounded-2xl bg-white border border-cream-200 p-4 shadow-soft"
             >
               <Icon className="h-5 w-5 text-coral-400 shrink-0 mt-0.5" />
               <div>

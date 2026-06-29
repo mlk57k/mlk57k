@@ -86,7 +86,7 @@ export default function ResultsPage({
   return (
     <div className="min-h-screen bg-cream-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 px-4 h-14 flex items-center justify-center border-b border-cream-200/60 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 px-4 h-14 flex items-center justify-center border-b border-cream-200/50 glass">
         <Link href="/">
           <GlowyLogo size="md" />
         </Link>
