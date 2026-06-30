@@ -1,43 +1,44 @@
 import type { Metadata } from "next";
-import { DM_Sans, Playfair_Display } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://glowy.app";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://ancrage.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: {
-    default: "Glowy — Découvre l'âge réel de ta peau",
-    template: "%s · Glowy",
+    default: "Ancrage — Le journal du soir",
+    template: "%s · Ancrage",
   },
   description:
-    "Analyse ta peau par IA en 10 secondes. Score, âge estimé de ta peau, routine personnalisée. Gratuit et sans compte.",
-  keywords: ["soin peau", "analyse peau", "routine beauté", "score peau", "skincare IA"],
+    "Trois minutes pour déposer ta journée — par écrit ou à voix haute. Ancrage t'écoute et te renvoie une pensée douce pour fermer la journée l'esprit plus léger.",
+  keywords: ["journal intime", "journaling", "bien-être", "coach IA", "écriture thérapeutique"],
   openGraph: {
-    title: "Glowy — Découvre l'âge réel de ta peau",
-    description: "Analyse ta peau par IA en 10 secondes. Score, âge estimé et routine personnalisée.",
+    title: "Ancrage — Le journal du soir",
+    description: "Écris ou parle. Ancrage t'écoute et te renvoie un reflet bienveillant, jamais un diagnostic.",
     type: "website",
     locale: "fr_FR",
-    siteName: "Glowy",
+    siteName: "Ancrage",
     url: appUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Glowy — Découvre l'âge réel de ta peau",
-    description: "Analyse ta peau par IA en 10 secondes.",
-    creator: "@glowy_app",
+    title: "Ancrage — Le journal du soir",
+    description: "Trois minutes pour déposer ta journée et fermer l'esprit plus léger.",
+    creator: "@ancrage_app",
   },
   robots: {
     index: true,
@@ -56,7 +57,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${dmSans.variable} ${playfair.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${fraunces.variable} antialiased`}>{children}</body>
     </html>
   );
 }

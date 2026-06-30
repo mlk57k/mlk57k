@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * Rafraîchit la session Supabase à chaque requête et protège les routes
- * authentifiées (/dashboard). Si les variables d'env ne sont pas configurées,
+ * authentifiées (/journal). Si les variables d'env ne sont pas configurées,
  * on laisse passer (utile en dev sans Supabase branché).
  */
 export async function updateSession(request: NextRequest) {
@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Routes nécessitant un compte — redirige vers /auth si non connecté.
-  const protectedPaths = ["/scan", "/results", "/dashboard", "/checkout"];
+  const protectedPaths = ["/journal", "/bilan", "/parametres", "/checkout"];
   if (!user && protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p))) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth";

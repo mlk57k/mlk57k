@@ -5,78 +5,56 @@ import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-let _prices: { monthly: string; annual: string } | null = null;
-let _promoEnsured = false;
+const TRIAL_PERIOD_DAYS = 3;
 
-async function ensureBeessapPromo(): Promise<void> {
-  if (_promoEnsured) return;
-  try {
-    const stripe = getStripe();
-    const existing = await stripe.promotionCodes.list({ code: "BEESSAP", limit: 1 });
-    if (existing.data.length === 0) {
-      const coupon = await stripe.coupons.create({
-        percent_off: 100,
-        duration: "forever",
-        name: "Accès à vie Glowy — beessap",
-        max_redemptions: 3,
-      });
-      await stripe.promotionCodes.create({
-        promotion: { type: "coupon", coupon: coupon.id },
-        code: "BEESSAP",
-        max_redemptions: 3,
-      });
-    }
-    _promoEnsured = true;
-  } catch {
-    // Non-fatal: Stripe key may not be available yet
-  }
-}
+let _prices: { weekly: string; monthly: string } | null = null;
 
-async function getPriceIds(): Promise<{ monthly: string; annual: string }> {
+async function getPriceIds(): Promise<{ weekly: string; monthly: string }> {
   if (_prices) return _prices;
 
+  const envWeekly = process.env.STRIPE_PRICE_ID_WEEKLY;
+  const envMonthly = process.env.STRIPE_PRICE_ID_MONTHLY;
+  if (envWeekly && envMonthly) {
+    _prices = { weekly: envWeekly, monthly: envMonthly };
+    return _prices;
+  }
+
   const stripe = getStripe();
-
   const existing = await stripe.prices.list({ limit: 100, active: true });
-  const monthly = existing.data.find(
-    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "monthly" && p.metadata?.version === "2"
-  );
-  const annual = existing.data.find(
-    (p) => p.metadata?.app === "glowy" && p.metadata?.plan === "annual" && p.metadata?.version === "2"
-  );
+  const weekly = existing.data.find((p) => p.metadata?.app === "ancrage" && p.metadata?.plan === "weekly");
+  const monthly = existing.data.find((p) => p.metadata?.app === "ancrage" && p.metadata?.plan === "monthly");
 
-  if (monthly && annual) {
-    _prices = { monthly: monthly.id, annual: annual.id };
+  if (weekly && monthly) {
+    _prices = { weekly: weekly.id, monthly: monthly.id };
     return _prices;
   }
 
   const product = await stripe.products.create({
-    name: "Glowy — Routine personnalisée",
-    description:
-      "Accès à ta routine de soin personnalisée par IA, suivi de score et historique des scans.",
-    metadata: { app: "glowy" },
+    name: "Ancrage — Journaling illimité",
+    description: "Entrées de journal illimitées, bilans hebdomadaires, et mémoire des sessions précédentes.",
+    metadata: { app: "ancrage" },
   });
 
-  const [monthlyPrice, annualPrice] = await Promise.all([
+  const [weeklyPrice, monthlyPrice] = await Promise.all([
     stripe.prices.create({
       product: product.id,
-      unit_amount: 2480,
+      unit_amount: 499,
       currency: "eur",
-      recurring: { interval: "month" },
-      nickname: "Mensuel — 24,80 €/mois",
-      metadata: { app: "glowy", plan: "monthly", version: "2" },
+      recurring: { interval: "week" },
+      nickname: "Hebdomadaire — 4,99 €/semaine",
+      metadata: { app: "ancrage", plan: "weekly" },
     }),
     stripe.prices.create({
       product: product.id,
-      unit_amount: 17880,
+      unit_amount: 1499,
       currency: "eur",
-      recurring: { interval: "year" },
-      nickname: "Annuel — 14,90 €/mois (178,80 €/an)",
-      metadata: { app: "glowy", plan: "annual", version: "2" },
+      recurring: { interval: "month" },
+      nickname: "Mensuel — 14,99 €/mois",
+      metadata: { app: "ancrage", plan: "monthly" },
     }),
   ]);
 
-  _prices = { monthly: monthlyPrice.id, annual: annualPrice.id };
+  _prices = { weekly: weeklyPrice.id, monthly: monthlyPrice.id };
   return _prices;
 }
 
@@ -86,57 +64,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Stripe non configuré." }, { status: 503 });
     }
 
-    // Fire-and-forget: ensure BEESSAP promo exists in Stripe
-    void ensureBeessapPromo();
-
-    let plan: "monthly" | "annual" | undefined;
+    let plan: "weekly" | "monthly" | undefined;
     try {
       ({ plan } = await request.json());
     } catch {
       return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
     }
 
-    if (plan !== "monthly" && plan !== "annual") {
+    if (plan !== "weekly" && plan !== "monthly") {
       return NextResponse.json({ error: "Plan invalide." }, { status: 400 });
     }
 
-    // Use request origin so success/cancel URLs always match the current domain
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL ??
-      new URL(request.url).origin;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
     const stripe = getStripe();
     const priceIds = await getPriceIds();
-    const priceId = plan === "monthly" ? priceIds.monthly : priceIds.annual;
-
-    // Si Supabase n'est pas configuré (déploiement preview sans env vars),
-    // on crée une session Stripe anonyme pour permettre de tester le flux.
-    const isSupabaseConfigured = !!(
-      process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
-
-    if (!isSupabaseConfigured) {
-      const session = await stripe.checkout.sessions.create({
-        mode: "subscription",
-        line_items: [{ price: priceId, quantity: 1 }],
-        success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${appUrl}/checkout`,
-        allow_promotion_codes: true,
-      } as Stripe.Checkout.SessionCreateParams);
-      return NextResponse.json({ url: session.url });
-    }
+    const priceId = plan === "weekly" ? priceIds.weekly : priceIds.monthly;
 
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
-    // maybeSingle : pas d'erreur si le profil n'existe pas encore (compte créé
-    // avant le trigger de signup, par exemple).
     const { data: profile } = await supabase
       .from("profiles")
       .select("stripe_customer_id")
@@ -160,13 +110,9 @@ export async function POST(request: Request) {
         metadata: { user_id: user.id },
       });
       customerId = customer.id;
-      // upsert : crée le profil s'il manque, sinon met à jour le customer_id.
       await supabase
         .from("profiles")
-        .upsert(
-          { id: user.id, email: user.email ?? null, stripe_customer_id: customerId },
-          { onConflict: "id" }
-        );
+        .upsert({ id: user.id, email: user.email ?? "", stripe_customer_id: customerId }, { onConflict: "id" });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -174,11 +120,11 @@ export async function POST(request: Request) {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: {
+        trial_period_days: TRIAL_PERIOD_DAYS,
         metadata: { user_id: user.id },
       },
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/checkout`,
-      allow_promotion_codes: true,
+      cancel_url: `${appUrl}/abonnement`,
       metadata: { user_id: user.id },
     } as Stripe.Checkout.SessionCreateParams);
 

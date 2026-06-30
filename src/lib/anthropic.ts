@@ -1,144 +1,165 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { skinAnalysisSchema, type SkinAnalysis, type SkinProfile } from "@/lib/scan-schema";
+import { z } from "zod";
 
 const MODEL = "claude-sonnet-4-6";
 
-const SUPPORTED_MEDIA_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-] as const;
+export const CRISIS_HOTLINE = "3114";
 
-type SupportedMediaType = (typeof SUPPORTED_MEDIA_TYPES)[number];
+// Réponse fixe, jamais générée par le modèle : on ne laisse jamais l'IA
+// improviser face à un risque suicidaire ou de mise en danger immédiate.
+const CRISIS_MESSAGE = `Ce que tu traverses semble très lourd, et je veux que tu saches que ça compte.
 
-const SYSTEM_PROMPT = `Tu es l'IA de "Glowy", une app beauté qui donne un aperçu cosmétique de la peau à partir d'un selfie.
+Je ne suis qu'une IA de journaling — je ne suis pas formée ni en mesure de t'accompagner sur ce que tu vis là, et ce n'est pas à moi de le faire. Tu mérites un soutien humain, tout de suite.
 
-Ton rôle : analyser visuellement l'apparence de la peau et produire une estimation ludique et bienveillante.
+Si tu as des pensées suicidaires ou que tu te sens en danger, appelle ou écris au **3114** (numéro national de prévention du suicide, gratuit, confidentiel, 24h/24 et 7j/7). En cas d'urgence vitale, appelle le **15** (SAMU) ou le **112**.
 
-RÈGLES ABSOLUES :
-- Tu ne poses JAMAIS de diagnostic. Tu ne donnes JAMAIS d'avis médical ou dermatologique.
-- Tu n'utilises JAMAIS de vocabulaire médical (pas de "pathologie", "lésion", "diagnostic", "maladie", "acné" cliniques, etc.). Reste sur du vocabulaire beauté/cosmétique grand public ("éclat", "hydratation", "texture", "petites imperfections", "zones de brillance"...).
-- Tout est une "estimation" ou un "aperçu", jamais une certitude.
-- Ton jeune, direct, bienveillant et positif, 100% en français. Tutoiement.
-- Les descriptions s'adressent directement à la personne ("ta peau", "tu peux...").
+Si tu peux, parle-en aussi à quelqu'un de confiance autour de toi — tu n'as pas à porter ça seul·e.`;
 
-Donne :
-- skin_score : un score global d'éclat/santé apparente de la peau, de 0 à 100.
-- skin_age : un âge estimé de la peau (apparence), en années.
-- issues : 3 à 4 points d'attention cosmétiques (hydratation, éclat, texture, zones de brillance...), chacun avec une sévérité de 0 (parfait) à 100 (à chouchouter) et une courte description bienveillante.
-- routine : 2 à 3 catégories de soins recommandées (ex : "Hydratation", "Protection solaire", "Exfoliation douce") avec une raison courte et motivante.
+const SYSTEM_PROMPT_TEMPLATE = `Tu es le coach d'"Ancrage", une app de journaling quotidien. Ton rôle est d'aider la personne à réfléchir sur sa journée à travers l'écoute, le reflet et des questions ouvertes — pas de lui dire quoi penser ou faire.
 
-Si l'image ne montre pas clairement un visage, donne quand même une estimation prudente et encourageante.`;
+CADRE — Tu t'appuies sur des principes de thérapie cognitivo-comportementale (TCC) et d'entretien motivationnel (EM) :
+- Écoute réflective : reformule brièvement ce que tu comprends, sans interpréter à outrance.
+- Questions ouvertes plutôt que fermées.
+- Affirmations sincères (souligner un effort, une lucidité, une prise de recul) — jamais flatteuses ou creuses.
+- Explorer l'ambivalence sans juger ("une partie de toi... et une autre...").
+- Aider à repérer les pensées automatiques et les distorsions cognitives, sans jamais les nommer comme un diagnostic.
+- Varier la forme de tes relances : ne répète jamais la même structure de question deux tours de suite (regarde l'historique de conversation pour t'en assurer).
 
-const ANALYZE_TOOL: Anthropic.Tool = {
-  name: "analyze_skin",
-  description: "Retourne l'analyse cosmétique de la peau",
+LIMITES ABSOLUES — tu n'es PAS un·e thérapeute :
+- Tu ne poses jamais de diagnostic, ne donnes jamais d'avis médical ou de traitement.
+- Tu ne remplaces jamais un suivi professionnel ; si la personne semble en avoir besoin, encourage-la doucement à consulter, sans insister lourdement à chaque message.
+- Tu ne donnes pas de conseils de vie tranchés ("tu devrais quitter ton travail") — tu aides la personne à clarifier ce qu'elle pense déjà.
+
+TON — 100% français, tutoiement, chaleureux, posé, jamais clinique ni robotique. Phrases courtes. Pas d'emoji. Pas de "Je comprends que..." en formule figée à chaque message.
+
+LONGUEUR — 2 à 5 phrases maximum. Toujours se terminer par une seule question ouverte (sauf cas de crise, voir plus bas).
+
+MÉMOIRE — Voici ce que tu sais déjà de cette personne :
+{{CONTEXT}}
+Utilise ces éléments avec parcimonie, pour personnaliser sans plaquer artificiellement une référence à chaque message.
+
+DÉTECTION DE CRISE — Si le message laisse penser à un risque suicidaire, d'auto-mutilation, de mise en danger immédiate de soi-même ou d'autrui, ou de détresse aiguë nécessitant une aide humaine urgente, mets crisis_detected à true. Dans ce cas, n'essaie PAS toi-même de gérer la crise, ne donne aucun conseil — le système affichera automatiquement un message de sécurité à la place du tien.`;
+
+const COACH_TOOL: Anthropic.Tool = {
+  name: "repondre_journal",
+  description: "Retourne la réponse du coach à l'entrée de journal de l'utilisateur",
   input_schema: {
     type: "object",
     properties: {
-      skin_score: {
-        type: "number",
-        description: "Score global d'éclat de la peau, de 0 à 100",
+      message: {
+        type: "string",
+        description: "La réponse du coach, en français, 2 à 5 phrases, terminée par une question ouverte (sauf crise).",
       },
-      skin_age: {
-        type: "number",
-        description: "Âge estimé de la peau en années",
+      mood_estimate: {
+        type: ["number", "null"],
+        description: "Humeur perçue dans ce message, de 1 (très difficile) à 10 (très bien), ou null si impossible à estimer.",
       },
-      issues: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            name: { type: "string" },
-            severity: { type: "number", description: "0 (parfait) à 100 (à chouchouter)" },
-            description: { type: "string" },
-          },
-          required: ["name", "severity", "description"],
-        },
-      },
-      routine: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            category: { type: "string" },
-            reason: { type: "string" },
-          },
-          required: ["category", "reason"],
-        },
+      crisis_detected: {
+        type: "boolean",
+        description: "true si risque suicidaire, auto-mutilation, mise en danger immédiate, ou détresse aiguë nécessitant une aide humaine urgente.",
       },
     },
-    required: ["skin_score", "skin_age", "issues", "routine"],
+    required: ["message", "mood_estimate", "crisis_detected"],
   },
 };
 
-export class InvalidImageError extends Error {}
+const coachReplySchema = z.object({
+  message: z.string(),
+  mood_estimate: z.number().min(1).max(10).nullable(),
+  crisis_detected: z.boolean(),
+});
 
-function parseDataUrl(dataUrl: string): { mediaType: SupportedMediaType; data: string } {
-  const match = /^data:(image\/[a-zA-Z+]+);base64,(.+)$/.exec(dataUrl);
-  if (!match) {
-    throw new InvalidImageError("Format d'image invalide.");
-  }
-  const [, mediaType, data] = match;
-  if (!SUPPORTED_MEDIA_TYPES.includes(mediaType as SupportedMediaType)) {
-    throw new InvalidImageError(`Type d'image non supporté : ${mediaType}.`);
-  }
-  return { mediaType: mediaType as SupportedMediaType, data };
+export interface CoachMessage {
+  role: "user" | "assistant";
+  content: string;
 }
 
-export async function analyzeSkin(imageDataUrl: string, apiKey: string, skinProfile?: SkinProfile): Promise<SkinAnalysis> {
+export interface CoachContext {
+  objectifs?: string | null;
+  memoryDigest?: string | null;
+}
+
+export interface CoachReply {
+  message: string;
+  moodEstimate: number | null;
+  crisisDetected: boolean;
+}
+
+function buildContextBlock({ objectifs, memoryDigest }: CoachContext): string {
+  const lines: string[] = [];
+  if (objectifs) lines.push(`- Objectifs exprimés par la personne : ${objectifs}`);
+  if (memoryDigest) lines.push(`- Résumé des sessions précédentes : ${memoryDigest}`);
+  if (lines.length === 0) lines.push("- Pas encore d'historique connu — c'est probablement l'une de ses premières entrées.");
+  return lines.join("\n");
+}
+
+export async function generateCoachReply(
+  history: CoachMessage[],
+  newUserMessage: string,
+  context: CoachContext,
+  apiKey: string
+): Promise<CoachReply> {
   const client = new Anthropic({ apiKey });
-  const { mediaType, data } = parseDataUrl(imageDataUrl);
 
-  const userContent: Anthropic.MessageParam["content"] = [
-    { type: "image", source: { type: "base64", media_type: mediaType, data } },
-    { type: "text", text: "Voici mon selfie. Donne-moi mon aperçu de peau Glowy." },
+  const system = SYSTEM_PROMPT_TEMPLATE.replace("{{CONTEXT}}", buildContextBlock(context));
+
+  const messages: Anthropic.MessageParam[] = [
+    ...history.map((m) => ({ role: m.role, content: m.content }) as Anthropic.MessageParam),
+    { role: "user", content: newUserMessage },
   ];
-
-  if (skinProfile) {
-    const skinTypeLabels: Record<string, string> = {
-      normale: "normale",
-      seche: "sèche / avec inconfort",
-      grasse: "grasse / brillante",
-      mixte: "mixte (zone T)",
-      sensible: "sensible / réactive",
-    };
-    const routineLabels: Record<string, string> = {
-      aucune: "aucune routine",
-      basique: "routine basique (nettoyant)",
-      quelques: "quelques produits",
-      complete: "routine complète",
-    };
-    userContent.push({
-      type: "text",
-      text: `Profil renseigné par l'utilisateur : peau ${skinTypeLabels[skinProfile.skinType] ?? skinProfile.skinType}, préoccupations principales : ${skinProfile.concerns.join(", ")}, tranche d'âge : ${skinProfile.ageRange} ans, routine actuelle : ${routineLabels[skinProfile.routine] ?? skinProfile.routine}. Utilise ces informations pour affiner et personnaliser ton analyse.`,
-    });
-  }
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 1500,
-    system: SYSTEM_PROMPT,
-    tools: [ANALYZE_TOOL],
-    tool_choice: { type: "tool", name: "analyze_skin" },
-    messages: [
-      {
-        role: "user",
-        content: userContent,
-      },
-    ],
+    max_tokens: 600,
+    system,
+    tools: [COACH_TOOL],
+    tool_choice: { type: "tool", name: "repondre_journal" },
+    messages,
   });
 
   const toolBlock = response.content.find((b) => b.type === "tool_use");
   if (!toolBlock || toolBlock.type !== "tool_use") {
-    throw new Error("L'analyse n'a pas pu être structurée correctement.");
+    throw new Error("La réponse du coach n'a pas pu être générée.");
   }
 
-  const parsed = skinAnalysisSchema.safeParse(toolBlock.input);
+  const parsed = coachReplySchema.safeParse(toolBlock.input);
   if (!parsed.success) {
     throw new Error("Réponse inattendue de l'IA.");
   }
 
-  return parsed.data;
+  if (parsed.data.crisis_detected) {
+    return { message: CRISIS_MESSAGE, moodEstimate: null, crisisDetected: true };
+  }
+
+  return {
+    message: parsed.data.message,
+    moodEstimate: parsed.data.mood_estimate,
+    crisisDetected: false,
+  };
+}
+
+const WEEKLY_SUMMARY_SYSTEM_PROMPT = `Tu rédiges un bilan hebdomadaire bienveillant pour une personne qui tient un journal sur Ancrage. À partir des entrées de la semaine fournies, identifie 2 à 3 tendances ou motifs récurrents (pas une liste exhaustive de tout ce qui s'est passé). Ton chaleureux, concis, en français, tutoiement. 100 à 150 mots. Ne donne aucun diagnostic, ne fais aucune supposition clinique. Termine par une phrase d'encouragement tournée vers la semaine à venir.`;
+
+export async function generateWeeklySummary(
+  entries: { content: string; moodScore: number | null; createdAt: string }[],
+  apiKey: string
+): Promise<string> {
+  const client = new Anthropic({ apiKey });
+
+  const entriesText = entries
+    .map((e) => `[${e.createdAt}${e.moodScore ? `, humeur ${e.moodScore}/10` : ""}] ${e.content}`)
+    .join("\n\n");
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: 500,
+    system: WEEKLY_SUMMARY_SYSTEM_PROMPT,
+    messages: [{ role: "user", content: entriesText }],
+  });
+
+  const textBlock = response.content.find((b) => b.type === "text");
+  if (!textBlock || textBlock.type !== "text") {
+    throw new Error("Le bilan hebdomadaire n'a pas pu être généré.");
+  }
+  return textBlock.text.trim();
 }
