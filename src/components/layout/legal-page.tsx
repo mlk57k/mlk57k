@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { GlowyLogo } from "@/components/ui/logo";
+import { AppLogo } from "@/components/ui/logo";
 
 interface Props {
   title: string;
@@ -16,7 +16,7 @@ export function LegalPage({ title, subtitle, lastUpdated, children }: Props) {
       <header className="sticky top-0 z-40 border-b border-cream-200 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link href="/">
-            <GlowyLogo size="md" />
+            <AppLogo size="md" />
           </Link>
           <Link
             href="/"
@@ -58,7 +58,7 @@ export function LegalPage({ title, subtitle, lastUpdated, children }: Props) {
       {/* Footer */}
       <footer className="border-t border-cream-200 bg-cream-50">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
-          <p>© 2025 Glowy. Tous droits réservés.</p>
+          <p>© 2026 Ancrage. Tous droits réservés.</p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-stone-700 transition-colors">Confidentialité</Link>
             <Link href="/terms" className="hover:text-stone-700 transition-colors">CGU</Link>

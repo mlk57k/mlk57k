@@ -5,79 +5,41 @@ import type Stripe from "stripe";
 
 export const runtime = "nodejs";
 
-// Client admin (service role) pour contourner la RLS dans le webhook
 function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 }
 
-/** Statuts Stripe qui donnent droit à l'accès. */
-function isActiveStatus(status: Stripe.Subscription.Status): boolean {
-  return status === "active" || status === "trialing";
-}
-
-/**
- * Source de vérité de l'accès : met à jour le profil ET (dé)verrouille les scans.
- * `active` accordé → lifetime_access = true + scans débloqués.
- * `active` retiré (annulation, impayé) → lifetime_access = false + scans reverrouillés.
- * Les accès promo (subscription_status = 'promo') ne sont jamais touchés ici.
- */
-async function setSubscriptionAccess(
-  userId: string,
-  active: boolean,
-  fields: {
-    status?: string;
-    subscriptionId?: string | null;
-    currentPeriodEnd?: number | null;
-  } = {}
-) {
-  const admin = getAdminClient();
-
-  // Ne pas écraser un accès promo à vie avec une révocation d'abonnement.
-  if (!active) {
-    const { data: profile } = await admin
-      .from("profiles")
-      .select("subscription_status")
-      .eq("id", userId)
-      .single();
-    if (profile?.subscription_status === "promo") return;
-  }
-
-  const update: Record<string, unknown> = {
-    lifetime_access: active,
-  };
-  if (fields.status !== undefined) update.subscription_status = fields.status;
-  if (fields.subscriptionId !== undefined)
-    update.stripe_subscription_id = fields.subscriptionId;
-  if (fields.currentPeriodEnd !== undefined)
-    update.subscription_current_period_end = fields.currentPeriodEnd
-      ? new Date(fields.currentPeriodEnd * 1000).toISOString()
-      : null;
-
-  await admin.from("profiles").update(update).eq("id", userId);
-
-  // Les scans suivent l'accès : débloqués si actif, reverrouillés sinon.
-  await admin.from("scans").update({ unlocked: active }).eq("user_id", userId);
+function mapStripeStatus(status: Stripe.Subscription.Status): string {
+  if (status === "active" || status === "trialing") return status;
+  if (status === "past_due" || status === "unpaid") return "past_due";
+  return "canceled";
 }
 
 async function getUserIdFromCustomer(customerId: string): Promise<string | null> {
   const admin = getAdminClient();
-  const { data } = await admin
-    .from("profiles")
-    .select("id")
-    .eq("stripe_customer_id", customerId)
-    .single();
+  const { data } = await admin.from("profiles").select("id").eq("stripe_customer_id", customerId).single();
   return data?.id ?? null;
 }
 
-/** Récupère le user_id depuis les metadata de l'abonnement, sinon via le customer. */
 async function resolveUserId(sub: Stripe.Subscription): Promise<string | null> {
-  return (
-    sub.metadata?.user_id ??
-    (await getUserIdFromCustomer(sub.customer as string))
-  );
+  return sub.metadata?.user_id ?? (await getUserIdFromCustomer(sub.customer as string));
+}
+
+async function applySubscriptionState(userId: string, sub: Stripe.Subscription) {
+  const admin = getAdminClient();
+  const currentPeriodEnd = (sub as unknown as { current_period_end?: number }).current_period_end ?? null;
+  const interval = sub.items.data[0]?.price.recurring?.interval === "week" ? "week" : "month";
+
+  await admin
+    .from("profiles")
+    .update({
+      plan_status: mapStripeStatus(sub.status),
+      plan_interval: interval,
+      stripe_subscription_id: sub.id,
+      current_period_end: currentPeriodEnd ? new Date(currentPeriodEnd * 1000).toISOString() : null,
+      cancel_at_period_end: sub.cancel_at_period_end,
+    })
+    .eq("id", userId);
 }
 
 export async function POST(request: Request) {
@@ -87,7 +49,6 @@ export async function POST(request: Request) {
 
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");
-
   if (!sig) {
     return NextResponse.json({ error: "Signature manquante." }, { status: 400 });
   }
@@ -100,61 +61,57 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Signature invalide." }, { status: 400 });
   }
 
+  const admin = getAdminClient();
+
+  // Idempotence : un évènement Stripe peut être livré plusieurs fois (retries).
+  // On n'applique jamais deux fois le même évènement — c'est ce qui évite un
+  // double traitement (et donc tout risque de double-facturation côté business logic).
+  const { error: insertError } = await admin
+    .from("stripe_events")
+    .insert({ id: event.id, type: event.type });
+  if (insertError) {
+    // Conflit de clé primaire = évènement déjà traité.
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
   try {
     switch (event.type) {
-      // Paiement initial confirmé : on accorde l'accès immédiatement.
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.user_id;
-        if (userId) {
-          await setSubscriptionAccess(userId, true, {
-            status: "active",
-            subscriptionId:
-              typeof session.subscription === "string" ? session.subscription : null,
-          });
+        if (typeof session.subscription === "string" && session.metadata?.user_id) {
+          const sub = await stripe.subscriptions.retrieve(session.subscription);
+          await applySubscriptionState(session.metadata.user_id, sub);
         }
         break;
       }
 
-      // Création / mise à jour d'abonnement : l'accès suit le statut réel.
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
         const userId = await resolveUserId(sub);
-        if (userId) {
-          await setSubscriptionAccess(userId, isActiveStatus(sub.status), {
-            status: sub.status,
-            subscriptionId: sub.id,
-            currentPeriodEnd:
-              (sub as unknown as { current_period_end?: number }).current_period_end ?? null,
-          });
-        }
+        if (userId) await applySubscriptionState(userId, sub);
         break;
       }
 
-      // Abonnement supprimé (fin d'annulation) : on révoque l'accès.
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         const userId = await resolveUserId(sub);
         if (userId) {
-          await setSubscriptionAccess(userId, false, {
-            status: "canceled",
-            subscriptionId: sub.id,
-            currentPeriodEnd: null,
-          });
+          await admin
+            .from("profiles")
+            .update({ plan_status: "canceled", cancel_at_period_end: false, current_period_end: null })
+            .eq("id", userId);
         }
         break;
       }
 
-      // Échec de paiement récurrent : on révoque jusqu'à régularisation.
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
-        const customerId =
-          typeof invoice.customer === "string" ? invoice.customer : null;
+        const customerId = typeof invoice.customer === "string" ? invoice.customer : null;
         if (customerId) {
           const userId = await getUserIdFromCustomer(customerId);
           if (userId) {
-            await setSubscriptionAccess(userId, false, { status: "past_due" });
+            await admin.from("profiles").update({ plan_status: "past_due" }).eq("id", userId);
           }
         }
         break;

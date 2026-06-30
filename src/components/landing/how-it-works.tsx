@@ -1,65 +1,44 @@
-import { Camera, Cpu, Sparkles } from "lucide-react";
-
-const steps = [
-  {
-    icon: Camera,
-    number: "01",
-    title: "Prends ton selfie",
-    description: "Caméra frontale ou galerie photo. Lumière naturelle pour un meilleur résultat.",
-  },
-  {
-    icon: Cpu,
-    number: "02",
-    title: "L'IA analyse",
-    description: "Notre IA étudie texture, éclat, hydratation et zones à améliorer en quelques secondes.",
-  },
-  {
-    icon: Sparkles,
-    number: "03",
-    title: "Ton aperçu complet",
-    description: "Score sur 100, âge cutané estimé, et une routine personnalisée rien que pour toi.",
-  },
-];
-
 export function HowItWorks() {
+  const steps = [
+    {
+      n: "1",
+      title: "Tu écris ou tu parles.",
+      body: "Comme ça vient, sans te relire. Au clavier les soirs bavards, à la voix les soirs fatigués.",
+    },
+    {
+      n: "2",
+      title: "Ancrage te répond.",
+      body: "Un reflet bienveillant et une question douce. Jamais de jugement, jamais un diagnostic.",
+    },
+    {
+      n: "3",
+      title: "Tout reste privé.",
+      body: "Chiffré, exportable, effaçable quand tu veux. Tes écrits ne servent jamais à entraîner un modèle.",
+    },
+  ];
+
   return (
-    <section id="how" className="grain relative py-20 sm:py-28 bg-cream-50">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
-        <div className="text-center mb-16">
-          <p className="text-coral-400 font-semibold text-xs uppercase tracking-[0.2em] mb-4">
-            Comment ça marche
-          </p>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-stone-900">
-            Simple comme un <span className="text-gradient-coral italic">selfie</span>
+    <section id="how" className="bg-cream-50 py-20 sm:py-28">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6">
+        <div className="text-center mb-14">
+          <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">Comment ça marche</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-stone-900">
+            Tu déposes,<br className="hidden sm:block" /> Ancrage reflète.
           </h2>
         </div>
 
-        <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {/* Ligne connectrice */}
-          <div className="hidden sm:block absolute top-[4.5rem] left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-coral-200 to-transparent" />
-
-          {steps.map((step, i) => {
-            const Icon = step.icon;
-            return (
-              <div
-                key={step.number}
-                className="card-premium group relative flex flex-col items-center text-center p-8"
-              >
-                {/* Icône avec numéro */}
-                <div className="relative mb-6">
-                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-coral-50 to-cream-100 border border-cream-200 shadow-soft flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                    <Icon className="h-7 w-7 text-coral-500" />
-                  </div>
-                  <span className="absolute -top-2.5 -right-2.5 h-6 w-6 rounded-full bg-gradient-to-br from-coral-400 to-coral-500 text-white text-[10px] font-bold flex items-center justify-center shadow-glow-coral">
-                    {i + 1}
-                  </span>
-                </div>
-
-                <h3 className="font-display text-xl font-bold text-stone-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-stone-500 leading-relaxed max-w-[220px]">{step.description}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {steps.map(({ n, title, body }) => (
+            <div key={n} className="bg-white border border-cream-200 rounded-2xl p-6 flex gap-4">
+              <div className="w-10 h-10 rounded-xl bg-coral-50 flex-none flex items-center justify-center font-display text-lg font-semibold text-coral-500">
+                {n}
               </div>
-            );
-          })}
+              <div>
+                <p className="font-semibold text-stone-900 text-sm mb-1.5">{title}</p>
+                <p className="text-stone-500 text-sm leading-relaxed">{body}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

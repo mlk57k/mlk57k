@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Shield } from "lucide-react";
-import { GlowyLogo } from "@/components/ui/logo";
+import { AppLogo } from "@/components/ui/logo";
 
 export function Footer() {
   return (
@@ -8,10 +8,10 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
           <div>
-            <GlowyLogo size="md" />
+            <AppLogo size="md" />
             <p className="text-xs text-stone-400 max-w-xs mt-3 leading-relaxed">
-              Aperçu cosmétique de ta peau par IA. Usage informatif uniquement,
-              pas un avis médical.
+              Un compagnon de réflexion quotidienne, pas un remplacement
+              de suivi thérapeutique.
             </p>
           </div>
 
@@ -36,7 +36,13 @@ export function Footer() {
                 Mentions légales
               </Link>
               <Link
-                href="mailto:hello@glowy.app"
+                href="/confidentialite-des-donnees"
+                className="hover:text-stone-900 transition-colors duration-150"
+              >
+                Mes données
+              </Link>
+              <Link
+                href="mailto:hello@ancrage.app"
                 className="hover:text-stone-900 transition-colors duration-150"
               >
                 Contact
@@ -46,10 +52,10 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-cream-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
-          <p>© 2025 Glowy. Tous droits réservés.</p>
+          <p>© 2026 Ancrage. Tous droits réservés.</p>
           <div className="flex items-center gap-1.5">
             <Shield className="h-3 w-3" />
-            <p>Tes photos ne sont jamais stockées ni partagées.</p>
+            <p>Tes écrits ne servent jamais à entraîner un modèle.</p>
           </div>
         </div>
       </div>

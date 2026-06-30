@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { GlowyLogo } from "@/components/ui/logo";
+import { AppLogo } from "@/components/ui/logo";
 
 async function getUser() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
@@ -22,10 +22,10 @@ export function Navbar() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  function handleScanClick() {
-    // On va toujours vers /scan : le middleware redirige vers /auth si l'utilisateur
+  function handleStartClick() {
+    // On va toujours vers /journal : le middleware redirige vers /auth si l'utilisateur
     // n'est pas connecté, et laisse passer s'il l'est. Pas de course à l'état client.
-    router.push("/scan");
+    router.push("/journal");
   }
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full glass border-b border-cream-200/50">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link href="/" className="cursor-pointer transition-transform duration-200 hover:scale-[1.03]">
-          <GlowyLogo size="md" />
+          <AppLogo size="md" />
         </Link>
         <nav className="hidden sm:flex items-center gap-8 text-sm font-medium text-stone-500">
           <Link href="#how" className="relative hover:text-stone-900 transition-colors duration-150 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-coral-400 after:transition-all hover:after:w-full">
@@ -66,7 +66,7 @@ export function Navbar() {
                 variant="ghost"
                 className="rounded-full px-4 text-stone-600 hover:text-stone-900"
               >
-                <Link href="/dashboard">Mon compte</Link>
+                <Link href="/journal">Mon journal</Link>
               </Button>
               <Button
                 size="sm"
@@ -95,9 +95,9 @@ export function Navbar() {
           <Button
             size="sm"
             className="rounded-full px-5 bg-coral-400 hover:bg-coral-500 text-white border-none shadow-md shadow-coral-200"
-            onClick={handleScanClick}
+            onClick={handleStartClick}
           >
-            Scanner ma peau
+            Commencer mon journal
           </Button>
         </div>
       </div>

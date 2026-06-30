@@ -4,81 +4,61 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const faqs = [
+const FAQS = [
   {
-    q: "Est-ce que mes photos sont stockées quelque part ?",
-    a: "Non. Tes photos sont envoyées directement à notre IA pour analyse, puis immédiatement supprimées. On ne stocke jamais tes images — seulement les résultats de l'analyse, si tu crées un compte.",
+    q: "C'est quoi exactement Ancrage ?",
+    a: "Ancrage est un carnet de journal numérique couplé à une IA bienveillante. Tu écris ou tu parles quelques minutes le soir ; l'IA te renvoie un reflet et une question pour t'aider à « fermer » ta journée. Ce n'est pas un suivi thérapeutique.",
   },
   {
-    q: "C'est vraiment gratuit ?",
-    a: "Le scan de base (score + âge estimé de ta peau) est 100% gratuit, sans compte. Pour débloquer ta routine personnalisée complète et l'historique de progression, on propose un abonnement à petit prix.",
+    q: "Mes écrits sont-ils privés ?",
+    a: "Oui. Tes entrées sont chiffrées en transit et au repos. Elles ne sont jamais utilisées pour entraîner un modèle d'IA. Tu peux les exporter ou les effacer à tout moment depuis Mes données.",
   },
   {
-    q: "Comment l'IA fait pour analyser ma peau ?",
-    a: "Notre IA analyse visuellement ta photo pour détecter des paramètres visibles : texture, éclat, zones sèches, etc. C'est un aperçu informatif, pas un avis médical ou dermatologique.",
+    q: "Comment fonctionne l'essai gratuit ?",
+    a: "Tu as accès à 3 entrées par semaine en version gratuite, sans carte bancaire. Si tu veux passer à illimité, un essai de 7 jours est inclus à l'abonnement payant. Tu peux annuler en un clic, à tout moment.",
   },
   {
-    q: "Ça marche pour tous les types de peau ?",
-    a: "Oui ! L'IA a été entraînée sur des données diversifiées et s'adapte à tous les types et carnations de peau.",
+    q: "Puis-je utiliser la voix à la place du texte ?",
+    a: "Oui. Un bouton micro est disponible dans l'interface. Ta note vocale est transcrite automatiquement (via Whisper d'OpenAI), puis le fichier audio est supprimé — seul le texte est conservé.",
   },
   {
-    q: "Puis-je annuler mon abonnement quand je veux ?",
-    a: "Oui, à tout moment en un clic depuis ton espace personnel. Aucun engagement, aucune prise de tête.",
+    q: "L'IA peut-elle remplacer un thérapeute ?",
+    a: "Non. Ancrage est un compagnon de réflexion, pas un soutien clinique. En cas de détresse ou d'urgence, contacte le 3114 (numéro national de prévention du suicide), le 15 (SAMU) ou le 112.",
+  },
+  {
+    q: "Comment résilier mon abonnement ?",
+    a: "En un clic depuis Paramètres → Mon abonnement → Annuler. Tu gardes l'accès jusqu'à la fin de la période déjà payée, sans prélèvement supplémentaire. Un e-mail de confirmation t'est envoyé immédiatement.",
   },
 ];
 
-export function FAQ() {
-  const [open, setOpen] = useState<number | null>(null);
-
+function Item({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <section id="faq" className="py-20 sm:py-28 bg-cream-50">
-      <div className="mx-auto max-w-2xl px-4">
-        <div className="text-center mb-12">
-          <p className="text-coral-400 font-semibold text-xs uppercase tracking-[0.2em] mb-4">
-            On répond à tout
-          </p>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-stone-900">Questions fréquentes</h2>
-        </div>
+    <div className="border-b border-cream-200 last:border-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full text-left flex items-center justify-between gap-4 py-4"
+      >
+        <span className="font-medium text-stone-900 text-sm">{q}</span>
+        <ChevronDown className={cn("h-4 w-4 text-stone-400 flex-none transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <p className="text-stone-600 text-sm leading-relaxed pb-4">{a}</p>
+      )}
+    </div>
+  );
+}
 
-        <div className="space-y-3">
-          {faqs.map((faq, i) => (
-            <div
-              key={i}
-              className={cn(
-                "rounded-2xl border bg-white overflow-hidden transition-all duration-300",
-                open === i
-                  ? "border-coral-200 shadow-lift"
-                  : "border-cream-200 shadow-soft hover:border-coral-200/60"
-              )}
-            >
-              <button
-                className="w-full flex items-center justify-between gap-4 p-5 text-left font-semibold text-sm sm:text-base"
-                onClick={() => setOpen(open === i ? null : i)}
-              >
-                {faq.q}
-                <span
-                  className={cn(
-                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all duration-300",
-                    open === i ? "bg-coral-400 text-white rotate-180" : "bg-cream-100 text-coral-400"
-                  )}
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </span>
-              </button>
-              <div
-                className={cn(
-                  "grid transition-all duration-300 ease-out",
-                  open === i ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                )}
-              >
-                <div className="overflow-hidden">
-                  <p className="px-5 pb-5 text-sm text-stone-500 leading-relaxed">
-                    {faq.a}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
+export function FAQ() {
+  return (
+    <section id="faq" className="bg-cream-50 py-20 sm:py-28">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">FAQ</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-stone-900">Questions fréquentes</h2>
+        </div>
+        <div className="bg-white border border-cream-200 rounded-2xl px-6">
+          {FAQS.map((f) => <Item key={f.q} {...f} />)}
         </div>
       </div>
     </section>
