@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-export function GlowyLogo({
+export function AppLogo({
   className,
   size = "md",
 }: {
@@ -10,9 +10,9 @@ export function GlowyLogo({
   size?: "sm" | "md" | "lg";
 }) {
   const dims = {
-    sm: { icon: 14, text: "text-lg" },
-    md: { icon: 18, text: "text-xl" },
-    lg: { icon: 22, text: "text-2xl" },
+    sm: { icon: 16, text: "text-lg" },
+    md: { icon: 20, text: "text-xl" },
+    lg: { icon: 24, text: "text-2xl" },
   };
   const { icon, text } = dims[size];
 
@@ -25,21 +25,23 @@ export function GlowyLogo({
         fill="none"
         aria-hidden="true"
       >
-        {/* 4-pointed sparkle */}
+        {/* Anchor mark — ancrage / stabilité */}
+        <circle cx="10" cy="4" r="2" stroke="#c4523a" strokeWidth="1.4" />
         <path
-          d="M10 1L12 8L19 10L12 12L10 19L8 12L1 10L8 8Z"
-          fill="#e8826a"
+          d="M10 6V16M5 11C5 14 7.5 16 10 16C12.5 16 15 14 15 11"
+          stroke="#c4523a"
+          strokeWidth="1.4"
+          strokeLinecap="round"
         />
-        {/* Small accent dot */}
-        <circle cx="15.5" cy="4.5" r="1.2" fill="#eea593" opacity="0.7" />
+        <path d="M6 9H14" stroke="#c4523a" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
       <span
         className={cn(
-          "font-display font-bold italic tracking-tight text-stone-900 leading-none",
+          "font-display font-semibold tracking-tight text-stone-900 leading-none",
           text
         )}
       >
-        glowy
+        Ancrage
       </span>
     </span>
   );

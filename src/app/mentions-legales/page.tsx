@@ -2,7 +2,7 @@ import { LegalPage } from "@/components/layout/legal-page";
 
 export const metadata = {
   title: "Mentions légales",
-  description: "Mentions légales du service Glowy.",
+  description: "Mentions légales du service Ancrage.",
 };
 
 export default function MentionsLegalesPage() {
@@ -10,20 +10,20 @@ export default function MentionsLegalesPage() {
     <LegalPage
       title="Mentions légales"
       subtitle="Informations légales relatives à l'éditeur et à l'hébergeur du service."
-      lastUpdated="21 juin 2025"
+      lastUpdated="30 juin 2026"
     >
       <h2>1. Éditeur du site</h2>
       <p>
-        Le site <strong>glowy.beauty</strong> est édité par :
+        Le site <strong>ancrage.app</strong> est édité par :
       </p>
       <ul>
-        <li><strong>Dénomination sociale :</strong> Glowy</li>
+        <li><strong>Dénomination sociale :</strong> Ancrage</li>
         <li>
           <strong>Adresse e-mail :</strong>{" "}
-          <a href="mailto:hello@glowy.app">hello@glowy.app</a>
+          <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>
         </li>
         <li>
-          <strong>Directeur de la publication :</strong> Le représentant légal de Glowy
+          <strong>Directeur de la publication :</strong> Le représentant légal d&apos;Ancrage
         </li>
       </ul>
 
@@ -39,8 +39,10 @@ export default function MentionsLegalesPage() {
 
       <h3>Intelligence artificielle</h3>
       <ul>
-        <li><strong>Anthropic PBC</strong> — Analyse IA des images cutanées</li>
+        <li><strong>Anthropic PBC</strong> — génération des réponses du coach et des bilans</li>
         <li>548 Market St, PMB 90375, San Francisco, CA 94104, États-Unis</li>
+        <li><strong>OpenAI, L.L.C.</strong> — transcription des notes vocales</li>
+        <li>3180 18th St, San Francisco, CA 94110, États-Unis</li>
       </ul>
 
       <h3>Authentification et base de données</h3>
@@ -55,47 +57,54 @@ export default function MentionsLegalesPage() {
         <li>354 Oyster Point Blvd, South San Francisco, CA 94080, États-Unis</li>
       </ul>
 
+      <h3>E-mail transactionnel</h3>
+      <ul>
+        <li><strong>Resend Inc.</strong> — Envoi des e-mails (bilans, confirmations)</li>
+        <li>2261 Market Street, San Francisco, CA 94114, États-Unis</li>
+      </ul>
+
       <h2>4. Propriété intellectuelle</h2>
       <p>
-        L&apos;ensemble des contenus présents sur le site glowy.beauty (textes, images,
-        graphismes, logo, icônes, sons, logiciels) est la propriété exclusive de
-        Glowy, à l&apos;exception des éléments appartenant à des tiers clairement identifiés.
+        L&apos;ensemble des contenus présents sur le site ancrage.app (textes, images,
+        graphismes, logo, icônes, logiciels) est la propriété exclusive d&apos;Ancrage, à
+        l&apos;exception des éléments appartenant à des tiers clairement identifiés.
       </p>
       <p>
-        Toute reproduction, représentation, modification, publication, adaptation de tout
-        ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé,
-        est interdite, sauf autorisation écrite préalable de Glowy.
+        Toute reproduction, représentation, modification, publication, adaptation de tout ou
+        partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est
+        interdite, sauf autorisation écrite préalable d&apos;Ancrage.
       </p>
 
       <h2>5. Données personnelles</h2>
       <p>
-        Le traitement des données personnelles collectées sur ce site est détaillé dans
-        notre <a href="/privacy">Politique de confidentialité</a>. Conformément à la loi
-        Informatique et Libertés du 6 janvier 1978 modifiée et au RGPD, vous disposez
-        d&apos;un droit d&apos;accès, de rectification et de suppression de vos données en contactant{" "}
-        <a href="mailto:hello@glowy.app">hello@glowy.app</a>.
+        Le traitement des données personnelles collectées sur ce site est détaillé dans notre{" "}
+        <a href="/privacy">Politique de confidentialité</a>. Conformément à la loi Informatique
+        et Libertés du 6 janvier 1978 modifiée et au RGPD, tu disposes d&apos;un droit
+        d&apos;accès, de rectification et de suppression de tes données, exerçable directement
+        depuis la page <a href="/confidentialite-des-donnees">Mes données</a> ou en contactant{" "}
+        <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>.
       </p>
 
       <h2>6. Cookies</h2>
       <p>
-        Ce site utilise des cookies fonctionnels strictement nécessaires à son
-        fonctionnement (session d&apos;authentification). Aucun cookie publicitaire
-        n&apos;est déposé sans votre consentement.
+        Ce site utilise des cookies fonctionnels strictement nécessaires à son fonctionnement
+        (session d&apos;authentification). Aucun cookie publicitaire n&apos;est déposé sans
+        consentement.
       </p>
 
       <h2>7. Limitation de responsabilité</h2>
       <p>
-        Les informations contenues sur ce site sont aussi précises que possible et le site
-        est périodiquement remis à jour. Cependant, il peut contenir des inexactitudes,
-        des omissions ou des lacunes. Si vous constatez une erreur ou ce qui peut être un
-        dysfonctionnement, merci de le signaler par e-mail à{" "}
-        <a href="mailto:hello@glowy.app">hello@glowy.app</a>.
+        Les informations contenues sur ce site sont aussi précises que possible et le site est
+        périodiquement remis à jour. Cependant, il peut contenir des inexactitudes, des
+        omissions ou des lacunes. Si tu constates une erreur ou un dysfonctionnement, merci de
+        le signaler par e-mail à <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>.
       </p>
       <p>
         <strong>
-          Les analyses fournies par Glowy sont exclusivement cosmétiques et informatives.
-          Elles ne constituent pas un diagnostic médical et ne sauraient remplacer l&apos;avis
-          d&apos;un professionnel de santé.
+          Ancrage est un compagnon de réflexion personnelle. Il ne constitue pas un suivi
+          thérapeutique, un diagnostic ou un avis médical, et ne saurait remplacer
+          l&apos;accompagnement d&apos;un professionnel de santé. En cas de détresse ou
+          d&apos;urgence, contacte le 3114, le 15 (SAMU) ou le 112.
         </strong>
       </p>
 
@@ -107,8 +116,7 @@ export default function MentionsLegalesPage() {
 
       <h2>9. Contact</h2>
       <p>
-        Pour toute question :{" "}
-        <a href="mailto:hello@glowy.app">hello@glowy.app</a>
+        Pour toute question : <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>
       </p>
     </LegalPage>
   );

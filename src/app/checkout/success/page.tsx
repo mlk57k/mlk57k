@@ -1,14 +1,14 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles } from "lucide-react";
-import { patchScan, getLastScanId } from "@/lib/scan-storage";
+import { AppLogo } from "@/components/ui/logo";
 
 function Success() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const ran = useRef(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (ran.current) return;
@@ -18,7 +18,7 @@ function Success() {
 
     (async () => {
       if (!sessionId) {
-        router.replace("/dashboard");
+        router.replace("/abonnement");
         return;
       }
 
@@ -27,32 +27,33 @@ function Success() {
         const data = await res.json();
 
         if (data.success) {
-          // Met à jour le sessionStorage pour que la page résultats affiche la routine
-          const localId = getLastScanId();
-          if (localId) patchScan(localId, { unlocked: true });
-
-          // Redirige vers les résultats (local ou DB), sinon le scan
-          const targetId = localId ?? data.scan_id;
-          if (targetId) {
-            router.replace(`/results/${targetId}`);
-          } else {
-            router.replace("/scan");
-          }
+          router.replace("/journal?bienvenue=1");
           return;
         }
       } catch {
         // best-effort
       }
 
-      router.replace("/dashboard");
+      setError(true);
     })();
   }, [searchParams, router]);
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="font-semibold">On n&apos;a pas pu confirmer ton paiement.</p>
+        <p className="text-sm text-stone-500">
+          Si le prélèvement a bien eu lieu, réessaie dans une minute ou contacte-nous.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-cream-50 flex flex-col items-center justify-center gap-3">
-      <Sparkles className="h-10 w-10 text-coral-400 animate-pulse" />
+      <AppLogo size="sm" className="animate-pulse" />
       <p className="font-semibold">Paiement confirmé !</p>
-      <p className="text-sm text-stone-500">Débloquage de ta routine…</p>
+      <p className="text-sm text-stone-500">On débloque ton accès…</p>
     </div>
   );
 }

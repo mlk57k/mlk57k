@@ -10,17 +10,17 @@
     --card-foreground: 20 14% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14% 10%;
-    --primary: 16 60% 67%;        /* coral-400 */
+    --primary: 11 54% 50%;        /* coral-400 */
     --primary-foreground: 0 0% 100%;
     --secondary: 30 25% 95%;
     --secondary-foreground: 20 14% 20%;
     --muted: 30 20% 95%;
     --muted-foreground: 25 10% 47%;
-    --accent: 16 60% 67%;
+    --accent: 11 54% 50%;
     --accent-foreground: 0 0% 100%;
     --border: 25 20% 88%;
     --input: 25 20% 88%;
-    --ring: 16 60% 67%;
+    --ring: 11 54% 50%;
     --radius: 1rem;
   }
 }
@@ -55,7 +55,7 @@
   }
 
   .text-gradient-coral {
-    background: linear-gradient(135deg, #dc6b51, #e8826a, #eea593);
+    background: linear-gradient(135deg, #A3402D, #C4523A, #D6A084);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -63,16 +63,12 @@
 
   /* Gradient texte animé (coral → champagne → coral) pour les accents premium */
   .text-gradient-glow {
-    background: linear-gradient(110deg, #dc6b51, #e8826a, #D4B27A, #e8826a, #dc6b51);
+    background: linear-gradient(110deg, #A3402D, #C4523A, #B49F66, #C4523A, #A3402D);
     background-size: 220% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: gradientShift 8s ease infinite;
-  }
-
-  .score-ring {
-    background: conic-gradient(#E8826A var(--score-deg, 0deg), #F5F0EC var(--score-deg, 0deg));
   }
 
   .font-display {
@@ -121,7 +117,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(232,130,106,0.6), rgba(212,178,122,0.5));
+    background: linear-gradient(135deg, rgba(196,82,58,0.6), rgba(180,159,102,0.5));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;

@@ -4,13 +4,13 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Loader2 } from "lucide-react";
-import { GlowyLogo } from "@/components/ui/logo";
+import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 function AuthForm() {
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/scan";
+  const next = searchParams.get("next") ?? "/journal";
 
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -98,8 +98,8 @@ function AuthForm() {
         </h1>
         <p className="text-stone-500 text-sm">
           {mode === "login"
-            ? "Connecte-toi pour débloquer ta routine et suivre tes progrès."
-            : "Quelques secondes et c'est parti pour ta routine perso."}
+            ? "Connecte-toi pour retrouver ton journal et tes repères."
+            : "Quelques secondes et ton journal est prêt."}
         </p>
       </div>
 
@@ -224,7 +224,7 @@ export default function AuthPage() {
       <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full bg-coral-100/40 blur-[120px]" />
       <header className="relative px-4 h-14 flex items-center justify-center border-b border-cream-200/50 glass">
         <Link href="/">
-          <GlowyLogo size="md" />
+          <AppLogo size="md" />
         </Link>
       </header>
       <main className="relative mx-auto max-w-md px-4 py-12">
