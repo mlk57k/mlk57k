@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Flame, Trophy, BookOpen } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
+import { computeStreaks, type StreakStats } from "@/lib/streak";
 
 interface WeeklySummary {
   id: string;
@@ -63,6 +64,7 @@ export default function BilanPage() {
   const router = useRouter();
   const [summaries, setSummaries] = useState<WeeklySummary[]>([]);
   const [recentMoods, setRecentMoods] = useState<MoodEntry[]>([]);
+  const [streaks, setStreaks] = useState<StreakStats>({ current: 0, best: 0, total: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,7 +74,7 @@ export default function BilanPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.replace("/auth?next=/bilan"); return; }
 
-      const [{ data: sums }, { data: moods }] = await Promise.all([
+      const [{ data: sums }, { data: moods }, { data: allDates }] = await Promise.all([
         supabase
           .from("weekly_summaries")
           .select("id, week_start, summary_text, mood_trend")
@@ -86,10 +88,15 @@ export default function BilanPage() {
           .not("mood_score", "is", null)
           .order("created_at", { ascending: false })
           .limit(14),
+        supabase
+          .from("journal_entries")
+          .select("created_at")
+          .eq("user_id", user.id),
       ]);
 
       setSummaries(sums ?? []);
       setRecentMoods((moods ?? []).filter((m) => m.mood_score !== null).reverse() as MoodEntry[]);
+      if (allDates) setStreaks(computeStreaks(allDates.map((e) => e.created_at)));
       setLoading(false);
     })();
   }, [router]);
@@ -124,6 +131,25 @@ export default function BilanPage() {
 
         {!loading && (
           <>
+            {/* Série & stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white border border-cream-200 rounded-2xl p-4 text-center">
+                <Flame className="h-5 w-5 mx-auto mb-1.5 text-coral-400" />
+                <p className="font-display text-2xl font-semibold text-stone-900 leading-none">{streaks.current}</p>
+                <p className="text-[11px] text-stone-400 mt-1.5 leading-tight">jour{streaks.current > 1 ? "s" : ""} d&apos;affilée</p>
+              </div>
+              <div className="bg-white border border-cream-200 rounded-2xl p-4 text-center">
+                <Trophy className="h-5 w-5 mx-auto mb-1.5 text-champagne-400" />
+                <p className="font-display text-2xl font-semibold text-stone-900 leading-none">{streaks.best}</p>
+                <p className="text-[11px] text-stone-400 mt-1.5 leading-tight">record</p>
+              </div>
+              <div className="bg-white border border-cream-200 rounded-2xl p-4 text-center">
+                <BookOpen className="h-5 w-5 mx-auto mb-1.5 text-sage" />
+                <p className="font-display text-2xl font-semibold text-stone-900 leading-none">{streaks.total}</p>
+                <p className="text-[11px] text-stone-400 mt-1.5 leading-tight">entrée{streaks.total > 1 ? "s" : ""}</p>
+              </div>
+            </div>
+
             {/* Humeurs 7 derniers jours */}
             <div className="bg-white border border-cream-200 rounded-2xl p-6">
               <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-5">Tes humeurs cette semaine</p>

@@ -99,12 +99,7 @@ export default function HistoriquePage() {
             </div>
             <span className="text-xs text-stone-400">{formatTime(entry.created_at)}</span>
           </div>
-          <p className="text-stone-500 text-sm leading-relaxed line-clamp-2">{entry.content || "Entrée vide"}</p>
-          {entry.content && (
-            <span className="inline-block mt-2.5 text-xs font-semibold text-stone-500 bg-cream-100 border border-cream-200 px-2.5 py-1 rounded-lg">
-              Texte
-            </span>
-          )}
+          <p className="text-stone-500 text-sm leading-relaxed line-clamp-2">{entry.content || "Conversation du soir"}</p>
         </div>
       </Link>
     );

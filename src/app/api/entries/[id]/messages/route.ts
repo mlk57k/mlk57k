@@ -57,8 +57,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
       .single();
     if (assistantError) throw new Error(assistantError.message);
 
-    if (reply.moodEstimate !== null) {
-      await supabase.from("journal_entries").update({ mood_score: reply.moodEstimate }).eq("id", params.id);
+    const entryUpdate: { mood_score?: number; content?: string } = {};
+    if (reply.moodEstimate !== null) entryUpdate.mood_score = reply.moodEstimate;
+    if (reply.titre) entryUpdate.content = reply.titre;
+    if (Object.keys(entryUpdate).length > 0) {
+      await supabase.from("journal_entries").update(entryUpdate).eq("id", params.id);
     }
 
     return NextResponse.json({ userMessage, assistantMessage, crisisDetected: reply.crisisDetected });

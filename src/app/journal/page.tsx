@@ -3,10 +3,12 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mic, Send, Square, History, BarChart3, Settings } from "lucide-react";
+import { Mic, Send, Square, History, BarChart3, Settings, Flame, Sparkles } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { computeStreaks } from "@/lib/streak";
+import { getDailyQuestion } from "@/lib/prompts";
 
 interface Message {
   id: string;
@@ -29,6 +31,7 @@ function JournalContent() {
   const [quotaError, setQuotaError] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [crisisDetected, setCrisisDetected] = useState(false);
+  const [streak, setStreak] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -41,6 +44,13 @@ function JournalContent() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.replace("/auth?next=/journal"); return; }
+
+      // Série de jours consécutifs
+      const { data: entryDates } = await supabase
+        .from("journal_entries")
+        .select("created_at")
+        .eq("user_id", user.id);
+      if (entryDates) setStreak(computeStreaks(entryDates.map((e) => e.created_at)).current);
 
       // Reprendre une entrée existante (lien "Continuer à écrire")
       if (resumeId) {
@@ -159,6 +169,15 @@ function JournalContent() {
         <div className="mx-auto max-w-2xl px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link href="/"><AppLogo size="sm" /></Link>
           <nav className="flex items-center gap-1">
+            {streak > 0 && (
+              <span
+                className="flex items-center gap-1 mr-1 px-2.5 py-1 rounded-full bg-coral-50 border border-coral-100 text-coral-600 text-xs font-semibold"
+                title={`${streak} jour${streak > 1 ? "s" : ""} d'affilée`}
+              >
+                <Flame className="h-3.5 w-3.5" />
+                {streak}
+              </span>
+            )}
             <Button asChild size="icon" variant="ghost" aria-label="Historique">
               <Link href="/journal/historique"><History className="h-4 w-4" /></Link>
             </Button>
@@ -205,7 +224,30 @@ function JournalContent() {
         {messages.length === 0 && !sending && (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-stone-400 py-16">
             <p className="font-display text-xl text-stone-600 mb-2">Comment s&apos;est passée ta journée ?</p>
-            <p className="text-sm">Écris ou enregistre une note vocale, le coach te répond.</p>
+            <p className="text-sm mb-8">Écris ou enregistre une note vocale, le coach te répond.</p>
+
+            <button
+              type="button"
+              onClick={() => {
+                const question = getDailyQuestion();
+                setMessages([{
+                  id: `question-${Date.now()}`,
+                  role: "assistant",
+                  content: question,
+                  created_at: new Date().toISOString(),
+                }]);
+              }}
+              className="group max-w-sm w-full text-left bg-white border border-cream-200 hover:border-coral-200 rounded-2xl px-5 py-4 transition-colors shadow-sm"
+            >
+              <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-coral-500 mb-2">
+                <Sparkles className="h-3.5 w-3.5" />
+                Question du jour
+              </span>
+              <span className="block text-sm text-stone-700 leading-relaxed">{getDailyQuestion()}</span>
+              <span className="block mt-2.5 text-xs font-medium text-coral-400 group-hover:underline">
+                Y répondre →
+              </span>
+            </button>
           </div>
         )}
 

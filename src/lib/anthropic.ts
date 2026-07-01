@@ -54,12 +54,16 @@ const COACH_TOOL: Anthropic.Tool = {
         type: ["number", "null"],
         description: "Humeur perçue dans ce message, de 1 (très difficile) à 10 (très bien), ou null si impossible à estimer.",
       },
+      titre: {
+        type: "string",
+        description: "Titre très court (3 à 6 mots, en français, sans guillemets ni point final) résumant le thème de la conversation. Exemple : 'Fatigue et pression au travail'.",
+      },
       crisis_detected: {
         type: "boolean",
         description: "true si risque suicidaire, auto-mutilation, mise en danger immédiate, ou détresse aiguë nécessitant une aide humaine urgente.",
       },
     },
-    required: ["message", "mood_estimate", "crisis_detected"],
+    required: ["message", "mood_estimate", "crisis_detected", "titre"],
   },
 };
 
@@ -67,6 +71,7 @@ const coachReplySchema = z.object({
   message: z.string(),
   mood_estimate: z.number().min(1).max(10).nullable(),
   crisis_detected: z.boolean(),
+  titre: z.string().optional(),
 });
 
 export interface CoachMessage {
@@ -83,6 +88,7 @@ export interface CoachReply {
   message: string;
   moodEstimate: number | null;
   crisisDetected: boolean;
+  titre: string | null;
 }
 
 function buildContextBlock({ objectifs, memoryDigest }: CoachContext): string {
@@ -128,13 +134,14 @@ export async function generateCoachReply(
   }
 
   if (parsed.data.crisis_detected) {
-    return { message: CRISIS_MESSAGE, moodEstimate: null, crisisDetected: true };
+    return { message: CRISIS_MESSAGE, moodEstimate: null, crisisDetected: true, titre: null };
   }
 
   return {
     message: parsed.data.message,
     moodEstimate: parsed.data.mood_estimate,
     crisisDetected: false,
+    titre: parsed.data.titre?.trim() || null,
   };
 }
 
