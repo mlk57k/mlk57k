@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mic, Send, Square, History, BarChart3, Settings } from "lucide-react";
@@ -17,7 +17,7 @@ interface Message {
 
 const CRISIS_HOTLINE = "3114";
 
-export default function JournalPage() {
+function JournalContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [entryId, setEntryId] = useState<string | null>(null);
@@ -238,5 +238,13 @@ export default function JournalPage() {
         </form>
       </main>
     </div>
+  );
+}
+
+export default function JournalPage() {
+  return (
+    <Suspense fallback={null}>
+      <JournalContent />
+    </Suspense>
   );
 }
