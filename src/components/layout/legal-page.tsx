@@ -60,6 +60,7 @@ export function LegalPage({ title, subtitle, lastUpdated, children }: Props) {
         <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
           <p>© 2026 Ancrage. Tous droits réservés.</p>
           <div className="flex gap-4">
+            <Link href="/faq" className="hover:text-stone-700 transition-colors">FAQ</Link>
             <Link href="/privacy" className="hover:text-stone-700 transition-colors">Confidentialité</Link>
             <Link href="/terms" className="hover:text-stone-700 transition-colors">CGU</Link>
             <Link href="/mentions-legales" className="hover:text-stone-700 transition-colors">Mentions légales</Link>
