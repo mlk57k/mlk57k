@@ -62,7 +62,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     return NextResponse.json({ userMessage, assistantMessage, crisisDetected: reply.crisisDetected });
-  } catch {
+  } catch (err) {
+    console.error("[coach] error:", err instanceof Error ? err.message : String(err));
     return NextResponse.json({ userMessage, assistantMessage: null, error: "coach_unavailable" });
   }
 }
