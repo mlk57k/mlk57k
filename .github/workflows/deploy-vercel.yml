@@ -115,3 +115,42 @@ jobs:
 
       - name: Deploy to Vercel
         run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Add ancrage.app domain to Vercel project
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, urllib.request, urllib.error
+
+          TOKEN      = os.environ["VERCEL_TOKEN"]
+          PROJECT_ID = "prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ"
+          TEAM_ID    = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+          DOMAIN     = "ancrage.app"
+
+          def api(method, path, body=None):
+              url  = f"https://api.vercel.com{path}?teamId={TEAM_ID}"
+              data = json.dumps(body).encode() if body else None
+              req  = urllib.request.Request(url, data=data, method=method,
+                         headers={"Authorization": f"Bearer {TOKEN}",
+                                  "Content-Type":  "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  return json.loads(e.read())
+
+          resp = api("POST", f"/v10/projects/{PROJECT_ID}/domains", {"name": DOMAIN})
+          if resp.get("name") == DOMAIN:
+              print(f"✅  Domaine {DOMAIN} ajouté au projet.")
+          elif resp.get("error", {}).get("code") in ("domain_already_in_use", "domain_already_exists"):
+              print(f"ℹ️   Domaine {DOMAIN} déjà configuré.")
+          else:
+              print(f"Réponse : {resp}")
+
+          # Récupérer les DNS requis
+          resp2 = api("GET", f"/v9/projects/{PROJECT_ID}/domains/{DOMAIN}")
+          if "verification" in resp2:
+              for v in resp2["verification"]:
+                  print(f"DNS requis → type={v['type']} name={v['domain']} value={v['value']}")
+          PYEOF
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
