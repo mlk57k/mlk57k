@@ -15,7 +15,7 @@ export default function TermsPage() {
       <h2>1. Présentation du service</h2>
       <p>
         Ancrage est un compagnon de réflexion quotidienne accessible via l&apos;application web{" "}
-        <strong>ancrage.app</strong>. Il permet de tenir un journal personnel (texte ou note
+        <strong>glowy.beauty</strong>. Il permet de tenir un journal personnel (texte ou note
         vocale), d&apos;échanger avec un coach IA inspiré des thérapies cognitivo-comportementales
         et de l&apos;entretien motivationnel, de suivre son humeur dans le temps, et de recevoir
         des bilans hebdomadaires. Ce service est fourni à titre{" "}
@@ -84,7 +84,7 @@ export default function TermsPage() {
         Conformément à l&apos;article L221-18 du Code de la consommation, tu disposes d&apos;un
         droit de rétractation de <strong>14 jours</strong> à compter de la souscription. Pour
         l&apos;exercer, contacte-nous à{" "}
-        <a href="mailto:hello@ancrage.app">hello@ancrage.app</a> avant l&apos;expiration de ce
+        <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a> avant l&apos;expiration de ce
         délai.
       </p>
 
@@ -157,7 +157,7 @@ export default function TermsPage() {
       <h2>10. Contact</h2>
       <p>
         Pour toute question relative aux présentes CGU :{" "}
-        <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>
+        <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>
       </p>
     </LegalPage>
   );

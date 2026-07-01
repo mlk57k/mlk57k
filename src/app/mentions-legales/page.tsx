@@ -14,13 +14,13 @@ export default function MentionsLegalesPage() {
     >
       <h2>1. Éditeur du site</h2>
       <p>
-        Le site <strong>ancrage.app</strong> est édité par :
+        Le site <strong>glowy.beauty</strong> est édité par :
       </p>
       <ul>
         <li><strong>Dénomination sociale :</strong> Ancrage</li>
         <li>
           <strong>Adresse e-mail :</strong>{" "}
-          <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>
+          <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>
         </li>
         <li>
           <strong>Directeur de la publication :</strong> Le représentant légal d&apos;Ancrage
@@ -65,7 +65,7 @@ export default function MentionsLegalesPage() {
 
       <h2>4. Propriété intellectuelle</h2>
       <p>
-        L&apos;ensemble des contenus présents sur le site ancrage.app (textes, images,
+        L&apos;ensemble des contenus présents sur le site glowy.beauty (textes, images,
         graphismes, logo, icônes, logiciels) est la propriété exclusive d&apos;Ancrage, à
         l&apos;exception des éléments appartenant à des tiers clairement identifiés.
       </p>
@@ -82,7 +82,7 @@ export default function MentionsLegalesPage() {
         et Libertés du 6 janvier 1978 modifiée et au RGPD, tu disposes d&apos;un droit
         d&apos;accès, de rectification et de suppression de tes données, exerçable directement
         depuis la page <a href="/confidentialite-des-donnees">Mes données</a> ou en contactant{" "}
-        <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>.
+        <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>.
       </p>
 
       <h2>6. Cookies</h2>
@@ -97,7 +97,7 @@ export default function MentionsLegalesPage() {
         Les informations contenues sur ce site sont aussi précises que possible et le site est
         périodiquement remis à jour. Cependant, il peut contenir des inexactitudes, des
         omissions ou des lacunes. Si tu constates une erreur ou un dysfonctionnement, merci de
-        le signaler par e-mail à <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>.
+        le signaler par e-mail à <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>.
       </p>
       <p>
         <strong>
@@ -116,7 +116,7 @@ export default function MentionsLegalesPage() {
 
       <h2>9. Contact</h2>
       <p>
-        Pour toute question : <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>
+        Pour toute question : <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>
       </p>
     </LegalPage>
   );

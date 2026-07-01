@@ -98,7 +98,7 @@ export default function FaqPage() {
         <p>
           Oui. Tu as <strong>14 jours</strong> à compter de la souscription pour exercer ton
           droit de rétractation, conformément à la loi. Contacte-nous à{" "}
-          <a href="mailto:hello@ancrage.app">hello@ancrage.app</a> avant l&apos;expiration de ce
+          <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a> avant l&apos;expiration de ce
           délai.
         </p>
       </Q>
@@ -185,7 +185,7 @@ export default function FaqPage() {
 
       <Q q="J&apos;ai un problème, comment vous contacter ?">
         <p>
-          Écris-nous à <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>. On répond
+          Écris-nous à <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>. On répond
           généralement sous 24–48h en jours ouvrés.
         </p>
       </Q>
@@ -195,7 +195,7 @@ export default function FaqPage() {
           Rends-toi dans <a href="/journal/historique">Historique</a> — tes 60 dernières
           entrées y sont listées. Si une entrée n&apos;apparaît pas, c&apos;est qu&apos;elle a peut-être été
           créée depuis un autre compte. Contacte-nous à{" "}
-          <a href="mailto:hello@ancrage.app">hello@ancrage.app</a> avec l&apos;adresse e-mail
+          <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a> avec l&apos;adresse e-mail
           concernée.
         </p>
       </Q>

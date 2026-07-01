@@ -14,9 +14,9 @@ export default function PrivacyPage() {
     >
       <h2>1. Qui sommes-nous ?</h2>
       <p>
-        Ancrage est un compagnon de réflexion quotidienne accessible sur <strong>ancrage.app</strong>.
+        Ancrage est un compagnon de réflexion quotidienne accessible sur <strong>glowy.beauty</strong>.
         Pour toute question relative à tes données, contacte-nous à{" "}
-        <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>.
+        <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>.
       </p>
 
       <h2>2. Données collectées</h2>
@@ -104,7 +104,7 @@ export default function PrivacyPage() {
       <p>
         Tu peux exporter ou supprimer toutes tes données toi-même, à tout moment, depuis la
         page <a href="/confidentialite-des-donnees">Mes données</a>. Pour toute autre demande :{" "}
-        <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>. Tu peux également adresser une
+        <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>. Tu peux également adresser une
         réclamation à la <strong>CNIL</strong> (cnil.fr).
       </p>
 
@@ -144,7 +144,7 @@ export default function PrivacyPage() {
 
       <h2>12. Contact</h2>
       <p>
-        <a href="mailto:hello@ancrage.app">hello@ancrage.app</a>
+        <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>
       </p>
     </LegalPage>
   );

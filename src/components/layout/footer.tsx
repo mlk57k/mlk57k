@@ -42,7 +42,7 @@ export function Footer() {
                 Mes données
               </Link>
               <Link
-                href="mailto:hello@ancrage.app"
+                href="mailto:hello@glowy.beauty"
                 className="hover:text-stone-900 transition-colors duration-150"
               >
                 Contact

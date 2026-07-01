@@ -15,7 +15,7 @@ const fraunces = Fraunces({
   weight: ["400", "500", "600", "700"],
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://ancrage.app";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://glowy.beauty";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
