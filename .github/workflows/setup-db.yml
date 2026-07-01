@@ -1,0 +1,25 @@
+name: Setup Database (apply migration)
+
+on:
+  workflow_dispatch:
+    inputs:
+      supabase_project_ref:
+        description: 'Ton project ref Supabase (ex: abcdefghijklmnop — visible dans ton URL https://XXXXX.supabase.co)'
+        required: true
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Apply migration
+        run: |
+          supabase link --project-ref "${{ github.event.inputs.supabase_project_ref }}"
+          supabase db push --include-all
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
