@@ -6,6 +6,10 @@ on:
       - claude/glowy-skin-webapp-l7m5ie
   workflow_dispatch:
 
+env:
+  VERCEL_ORG_ID: team_Gk17lZmjSWqGtF6aE5W89x9A
+  VERCEL_PROJECT_ID: prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,25 +23,95 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Test Vercel token
-        run: |
-          HTTP_CODE=$(curl -s -o /tmp/vercel_resp.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            https://api.vercel.com/v2/user)
-          echo "HTTP status: $HTTP_CODE"
-          head -c 300 /tmp/vercel_resp.json || true
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::Token invalide ou sans accès (HTTP $HTTP_CODE)"
-            exit 1
-          fi
-
       - name: Link Vercel project
         run: |
           mkdir -p .vercel
           printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
 
-      - name: Deploy to Vercel
-        run: vercel deploy --prod --yes --debug --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Setup Stripe products & prices
+        if: ${{ secrets.STRIPE_SECRET_KEY != '' }}
+        run: |
+          npm ci --ignore-scripts
+          OUTPUT=$(STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" node scripts/setup-stripe.mjs)
+          echo "$OUTPUT"
+          WEEKLY=$(echo  "$OUTPUT" | grep "^STRIPE_PRICE_ID_WEEKLY="  | cut -d= -f2)
+          MONTHLY=$(echo "$OUTPUT" | grep "^STRIPE_PRICE_ID_MONTHLY=" | cut -d= -f2)
+          echo "STRIPE_PRICE_ID_WEEKLY=$WEEKLY"   >> $GITHUB_ENV
+          echo "STRIPE_PRICE_ID_MONTHLY=$MONTHLY" >> $GITHUB_ENV
+
+      - name: Configure Vercel environment variables
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, urllib.request, urllib.error
+
+          TOKEN      = os.environ["VERCEL_TOKEN"]
+          PROJECT_ID = "prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ"
+          TEAM_ID    = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+          TARGETS    = ["production", "preview", "development"]
+
+          def api(method, path, body=None):
+              url  = f"https://api.vercel.com{path}?teamId={TEAM_ID}"
+              data = json.dumps(body).encode() if body else None
+              req  = urllib.request.Request(url, data=data, method=method,
+                         headers={"Authorization": f"Bearer {TOKEN}",
+                                  "Content-Type":  "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  return json.loads(e.read())
+
+          # Récupère les IDs existants
+          resp     = api("GET", f"/v9/projects/{PROJECT_ID}/env")
+          existing = {e["key"]: e["id"] for e in resp.get("envs", [])}
+
+          def upsert(key, value):
+              if not value:
+                  return
+              if key in existing:
+                  api("PATCH", f"/v10/projects/{PROJECT_ID}/env/{existing[key]}", {"value": value})
+                  print(f"  updated : {key}")
+              else:
+                  api("POST", f"/v10/projects/{PROJECT_ID}/env",
+                      {"key": key, "value": value, "type": "encrypted", "target": TARGETS})
+                  print(f"  created : {key}")
+
+          env = os.environ
+          weekly  = env.get("STRIPE_PRICE_ID_WEEKLY",  "")
+          monthly = env.get("STRIPE_PRICE_ID_MONTHLY", "")
+
+          pairs = [
+              ("ANTHROPIC_API_KEY",               env.get("ANTHROPIC_API_KEY",               "")),
+              ("OPENAI_API_KEY",                  env.get("OPENAI_API_KEY",                  "")),
+              ("STRIPE_SECRET_KEY",               env.get("STRIPE_SECRET_KEY",               "")),
+              ("STRIPE_WEBHOOK_SECRET",           env.get("STRIPE_WEBHOOK_SECRET",           "")),
+              ("STRIPE_PRICE_ID_WEEKLY",          weekly),
+              ("NEXT_PUBLIC_STRIPE_PRICE_WEEKLY", weekly),
+              ("STRIPE_PRICE_ID_MONTHLY",         monthly),
+              ("NEXT_PUBLIC_STRIPE_PRICE_MONTHLY",monthly),
+              ("RESEND_API_KEY",                  env.get("RESEND_API_KEY",                  "")),
+              ("RESEND_FROM_EMAIL",               "Ancrage <noreply@ancrage.app>"),
+              ("NEXT_PUBLIC_SUPABASE_URL",        env.get("NEXT_PUBLIC_SUPABASE_URL",        "")),
+              ("NEXT_PUBLIC_SUPABASE_ANON_KEY",   env.get("NEXT_PUBLIC_SUPABASE_ANON_KEY",   "")),
+              ("SUPABASE_SERVICE_ROLE_KEY",       env.get("SUPABASE_SERVICE_ROLE_KEY",       "")),
+              ("CRON_SECRET",                     env.get("CRON_SECRET",                     "")),
+              ("NEXT_PUBLIC_APP_URL",             "https://ancrage.app"),
+          ]
+          for key, val in pairs:
+              upsert(key, val)
+          print("✅  Variables Vercel configurées.")
+          PYEOF
         env:
-          VERCEL_ORG_ID: team_Gk17lZmjSWqGtF6aE5W89x9A
-          VERCEL_PROJECT_ID: prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ
+          VERCEL_TOKEN:                ${{ secrets.VERCEL_TOKEN }}
+          ANTHROPIC_API_KEY:           ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY:              ${{ secrets.OPENAI_API_KEY }}
+          STRIPE_SECRET_KEY:           ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET:       ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_SUPABASE_URL:    ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY:   ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY:              ${{ secrets.RESEND_API_KEY }}
+          CRON_SECRET:                 ${{ secrets.CRON_SECRET }}
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
