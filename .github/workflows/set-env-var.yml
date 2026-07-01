@@ -1,0 +1,78 @@
+name: Configurer une variable d'environnement
+
+on:
+  workflow_dispatch:
+    inputs:
+      key_name:
+        description: 'Quelle variable ?'
+        required: true
+        type: choice
+        options:
+          - RESEND_API_KEY
+          - OPENAI_API_KEY
+          - ANTHROPIC_API_KEY
+          - STRIPE_SECRET_KEY
+          - STRIPE_WEBHOOK_SECRET
+      key_value:
+        description: 'La valeur (les espaces seront nettoyés automatiquement)'
+        required: true
+
+env:
+  VERCEL_ORG_ID: team_Gk17lZmjSWqGtF6aE5W89x9A
+  VERCEL_PROJECT_ID: prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ
+
+jobs:
+  set:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upsert la variable dans Vercel
+        run: |
+          python3 - <<'PYEOF'
+          import re, os, json, urllib.request, urllib.error
+
+          key_name  = os.environ["KEY_NAME"].strip()
+          key_value = re.sub(r'\s+', '', os.environ["KEY_VALUE"])
+
+          if not key_value:
+              print("Valeur vide, abandon.")
+              exit(1)
+
+          TOKEN      = os.environ["VERCEL_TOKEN"]
+          PROJECT_ID = "prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ"
+          TEAM_ID    = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+          TARGETS    = ["production", "preview", "development"]
+
+          def api(method, path, body=None):
+              url  = f"https://api.vercel.com{path}?teamId={TEAM_ID}"
+              data = json.dumps(body).encode() if body else None
+              req  = urllib.request.Request(url, data=data, method=method,
+                         headers={"Authorization": f"Bearer {TOKEN}",
+                                  "Content-Type":  "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  return json.loads(e.read())
+
+          resp     = api("GET", f"/v9/projects/{PROJECT_ID}/env")
+          existing = {e["key"]: e["id"] for e in resp.get("envs", [])}
+
+          if key_name in existing:
+              api("PATCH", f"/v10/projects/{PROJECT_ID}/env/{existing[key_name]}", {"value": key_value})
+              print(f"✅ {key_name} mise à jour ({len(key_value)} caractères)")
+          else:
+              api("POST", f"/v10/projects/{PROJECT_ID}/env",
+                  {"key": key_name, "value": key_value, "type": "encrypted", "target": TARGETS})
+              print(f"✅ {key_name} créée ({len(key_value)} caractères)")
+          PYEOF
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          KEY_NAME: ${{ github.event.inputs.key_name }}
+          KEY_VALUE: ${{ github.event.inputs.key_value }}
+
+      - name: Redeploy
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
