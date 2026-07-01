@@ -29,7 +29,6 @@ jobs:
           printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
 
       - name: Setup Stripe products & prices
-        if: ${{ secrets.STRIPE_SECRET_KEY != '' }}
         run: |
           npm ci --ignore-scripts
           OUTPUT=$(STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" node scripts/setup-stripe.mjs)
