@@ -8,22 +8,27 @@ on:
         required: true
       openai_key:
         description: 'OPENAI_API_KEY (sk-...)'
-        required: true
+        required: false
+        default: ''
       stripe_secret:
         description: 'STRIPE_SECRET_KEY (sk_test_... ou sk_live_...)'
         required: true
       resend_key:
         description: 'RESEND_API_KEY (re_...)'
-        required: true
+        required: false
+        default: ''
       supabase_url:
         description: 'NEXT_PUBLIC_SUPABASE_URL (https://xxx.supabase.co)'
-        required: true
+        required: false
+        default: ''
       supabase_anon:
         description: 'NEXT_PUBLIC_SUPABASE_ANON_KEY (eyJ...)'
-        required: true
+        required: false
+        default: ''
       supabase_service:
         description: 'SUPABASE_SERVICE_ROLE_KEY (eyJ...)'
-        required: true
+        required: false
+        default: ''
       stripe_webhook_secret:
         description: 'STRIPE_WEBHOOK_SECRET (whsec_... — laisser vide pour configurer plus tard)'
         required: false
