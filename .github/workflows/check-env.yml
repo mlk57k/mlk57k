@@ -1,0 +1,30 @@
+name: Vérifier les variables d'environnement
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lister les noms des variables Vercel
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, urllib.request
+
+          TOKEN      = os.environ["VERCEL_TOKEN"]
+          PROJECT_ID = "prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ"
+          TEAM_ID    = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+
+          req = urllib.request.Request(
+              f"https://api.vercel.com/v9/projects/{PROJECT_ID}/env?teamId={TEAM_ID}",
+              headers={"Authorization": f"Bearer {TOKEN}"})
+          with urllib.request.urlopen(req) as r:
+              envs = json.loads(r.read()).get("envs", [])
+
+          print("Variables configurées :")
+          for e in sorted(envs, key=lambda x: x["key"]):
+              print(f"  - {e['key']}")
+          PYEOF
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
