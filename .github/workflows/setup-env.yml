@@ -1,0 +1,145 @@
+name: Setup Ancrage — Configuration des variables
+
+on:
+  workflow_dispatch:
+    inputs:
+      anthropic_key:
+        description: 'ANTHROPIC_API_KEY (sk-ant-...)'
+        required: true
+      openai_key:
+        description: 'OPENAI_API_KEY (sk-...)'
+        required: true
+      stripe_secret:
+        description: 'STRIPE_SECRET_KEY (sk_test_... ou sk_live_...)'
+        required: true
+      resend_key:
+        description: 'RESEND_API_KEY (re_...)'
+        required: true
+      supabase_url:
+        description: 'NEXT_PUBLIC_SUPABASE_URL (https://xxx.supabase.co)'
+        required: true
+      supabase_anon:
+        description: 'NEXT_PUBLIC_SUPABASE_ANON_KEY (eyJ...)'
+        required: true
+      supabase_service:
+        description: 'SUPABASE_SERVICE_ROLE_KEY (eyJ...)'
+        required: true
+      stripe_webhook_secret:
+        description: 'STRIPE_WEBHOOK_SECRET (whsec_... — laisser vide pour configurer plus tard)'
+        required: false
+        default: ''
+
+env:
+  VERCEL_ORG_ID: team_Gk17lZmjSWqGtF6aE5W89x9A
+  VERCEL_PROJECT_ID: prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Setup Stripe products & prices
+        id: stripe
+        run: |
+          OUTPUT=$(STRIPE_SECRET_KEY="${{ github.event.inputs.stripe_secret }}" node scripts/setup-stripe.mjs)
+          echo "$OUTPUT"
+          WEEKLY=$(echo  "$OUTPUT" | grep "^STRIPE_PRICE_ID_WEEKLY="  | cut -d= -f2)
+          MONTHLY=$(echo "$OUTPUT" | grep "^STRIPE_PRICE_ID_MONTHLY=" | cut -d= -f2)
+          echo "weekly=$WEEKLY"   >> $GITHUB_OUTPUT
+          echo "monthly=$MONTHLY" >> $GITHUB_OUTPUT
+
+      - name: Configure all Vercel environment variables
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, urllib.request, urllib.error, secrets
+
+          TOKEN      = os.environ["VERCEL_TOKEN"]
+          PROJECT_ID = "prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ"
+          TEAM_ID    = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+          TARGETS    = ["production", "preview", "development"]
+
+          def api(method, path, body=None):
+              url  = f"https://api.vercel.com{path}?teamId={TEAM_ID}"
+              data = json.dumps(body).encode() if body else None
+              req  = urllib.request.Request(url, data=data, method=method,
+                         headers={"Authorization": f"Bearer {TOKEN}",
+                                  "Content-Type":  "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  return json.loads(e.read())
+
+          resp     = api("GET", f"/v9/projects/{PROJECT_ID}/env")
+          existing = {e["key"]: e["id"] for e in resp.get("envs", [])}
+
+          def upsert(key, value):
+              if not value:
+                  return
+              if key in existing:
+                  api("PATCH", f"/v10/projects/{PROJECT_ID}/env/{existing[key]}", {"value": value})
+                  print(f"  ✔ updated : {key}")
+              else:
+                  api("POST", f"/v10/projects/{PROJECT_ID}/env",
+                      {"key": key, "value": value, "type": "encrypted", "target": TARGETS})
+                  print(f"  ✔ created : {key}")
+
+          env     = os.environ
+          weekly  = env.get("STRIPE_PRICE_WEEKLY",  "")
+          monthly = env.get("STRIPE_PRICE_MONTHLY", "")
+
+          # CRON_SECRET auto-généré si absent
+          existing_cron = "CRON_SECRET" in existing
+          cron_secret   = secrets.token_urlsafe(32) if not existing_cron else ""
+
+          pairs = [
+              ("ANTHROPIC_API_KEY",                env.get("ANTHROPIC_API_KEY",    "")),
+              ("OPENAI_API_KEY",                   env.get("OPENAI_API_KEY",        "")),
+              ("STRIPE_SECRET_KEY",                env.get("STRIPE_SECRET_KEY",    "")),
+              ("STRIPE_WEBHOOK_SECRET",            env.get("STRIPE_WEBHOOK_SECRET","")),
+              ("STRIPE_PRICE_ID_WEEKLY",           weekly),
+              ("NEXT_PUBLIC_STRIPE_PRICE_WEEKLY",  weekly),
+              ("STRIPE_PRICE_ID_MONTHLY",          monthly),
+              ("NEXT_PUBLIC_STRIPE_PRICE_MONTHLY", monthly),
+              ("RESEND_API_KEY",                   env.get("RESEND_API_KEY",       "")),
+              ("RESEND_FROM_EMAIL",                "Ancrage <noreply@ancrage.app>"),
+              ("NEXT_PUBLIC_SUPABASE_URL",         env.get("SUPABASE_URL",         "")),
+              ("NEXT_PUBLIC_SUPABASE_ANON_KEY",    env.get("SUPABASE_ANON",        "")),
+              ("SUPABASE_SERVICE_ROLE_KEY",        env.get("SUPABASE_SERVICE",     "")),
+              ("CRON_SECRET",                      cron_secret),
+              ("NEXT_PUBLIC_APP_URL",              "https://ancrage.app"),
+          ]
+          for key, val in pairs:
+              upsert(key, val)
+
+          if cron_secret:
+              print(f"\n  CRON_SECRET généré automatiquement.")
+          print("\n✅  Variables Vercel configurées.")
+          PYEOF
+        env:
+          VERCEL_TOKEN:          ${{ secrets.VERCEL_TOKEN }}
+          ANTHROPIC_API_KEY:     ${{ github.event.inputs.anthropic_key }}
+          OPENAI_API_KEY:        ${{ github.event.inputs.openai_key }}
+          STRIPE_SECRET_KEY:     ${{ github.event.inputs.stripe_secret }}
+          STRIPE_WEBHOOK_SECRET: ${{ github.event.inputs.stripe_webhook_secret }}
+          RESEND_API_KEY:        ${{ github.event.inputs.resend_key }}
+          SUPABASE_URL:          ${{ github.event.inputs.supabase_url }}
+          SUPABASE_ANON:         ${{ github.event.inputs.supabase_anon }}
+          SUPABASE_SERVICE:      ${{ github.event.inputs.supabase_service }}
+          STRIPE_PRICE_WEEKLY:   ${{ steps.stripe.outputs.weekly }}
+          STRIPE_PRICE_MONTHLY:  ${{ steps.stripe.outputs.monthly }}
+
+      - name: Trigger production deploy
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
