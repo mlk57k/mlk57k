@@ -37,19 +37,16 @@ function AuthForm() {
         if (error) throw error;
         window.location.assign(completeUrl);
       } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
         });
-        if (error) throw error;
-        if (data.session) {
-          window.location.assign(completeUrl);
-        } else {
-          setMessage(
-            "Vérifie tes emails pour confirmer ton compte, puis reviens te connecter."
-          );
-          setLoading(false);
-        }
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Erreur inscription.");
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+        window.location.assign(completeUrl);
       }
     } catch (err) {
       setError(
