@@ -20,10 +20,21 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    const msg = error.message.includes("already registered")
-      ? "Un compte existe déjà avec cet email."
-      : error.message;
-    return NextResponse.json({ error: msg }, { status: 400 });
+    const msg = error.message.toLowerCase();
+    if (msg.includes("already registered") || msg.includes("already been registered")) {
+      // User exists — confirm email + update password (handles unconfirmed accounts)
+      const { data: listData } = await admin.auth.admin.listUsers();
+      const existing = listData?.users?.find((u) => u.email === email);
+      if (existing) {
+        const { error: updateError } = await admin.auth.admin.updateUserById(
+          existing.id,
+          { email_confirm: true, password }
+        );
+        if (!updateError) return NextResponse.json({ userId: existing.id });
+      }
+      return NextResponse.json({ error: "Un compte existe déjà avec cet email." }, { status: 400 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
   return NextResponse.json({ userId: data.user.id });

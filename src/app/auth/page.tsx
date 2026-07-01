@@ -192,13 +192,17 @@ function AuthForm() {
 }
 
 function traduireErreur(msg: string): string {
-  if (msg.includes("Invalid login credentials"))
+  if (msg.includes("Invalid login credentials") || msg.includes("invalid_credentials"))
     return "Email ou mot de passe incorrect.";
-  if (msg.includes("already registered"))
+  if (msg.includes("already registered") || msg.includes("already been registered"))
     return "Un compte existe déjà avec cet email.";
   if (msg.includes("at least 6"))
     return "Le mot de passe doit faire au moins 6 caractères.";
-  return "Une erreur est survenue. Réessaie.";
+  if (msg.includes("Email not confirmed") || msg.includes("email_not_confirmed"))
+    return "Email non confirmé. Crée un nouveau compte avec le même email pour débloquer l'accès.";
+  if (msg.includes("supabaseUrl") || msg.includes("supabase_url"))
+    return "Configuration manquante. Contacte le support.";
+  return msg || "Une erreur est survenue. Réessaie.";
 }
 
 function GoogleIcon() {
