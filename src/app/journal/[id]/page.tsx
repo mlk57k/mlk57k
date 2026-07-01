@@ -139,7 +139,7 @@ export default function EntryPage() {
 
             <div className="flex justify-center">
               <Link
-                href="/journal"
+                href={`/journal?entree=${entry?.id ?? ""}`}
                 className="text-sm text-coral-500 font-medium hover:underline"
               >
                 Continuer à écrire →

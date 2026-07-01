@@ -33,13 +33,29 @@ function JournalContent() {
   const chunksRef = useRef<Blob[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const resumeId = searchParams.get("entree");
+
   useEffect(() => {
     (async () => {
       const { createClient } = await import("@/lib/supabase/client");
-      const { data: { user } } = await createClient().auth.getUser();
-      if (!user) router.replace("/auth?next=/journal");
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.replace("/auth?next=/journal"); return; }
+
+      // Reprendre une entrée existante (lien "Continuer à écrire")
+      if (resumeId) {
+        const { data: msgData } = await supabase
+          .from("entry_messages")
+          .select("id, role, content, created_at")
+          .eq("entry_id", resumeId)
+          .order("created_at", { ascending: true });
+        if (msgData && msgData.length > 0) {
+          setEntryId(resumeId);
+          setMessages(msgData as Message[]);
+        }
+      }
     })();
-  }, [router]);
+  }, [router, resumeId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
