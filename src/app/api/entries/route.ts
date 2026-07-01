@@ -34,11 +34,13 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const content = typeof body?.content === "string" ? body.content : "";
 
-  let { data: profile, error: profileError } = await supabase
+  const { data: initialProfile, error: profileError } = await supabase
     .from("profiles")
     .select("plan_status, free_entries_used, free_entries_reset_at")
     .eq("id", user.id)
     .single();
+
+  let profile = initialProfile;
 
   // Auto-create profile if missing (trigger may not have fired)
   if (!profile) {
