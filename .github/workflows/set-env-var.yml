@@ -25,6 +25,8 @@ jobs:
   set:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Upsert la variable dans Vercel
         run: |
           python3 - <<'PYEOF'
