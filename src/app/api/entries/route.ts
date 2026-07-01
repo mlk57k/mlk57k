@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
+import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { consumeFreeEntry } from "@/lib/quota";
+
+function adminClient() {
+  return createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 export async function GET() {
   const supabase = createClient();
@@ -25,14 +34,26 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const content = typeof body?.content === "string" ? body.content : "";
 
-  const { data: profile, error: profileError } = await supabase
+  let { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("plan_status, free_entries_used, free_entries_reset_at")
     .eq("id", user.id)
     .single();
 
-  if (profileError || !profile) {
-    return NextResponse.json({ error: "profil introuvable" }, { status: 500 });
+  // Auto-create profile if missing (trigger may not have fired)
+  if (!profile) {
+    const admin = adminClient();
+    const { data: newProfile, error: insertError } = await admin
+      .from("profiles")
+      .insert({ id: user.id, email: user.email ?? "" })
+      .select("plan_status, free_entries_used, free_entries_reset_at")
+      .single();
+
+    if (insertError || !newProfile) {
+      console.error("profile insert error", profileError, insertError);
+      return NextResponse.json({ error: "profil introuvable" }, { status: 500 });
+    }
+    profile = newProfile;
   }
 
   const quota = await consumeFreeEntry(supabase, user.id, profile);

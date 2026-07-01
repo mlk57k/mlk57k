@@ -30,12 +30,22 @@ export async function POST(request: Request) {
           existing.id,
           { email_confirm: true, password }
         );
-        if (!updateError) return NextResponse.json({ userId: existing.id });
+        if (!updateError) {
+          // Ensure profile exists
+          await admin.from("profiles").upsert({ id: existing.id, email }, { onConflict: "id" });
+          return NextResponse.json({ userId: existing.id });
+        }
       }
       return NextResponse.json({ error: "Un compte existe déjà avec cet email." }, { status: 400 });
     }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  // Ensure profile exists (in case trigger didn't fire)
+  await admin.from("profiles").upsert(
+    { id: data.user.id, email },
+    { onConflict: "id" }
+  );
 
   return NextResponse.json({ userId: data.user.id });
 }

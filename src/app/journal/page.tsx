@@ -27,6 +27,7 @@ function JournalContent() {
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [quotaError, setQuotaError] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const [crisisDetected, setCrisisDetected] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -55,7 +56,12 @@ function JournalContent() {
       setQuotaError(true);
       return null;
     }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Erreur serveur (${res.status})`);
+    }
     const data = await res.json();
+    if (!data.entry?.id) throw new Error("Réponse invalide du serveur.");
     setEntryId(data.entry.id);
     return data.entry.id;
   }
@@ -64,23 +70,21 @@ function JournalContent() {
     if (!content.trim() || sending) return;
     setSending(true);
     setQuotaError(false);
-
-    const id = await ensureEntry();
-    if (!id) {
-      setSending(false);
-      return;
-    }
-
-    const optimistic: Message = {
-      id: `local-${Date.now()}`,
-      role: "user",
-      content,
-      created_at: new Date().toISOString(),
-    };
-    setMessages((m) => [...m, optimistic]);
-    setText("");
+    setSendError(null);
 
     try {
+      const id = await ensureEntry();
+      if (!id) return;
+
+      const optimistic: Message = {
+        id: `local-${Date.now()}`,
+        role: "user",
+        content,
+        created_at: new Date().toISOString(),
+      };
+      setMessages((m) => [...m, optimistic]);
+      setText("");
+
       const res = await fetch(`/api/entries/${id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,6 +95,8 @@ function JournalContent() {
         setMessages((m) => [...m, data.assistantMessage]);
       }
       if (data.crisisDetected) setCrisisDetected(true);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : "Erreur lors de l'envoi.");
     } finally {
       setSending(false);
     }
@@ -120,7 +126,7 @@ function JournalContent() {
       mediaRecorderRef.current = recorder;
       setRecording(true);
     } catch {
-      // micro refusé ou indisponible — l'utilisateur peut toujours écrire au clavier
+      // micro refusé ou indisponible
     }
   }
 
@@ -167,6 +173,12 @@ function JournalContent() {
           </div>
         )}
 
+        {sendError && (
+          <div className="mb-4 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {sendError}
+          </div>
+        )}
+
         {crisisDetected && (
           <div className="mb-4 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
             Si tu traverses un moment difficile, le {CRISIS_HOTLINE} (numéro national de prévention
@@ -174,7 +186,7 @@ function JournalContent() {
           </div>
         )}
 
-        {messages.length === 0 && (
+        {messages.length === 0 && !sending && (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-stone-400 py-16">
             <p className="font-display text-xl text-stone-600 mb-2">Comment s&apos;est passée ta journée ?</p>
             <p className="text-sm">Écris ou enregistre une note vocale, le coach te répond.</p>
