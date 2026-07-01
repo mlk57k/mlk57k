@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
-import { cn } from "@/lib/utils";
 
 interface Entry {
   id: string;
