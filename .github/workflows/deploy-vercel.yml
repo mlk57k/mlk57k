@@ -19,13 +19,25 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      - name: Test Vercel token
+        run: |
+          HTTP_CODE=$(curl -s -o /tmp/vercel_resp.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            https://api.vercel.com/v2/user)
+          echo "HTTP status: $HTTP_CODE"
+          head -c 300 /tmp/vercel_resp.json || true
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Token invalide ou sans accès (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
       - name: Link Vercel project
         run: |
           mkdir -p .vercel
           printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
 
       - name: Deploy to Vercel
-        run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prod --yes --debug --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: team_Gk17lZmjSWqGtF6aE5W89x9A
           VERCEL_PROJECT_ID: prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ
