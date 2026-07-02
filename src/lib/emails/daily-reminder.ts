@@ -16,7 +16,7 @@ export async function sendDailyReminderEmail(to: string, appUrl: string) {
   `);
 
   await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "Glowy <noreply@glowy.beauty>",
+    from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>",
     to,
     subject: "Un instant pour toi ?",
     html,

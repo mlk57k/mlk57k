@@ -115,12 +115,12 @@ jobs:
               ("STRIPE_PRICE_ID_MONTHLY",          monthly),
               ("NEXT_PUBLIC_STRIPE_PRICE_MONTHLY", monthly),
               ("RESEND_API_KEY",                   env.get("RESEND_API_KEY",       "")),
-              ("RESEND_FROM_EMAIL",                "Glowy <noreply@glowy.beauty>"),
+              ("RESEND_FROM_EMAIL",                "Ancrage <noreply@glowy.beauty>"),
               ("NEXT_PUBLIC_SUPABASE_URL",         env.get("SUPABASE_URL",         "")),
               ("NEXT_PUBLIC_SUPABASE_ANON_KEY",    env.get("SUPABASE_ANON",        "")),
               ("SUPABASE_SERVICE_ROLE_KEY",        env.get("SUPABASE_SERVICE",     "")),
               ("CRON_SECRET",                      cron_secret),
-              ("NEXT_PUBLIC_APP_URL",              "https://glowy.beauty"),
+              ("NEXT_PUBLIC_APP_URL",              "https://ancrage.xyz"),
           ]
           for key, val in pairs:
               upsert(key, val)

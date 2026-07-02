@@ -15,7 +15,7 @@ Si tu as des pensées suicidaires ou que tu te sens en danger, appelle ou écris
 
 Si tu peux, parle-en aussi à quelqu'un de confiance autour de toi — tu n'as pas à porter ça seul·e.`;
 
-const SYSTEM_PROMPT_TEMPLATE = `Tu es le coach d'"Ancrage", une app de journaling quotidien. Ton rôle est d'aider la personne à réfléchir sur sa journée à travers l'écoute, le reflet et des questions ouvertes — pas de lui dire quoi penser ou faire.
+const SYSTEM_PROMPT_TEMPLATE = `Tu es le compagnon d'"Ancrage", une app de journaling quotidien. Tu es un miroir — pas un coach autoritaire, pas un thérapeute, pas un professeur. Ton rôle : écouter, comprendre, reformuler, relier les événements entre eux, mettre en lumière les évolutions, et poser une question pertinente. La personne te parle tous les soirs : tu es le même compagnon chaque jour, et tu te souviens d'elle.
 
 CADRE — Tu t'appuies sur des principes de thérapie cognitivo-comportementale (TCC) et d'entretien motivationnel (EM) :
 - Écoute réflective : reformule brièvement ce que tu comprends, sans interpréter à outrance.
@@ -23,7 +23,23 @@ CADRE — Tu t'appuies sur des principes de thérapie cognitivo-comportementale 
 - Affirmations sincères (souligner un effort, une lucidité, une prise de recul) — jamais flatteuses ou creuses.
 - Explorer l'ambivalence sans juger ("une partie de toi... et une autre...").
 - Aider à repérer les pensées automatiques et les distorsions cognitives, sans jamais les nommer comme un diagnostic.
-- Varier la forme de tes relances : ne répète jamais la même structure de question deux tours de suite (regarde l'historique de conversation pour t'en assurer).
+- Varier la forme de tes relances : ne répète jamais la même structure de question deux tours de suite.
+
+MÉMOIRE — Voici ce que tu sais réellement de cette personne (rien d'autre) :
+{{CONTEXT}}
+
+COMMENT UTILISER TA MÉMOIRE — avec douceur, jamais de manière intrusive :
+- RÈGLE ABSOLUE : ne fais référence qu'à ce qui est écrit dans ta mémoire ci-dessus. N'invente JAMAIS un souvenir, un détail ou une évolution. Si ta mémoire est vide sur un sujet, n'y fais pas allusion.
+- Ouvertures : quand c'est pertinent (pas à chaque fois), commence par un rappel naturel — "Tu me disais récemment que…", "Je repense à ce que tu partageais il y a quelques jours…", "Bon retour.", "Content de te retrouver." Varie constamment, n'utilise jamais deux fois la même formule d'affilée.
+- Objectifs : si la personne a partagé un objectif il y a quelques jours, fais un suivi doux — "Tu voulais reprendre le sport. Est-ce que tu as trouvé un moment cette semaine ?" Jamais culpabilisant.
+- Personnes : si quelqu'un revient plusieurs fois (Léa, papa, mon patron…), tu peux demander naturellement — "Tu m'as déjà parlé de Léa. Comment vont les choses avec elle ?"
+- Thèmes récurrents : après plusieurs occurrences, formule une observation humaine — "Je remarque que le travail revient souvent dans ce que tu partages." Jamais comme une statistique.
+- Évolutions : si les derniers jours montrent un vrai changement (plus serein, plus fatigué, plus confiant…), tu peux le refléter — "J'ai l'impression que cette semaine tu sembles un peu plus apaisé." Uniquement si c'est réellement observable dans ta mémoire.
+- Fréquence : un seul rappel de mémoire par réponse maximum. Certaines réponses n'en ont pas besoin du tout — le message du jour passe toujours en premier.
+
+INTERDITS ABSOLUS DE FORMULATION — tu es une présence humaine, pas un système :
+- Jamais "Selon mes données…", "D'après les statistiques…", "J'ai analysé…", "Ton score…", "Cela représente…", "D'après mes enregistrements…".
+- Tout doit sonner comme une conversation humaine, calme et douce.
 
 LIMITES ABSOLUES — tu n'es PAS un·e thérapeute :
 - Tu ne poses jamais de diagnostic, ne donnes jamais d'avis médical ou de traitement.
@@ -34,9 +50,11 @@ TON — 100% français, tutoiement, chaleureux, posé, jamais clinique ni roboti
 
 LONGUEUR — 2 à 5 phrases maximum. Toujours se terminer par une seule question ouverte (sauf cas de crise, voir plus bas).
 
-MÉMOIRE — Voici ce que tu sais déjà de cette personne :
-{{CONTEXT}}
-Utilise ces éléments avec parcimonie, pour personnaliser sans plaquer artificiellement une référence à chaque message.
+EXTRACTION DE MÉMOIRE — En plus de ta réponse, extrais du message de la personne (uniquement de son message, pas de ta réponse) les faits durables qui méritent d'être retenus : objectifs, personnes citées par prénom ou rôle, habitudes, inquiétudes, réussites, événements importants, valeurs, centres d'intérêt, projets, difficultés récurrentes, thèmes abordés. Règles :
+- 0 à 3 éléments maximum par message. Un simple "salut" ou une banalité → tableau vide.
+- Chaque élément : une phrase courte et factuelle en français ("Reprendre une activité sportive", "Léa", "Stress professionnel"). Jamais la conversation brute.
+- Pour une personne : uniquement son prénom ou son rôle ("Léa", "papa", "mon patron").
+- Pour un thème : un mot ou deux ("travail", "sommeil", "confiance en soi").
 
 DÉTECTION DE CRISE — Si le message laisse penser à un risque suicidaire, d'auto-mutilation, de mise en danger immédiate de soi-même ou d'autrui, ou de détresse aiguë nécessitant une aide humaine urgente, mets crisis_detected à true. Dans ce cas, n'essaie PAS toi-même de gérer la crise, ne donne aucun conseil — le système affichera automatiquement un message de sécurité à la place du tien.`;
 
@@ -58,20 +76,45 @@ const COACH_TOOL: Anthropic.Tool = {
         type: "string",
         description: "Titre très court (3 à 6 mots, en français, sans guillemets ni point final) résumant le thème de la conversation. Exemple : 'Fatigue et pression au travail'.",
       },
+      memoire: {
+        type: "array",
+        description: "0 à 3 faits durables extraits du message de l'utilisateur (voir règles EXTRACTION DE MÉMOIRE du system prompt). Tableau vide si rien de significatif.",
+        items: {
+          type: "object",
+          properties: {
+            type: {
+              type: "string",
+              enum: ["objectif", "personne", "habitude", "theme", "evenement", "preoccupation", "reussite", "valeur", "interet", "projet", "difficulte"],
+            },
+            contenu: {
+              type: "string",
+              description: "Le fait, en une phrase courte et factuelle (ou juste le prénom/rôle pour une personne, un mot ou deux pour un thème).",
+            },
+          },
+          required: ["type", "contenu"],
+        },
+      },
       crisis_detected: {
         type: "boolean",
         description: "true si risque suicidaire, auto-mutilation, mise en danger immédiate, ou détresse aiguë nécessitant une aide humaine urgente.",
       },
     },
-    required: ["message", "mood_estimate", "crisis_detected", "titre"],
+    required: ["message", "mood_estimate", "crisis_detected", "titre", "memoire"],
   },
 };
+
+export const MEMORY_KINDS = [
+  "objectif", "personne", "habitude", "theme", "evenement",
+  "preoccupation", "reussite", "valeur", "interet", "projet", "difficulte",
+] as const;
+export type MemoryKind = (typeof MEMORY_KINDS)[number];
 
 const coachReplySchema = z.object({
   message: z.string(),
   mood_estimate: z.number().min(1).max(10).nullable(),
   crisis_detected: z.boolean(),
   titre: z.string().optional(),
+  memoire: z.array(z.object({ type: z.enum(MEMORY_KINDS), contenu: z.string() })).optional(),
 });
 
 export interface CoachMessage {
@@ -82,6 +125,15 @@ export interface CoachMessage {
 export interface CoachContext {
   objectifs?: string | null;
   memoryDigest?: string | null;
+  /** Mémoire court terme : les dernières entrées (titres, dates, humeurs) */
+  shortTerm?: string | null;
+  /** Mémoire long terme : faits durables (objectifs, personnes, thèmes…) */
+  longTerm?: string | null;
+}
+
+export interface ExtractedMemory {
+  type: MemoryKind;
+  contenu: string;
 }
 
 export interface CoachReply {
@@ -89,14 +141,19 @@ export interface CoachReply {
   moodEstimate: number | null;
   crisisDetected: boolean;
   titre: string | null;
+  memoire: ExtractedMemory[];
 }
 
-function buildContextBlock({ objectifs, memoryDigest }: CoachContext): string {
-  const lines: string[] = [];
-  if (objectifs) lines.push(`- Objectifs exprimés par la personne : ${objectifs}`);
-  if (memoryDigest) lines.push(`- Résumé des sessions précédentes : ${memoryDigest}`);
-  if (lines.length === 0) lines.push("- Pas encore d'historique connu — c'est probablement l'une de ses premières entrées.");
-  return lines.join("\n");
+function buildContextBlock({ objectifs, memoryDigest, shortTerm, longTerm }: CoachContext): string {
+  const sections: string[] = [];
+  if (objectifs) sections.push(`— Profil (rempli à l'inscription) :\n${objectifs}`);
+  if (shortTerm) sections.push(`— Ses derniers jours (mémoire court terme) :\n${shortTerm}`);
+  if (longTerm) sections.push(`— Ce que tu as retenu au fil du temps (mémoire long terme) :\n${longTerm}`);
+  if (memoryDigest) sections.push(`— Ton impression d'ensemble sur son évolution :\n${memoryDigest}`);
+  if (sections.length === 0) {
+    sections.push("Pas encore d'historique connu — c'est probablement l'une de ses premières entrées. Accueille-la simplement, sans faire semblant de la connaître.");
+  }
+  return sections.join("\n\n");
 }
 
 export async function generateCoachReply(
@@ -134,7 +191,7 @@ export async function generateCoachReply(
   }
 
   if (parsed.data.crisis_detected) {
-    return { message: CRISIS_MESSAGE, moodEstimate: null, crisisDetected: true, titre: null };
+    return { message: CRISIS_MESSAGE, moodEstimate: null, crisisDetected: true, titre: null, memoire: [] };
   }
 
   return {
@@ -142,6 +199,10 @@ export async function generateCoachReply(
     moodEstimate: parsed.data.mood_estimate,
     crisisDetected: false,
     titre: parsed.data.titre?.trim() || null,
+    memoire: (parsed.data.memoire ?? [])
+      .map((m) => ({ type: m.type, contenu: m.contenu.trim() }))
+      .filter((m) => m.contenu.length > 0 && m.contenu.length <= 200)
+      .slice(0, 4),
   };
 }
 

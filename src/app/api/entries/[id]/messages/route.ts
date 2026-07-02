@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateCoachReply, type CoachMessage } from "@/lib/anthropic";
+import { buildShortTermMemory, buildLongTermMemory, saveExtractedMemories } from "@/lib/memory";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -19,17 +20,16 @@ export async function POST(request: Request, { params }: { params: { id: string 
     .single();
   if (entryError || !entry) return NextResponse.json({ error: "introuvable" }, { status: 404 });
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("objectifs, memory_digest")
-    .eq("id", user.id)
-    .single();
-
-  const { data: history } = await supabase
-    .from("entry_messages")
-    .select("role, content")
-    .eq("entry_id", params.id)
-    .order("created_at", { ascending: true });
+  const [{ data: profile }, { data: history }, shortTerm, longTerm] = await Promise.all([
+    supabase.from("profiles").select("objectifs, memory_digest").eq("id", user.id).single(),
+    supabase
+      .from("entry_messages")
+      .select("role, content")
+      .eq("entry_id", params.id)
+      .order("created_at", { ascending: true }),
+    buildShortTermMemory(supabase, user.id, params.id),
+    buildLongTermMemory(supabase, user.id),
+  ]);
 
   const { data: userMessage, error: insertError } = await supabase
     .from("entry_messages")
@@ -46,7 +46,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const reply = await generateCoachReply(
       (history ?? []) as CoachMessage[],
       content,
-      { objectifs: profile?.objectifs ?? null, memoryDigest: profile?.memory_digest ?? null },
+      {
+        objectifs: profile?.objectifs ?? null,
+        memoryDigest: profile?.memory_digest ?? null,
+        shortTerm,
+        longTerm,
+      },
       process.env.ANTHROPIC_API_KEY
     );
 
@@ -66,6 +71,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
     if (reply.titre) entryUpdate.content = reply.titre;
     if (Object.keys(entryUpdate).length > 0) {
       await supabase.from("journal_entries").update(entryUpdate).eq("id", params.id);
+    }
+
+    // Enrichit la mémoire long terme avec les faits extraits de ce message
+    if (reply.memoire.length > 0) {
+      await saveExtractedMemories(supabase, user.id, reply.memoire);
     }
 
     return NextResponse.json({ userMessage, assistantMessage, crisisDetected: reply.crisisDetected });

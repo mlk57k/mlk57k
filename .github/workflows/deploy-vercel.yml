@@ -95,12 +95,12 @@ jobs:
               ("STRIPE_PRICE_ID_ANNUAL",          annual),
               ("NEXT_PUBLIC_STRIPE_PRICE_ANNUAL", annual),
               ("RESEND_API_KEY",                  env.get("RESEND_API_KEY",                  "")),
-              ("RESEND_FROM_EMAIL",               "Glowy <noreply@glowy.beauty>"),
+              ("RESEND_FROM_EMAIL",               "Ancrage <noreply@glowy.beauty>"),
               ("NEXT_PUBLIC_SUPABASE_URL",        env.get("NEXT_PUBLIC_SUPABASE_URL",        "")),
               ("NEXT_PUBLIC_SUPABASE_ANON_KEY",   env.get("NEXT_PUBLIC_SUPABASE_ANON_KEY",   "")),
               ("SUPABASE_SERVICE_ROLE_KEY",       env.get("SUPABASE_SERVICE_ROLE_KEY",       "")),
               ("CRON_SECRET",                     env.get("CRON_SECRET",                     "")),
-              ("NEXT_PUBLIC_APP_URL",             "https://glowy.beauty"),
+              ("NEXT_PUBLIC_APP_URL",             "https://ancrage.xyz"),
           ]
           for key, val in pairs:
               upsert(key, val)
@@ -121,7 +121,7 @@ jobs:
       - name: Deploy to Vercel
         run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Add glowy.beauty domain to Vercel project
+      - name: Add ancrage.xyz domain to Vercel project
         run: |
           python3 - <<'PYEOF'
           import os, json, urllib.request, urllib.error
@@ -129,7 +129,7 @@ jobs:
           TOKEN      = os.environ["VERCEL_TOKEN"]
           PROJECT_ID = "prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ"
           TEAM_ID    = "team_Gk17lZmjSWqGtF6aE5W89x9A"
-          DOMAIN     = "glowy.beauty"
+          DOMAIN     = "ancrage.xyz"
 
           def api(method, path, body=None):
               url  = f"https://api.vercel.com{path}?teamId={TEAM_ID}"

@@ -99,7 +99,7 @@ export default function FaqPage() {
         <p>
           Oui. Tu as <strong>14 jours</strong> à compter de la souscription pour exercer ton
           droit de rétractation, conformément à la loi. Contacte-nous à{" "}
-          <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a> avant l&apos;expiration de ce
+          <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a> avant l&apos;expiration de ce
           délai.
         </p>
       </Q>
@@ -124,8 +124,9 @@ export default function FaqPage() {
 
       <Q q="Le coach peut-il se souvenir de mes entrées précédentes ?">
         <p>
-          Le coach accède à tes messages de la session en cours (l&apos;entrée du jour). Pour les
-          bilans hebdomadaires, il synthétise tes entrées de la semaine.
+          Oui. Le coach garde une mémoire de tes échanges : tes objectifs, les personnes dont
+          tu parles, les thèmes qui reviennent, et l&apos;évolution de tes derniers jours. Plus tu
+          écris, mieux il te connaît — et tu peux supprimer une entrée à tout moment.
         </p>
       </Q>
 
@@ -186,7 +187,7 @@ export default function FaqPage() {
 
       <Q q="J&apos;ai un problème, comment vous contacter ?">
         <p>
-          Écris-nous à <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a>. On répond
+          Écris-nous à <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a>. On répond
           généralement sous 24–48h en jours ouvrés.
         </p>
       </Q>
@@ -196,7 +197,7 @@ export default function FaqPage() {
           Rends-toi dans <a href="/journal/historique">Historique</a> — tes 60 dernières
           entrées y sont listées. Si une entrée n&apos;apparaît pas, c&apos;est qu&apos;elle a peut-être été
           créée depuis un autre compte. Contacte-nous à{" "}
-          <a href="mailto:hello@glowy.beauty">hello@glowy.beauty</a> avec l&apos;adresse e-mail
+          <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a> avec l&apos;adresse e-mail
           concernée.
         </p>
       </Q>

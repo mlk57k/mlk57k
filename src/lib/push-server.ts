@@ -13,7 +13,7 @@ function configured(): boolean {
 
 function setup() {
   webpush.setVapidDetails(
-    "mailto:noreply@glowy.beauty",
+    "mailto:hello@ancrage.xyz",
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
     process.env.VAPID_PRIVATE_KEY!
   );

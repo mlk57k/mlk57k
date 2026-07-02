@@ -32,7 +32,7 @@ export default function DataPrivacyPage() {
       await createClient().auth.signOut();
       window.location.assign("/");
     } catch {
-      setError("La suppression a échoué. Réessaie ou contacte-nous à hello@glowy.beauty.");
+      setError("La suppression a échoué. Réessaie ou contacte-nous à hello@ancrage.xyz.");
       setDeleting(false);
     }
   }
