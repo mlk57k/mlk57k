@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendDailyReminderEmail } from "@/lib/emails/daily-reminder";
+import { sendPushToUser } from "@/lib/push-server";
 
 export const runtime = "nodejs";
 
@@ -60,8 +61,15 @@ export async function GET(request: Request) {
     if (alreadyJournaled) continue;
 
     try {
+      // Push d'abord (si l'utilisateur a un appareil abonné), email en plus.
+      const pushed = await sendPushToUser(admin, profile.id, {
+        title: "Ancrage",
+        body: "Comment s'est passée ta journée ? Trois minutes pour la déposer.",
+        url: "/journal",
+      });
       await sendDailyReminderEmail(profile.email, appUrl);
       sent++;
+      if (pushed > 0) console.log("[cron/daily-reminder] push envoyé:", profile.id);
     } catch (err) {
       console.error("[cron/daily-reminder] envoi échoué:", profile.id, err);
     }

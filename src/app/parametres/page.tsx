@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut, BellRing } from "lucide-react";
+import { pushSupported, subscribeToPush, unsubscribeFromPush, isPushSubscribed } from "@/lib/push-client";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -39,6 +40,52 @@ export default function ParametresPage() {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [pushAvailable, setPushAvailable] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushMessage, setPushMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPushAvailable(pushSupported());
+    isPushSubscribed().then(setPushEnabled);
+  }, []);
+
+  async function handlePushToggle() {
+    setPushBusy(true);
+    setPushMessage(null);
+    try {
+      if (pushEnabled) {
+        await unsubscribeFromPush();
+        setPushEnabled(false);
+        setPushMessage("Notifications désactivées sur cet appareil.");
+      } else {
+        const result = await subscribeToPush();
+        if (result.ok) {
+          setPushEnabled(true);
+          setPushMessage("Notifications activées sur cet appareil 🎉");
+        } else if (result.error === "denied") {
+          setPushMessage("Tu as refusé les notifications. Autorise-les dans les réglages de ton navigateur.");
+        } else if (result.error === "unsupported") {
+          setPushMessage("Cet appareil ne supporte pas les notifications push.");
+        } else {
+          setPushMessage("Activation impossible. Réessaie dans un instant.");
+        }
+      }
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
+  async function handlePushTest() {
+    setPushBusy(true);
+    setPushMessage(null);
+    try {
+      const res = await fetch("/api/push/test", { method: "POST" });
+      setPushMessage(res.ok ? "Notification envoyée — regarde ton écran !" : "Envoi impossible. Active d'abord les notifications.");
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -210,6 +257,30 @@ export default function ParametresPage() {
                 ))}
               </select>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BellRing className="h-4 w-4 text-coral-400" />
+              Notifications push
+            </CardTitle>
+            <CardDescription>
+              Reçois ton rappel du soir directement sur cet appareil.
+              {!pushAvailable && " Sur iPhone : installe d'abord l'app sur ton écran d'accueil (Safari → Partager → Sur l'écran d'accueil) puis ouvre-la."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-3">
+            <Button disabled={!pushAvailable || pushBusy} onClick={handlePushToggle} variant={pushEnabled ? "outline" : "default"}>
+              {pushBusy ? "Un instant…" : pushEnabled ? "Désactiver sur cet appareil" : "Activer sur cet appareil"}
+            </Button>
+            {pushEnabled && (
+              <Button variant="ghost" disabled={pushBusy} onClick={handlePushTest}>
+                Envoyer un test
+              </Button>
+            )}
+            {pushMessage && <p className="text-sm text-stone-500 w-full">{pushMessage}</p>}
           </CardContent>
         </Card>
 

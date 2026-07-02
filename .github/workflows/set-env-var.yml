@@ -13,6 +13,8 @@ on:
           - ANTHROPIC_API_KEY
           - STRIPE_SECRET_KEY
           - STRIPE_WEBHOOK_SECRET
+          - NEXT_PUBLIC_VAPID_PUBLIC_KEY
+          - VAPID_PRIVATE_KEY
       key_value:
         description: 'La valeur (les espaces seront nettoyés automatiquement)'
         required: true
