@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LogOut } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -38,6 +38,17 @@ export default function ParametresPage() {
   const [canceling, setCanceling] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      await createClient().auth.signOut();
+    } finally {
+      router.replace("/auth");
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -211,6 +222,13 @@ export default function ParametresPage() {
           <Link href="/confidentialite-des-donnees" className="text-sm text-stone-500 hover:text-stone-900 underline">
             Mes données &amp; export
           </Link>
+        </div>
+
+        <div className="pt-4 border-t border-cream-200">
+          <Button variant="outline" disabled={signingOut} onClick={handleSignOut}>
+            <LogOut className="h-4 w-4 mr-2" />
+            {signingOut ? "Déconnexion…" : "Se déconnecter"}
+          </Button>
         </div>
       </main>
     </div>
