@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mic, Send, Square, History, BarChart3, Settings, Flame, Sparkles } from "lucide-react";
+import { Mic, Send, Square, History, BarChart3, Settings, Flame, Sparkles, Smartphone, X } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,20 @@ function JournalContent() {
   const [streak, setStreak] = useState(0);
   const [prenom, setPrenom] = useState<string | null>(null);
   const [checkinMood, setCheckinMood] = useState<number | null>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  useEffect(() => {
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as { standalone?: boolean }).standalone === true;
+    const dismissed = localStorage.getItem("ancrage-install-dismissed") === "1";
+    setShowInstallBanner(!standalone && !dismissed);
+  }, []);
+
+  function dismissInstallBanner() {
+    localStorage.setItem("ancrage-install-dismissed", "1");
+    setShowInstallBanner(false);
+  }
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -205,6 +219,24 @@ function JournalContent() {
         {bienvenue && (
           <div className="mb-4 rounded-2xl bg-coral-50 border border-coral-200 px-4 py-3 text-sm text-coral-700">
             Bienvenue dans Ancrage. Ton essai gratuit a commencé.
+          </div>
+        )}
+
+        {showInstallBanner && (
+          <div className="mb-4 rounded-2xl bg-white border border-cream-200 px-4 py-3 flex items-center gap-3">
+            <Smartphone className="h-5 w-5 text-coral-400 flex-none" />
+            <Link href="/installer" className="flex-1 text-sm text-stone-700 leading-snug">
+              <span className="font-semibold">Installe Ancrage sur ton écran d&apos;accueil</span>
+              <span className="text-stone-400"> — plein écran, notifications, à un tap de toi.</span>
+            </Link>
+            <button
+              type="button"
+              onClick={dismissInstallBanner}
+              aria-label="Masquer"
+              className="text-stone-300 hover:text-stone-500 flex-none p-1 -m-1"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
 
