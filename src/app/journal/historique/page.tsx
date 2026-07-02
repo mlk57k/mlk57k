@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 
 interface Entry {
@@ -66,6 +66,25 @@ export default function HistoriquePage() {
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleDelete(entry: Entry) {
+    const ok = window.confirm(
+      "Supprimer cette entrée ? Les messages de la conversation seront aussi supprimés. C'est définitif."
+    );
+    if (!ok) return;
+    setDeletingId(entry.id);
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const { error } = await createClient()
+        .from("journal_entries")
+        .delete()
+        .eq("id", entry.id);
+      if (!error) setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -89,15 +108,31 @@ export default function HistoriquePage() {
   const { thisWeek, lastWeek, older } = groupByWeek(entries);
 
   function EntryCard({ entry }: { entry: Entry }) {
+    const isDeleting = deletingId === entry.id;
     return (
-      <Link href={`/journal/${entry.id}`}>
+      <Link href={`/journal/${entry.id}`} className={isDeleting ? "opacity-40 pointer-events-none" : ""}>
         <div className="bg-white border border-cream-200 rounded-2xl px-5 py-4 hover:border-coral-100 transition-colors">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full flex-none" style={{ background: moodColor(entry.mood_score) }} />
               <span className="font-semibold text-stone-900 text-sm">{formatDay(entry.created_at)}</span>
             </div>
-            <span className="text-xs text-stone-400">{formatTime(entry.created_at)}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-stone-400">{formatTime(entry.created_at)}</span>
+              <button
+                type="button"
+                aria-label="Supprimer cette entrée"
+                disabled={isDeleting}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDelete(entry);
+                }}
+                className="text-stone-300 hover:text-coral-500 transition-colors p-1 -m-1"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <p className="text-stone-500 text-sm leading-relaxed line-clamp-2">{entry.content || "Conversation du soir"}</p>
         </div>
