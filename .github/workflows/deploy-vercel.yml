@@ -36,8 +36,10 @@ jobs:
           echo "$OUTPUT"
           WEEKLY=$(echo  "$OUTPUT" | grep "^STRIPE_PRICE_ID_WEEKLY="  | cut -d= -f2)
           MONTHLY=$(echo "$OUTPUT" | grep "^STRIPE_PRICE_ID_MONTHLY=" | cut -d= -f2)
+          ANNUAL=$(echo  "$OUTPUT" | grep "^STRIPE_PRICE_ID_ANNUAL="  | cut -d= -f2)
           echo "STRIPE_PRICE_ID_WEEKLY=$WEEKLY"   >> $GITHUB_ENV
           echo "STRIPE_PRICE_ID_MONTHLY=$MONTHLY" >> $GITHUB_ENV
+          echo "STRIPE_PRICE_ID_ANNUAL=$ANNUAL"   >> $GITHUB_ENV
 
       - name: Configure Vercel environment variables
         run: |
@@ -79,6 +81,7 @@ jobs:
           env = os.environ
           weekly  = env.get("STRIPE_PRICE_ID_WEEKLY",  "")
           monthly = env.get("STRIPE_PRICE_ID_MONTHLY", "")
+          annual  = env.get("STRIPE_PRICE_ID_ANNUAL",  "")
 
           pairs = [
               ("ANTHROPIC_API_KEY",               env.get("ANTHROPIC_API_KEY",               "")),
@@ -89,6 +92,8 @@ jobs:
               ("NEXT_PUBLIC_STRIPE_PRICE_WEEKLY", weekly),
               ("STRIPE_PRICE_ID_MONTHLY",         monthly),
               ("NEXT_PUBLIC_STRIPE_PRICE_MONTHLY",monthly),
+              ("STRIPE_PRICE_ID_ANNUAL",          annual),
+              ("NEXT_PUBLIC_STRIPE_PRICE_ANNUAL", annual),
               ("RESEND_API_KEY",                  env.get("RESEND_API_KEY",                  "")),
               ("RESEND_FROM_EMAIL",               "Glowy <noreply@glowy.beauty>"),
               ("NEXT_PUBLIC_SUPABASE_URL",        env.get("NEXT_PUBLIC_SUPABASE_URL",        "")),

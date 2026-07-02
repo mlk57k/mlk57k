@@ -51,13 +51,16 @@ async function upsertPrice(productId, amount, interval, lookupKey, label) {
   return price;
 }
 
-const weekly  = await upsertPrice(product.id, 499,  "week",  "ancrage_weekly",  "Hebdomadaire");
-const monthly = await upsertPrice(product.id, 1499, "month", "ancrage_monthly", "Mensuel");
+const weekly  = await upsertPrice(product.id, 499,  "week",  "ancrage_weekly",      "Hebdomadaire");
+const monthly = await upsertPrice(product.id, 999,  "month", "ancrage_monthly_999", "Mensuel");
+const annual  = await upsertPrice(product.id, 4999, "year",  "ancrage_annual",      "Annuel");
 
 // ─── Résumé ───────────────────────────────────────────────────────────────────
 console.log("---STRIPE_PRICES---");
 console.log(`STRIPE_PRICE_ID_WEEKLY=${weekly.id}`);
 console.log(`STRIPE_PRICE_ID_MONTHLY=${monthly.id}`);
+console.log(`STRIPE_PRICE_ID_ANNUAL=${annual.id}`);
 console.log(`NEXT_PUBLIC_STRIPE_PRICE_WEEKLY=${weekly.id}`);
 console.log(`NEXT_PUBLIC_STRIPE_PRICE_MONTHLY=${monthly.id}`);
+console.log(`NEXT_PUBLIC_STRIPE_PRICE_ANNUAL=${annual.id}`);
 console.log("---END---");

@@ -19,7 +19,7 @@ const PLANS = [
   {
     id: "monthly" as const,
     label: "Mensuel",
-    price: "14,99 €",
+    price: "9,99 €",
     cadence: "/ mois",
     highlight: true,
     note: "Le plus populaire",

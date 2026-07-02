@@ -7,54 +7,60 @@ export const runtime = "nodejs";
 
 const TRIAL_PERIOD_DAYS = 3;
 
-let _prices: { weekly: string; monthly: string } | null = null;
+type Plan = "weekly" | "monthly" | "annual";
 
-async function getPriceIds(): Promise<{ weekly: string; monthly: string }> {
+let _prices: Record<Plan, string> | null = null;
+
+async function getPriceIds(): Promise<Record<Plan, string>> {
   if (_prices) return _prices;
 
   const envWeekly = process.env.STRIPE_PRICE_ID_WEEKLY;
   const envMonthly = process.env.STRIPE_PRICE_ID_MONTHLY;
-  if (envWeekly && envMonthly) {
-    _prices = { weekly: envWeekly, monthly: envMonthly };
+  const envAnnual = process.env.STRIPE_PRICE_ID_ANNUAL;
+  if (envWeekly && envMonthly && envAnnual) {
+    _prices = { weekly: envWeekly, monthly: envMonthly, annual: envAnnual };
     return _prices;
   }
 
   const stripe = getStripe();
-  const existing = await stripe.prices.list({ limit: 100, active: true });
-  const weekly = existing.data.find((p) => p.metadata?.app === "ancrage" && p.metadata?.plan === "weekly");
-  const monthly = existing.data.find((p) => p.metadata?.app === "ancrage" && p.metadata?.plan === "monthly");
+  const existing = await stripe.prices.list({
+    lookup_keys: ["ancrage_weekly", "ancrage_monthly_999", "ancrage_annual"],
+    active: true,
+    limit: 10,
+  });
+  const byKey = (key: string) => existing.data.find((p) => p.lookup_key === key);
+  let weekly = byKey("ancrage_weekly");
+  let monthly = byKey("ancrage_monthly_999");
+  let annual = byKey("ancrage_annual");
 
-  if (weekly && monthly) {
-    _prices = { weekly: weekly.id, monthly: monthly.id };
-    return _prices;
+  if (!weekly || !monthly || !annual) {
+    const products = await stripe.products.search({ query: 'metadata["app"]:"ancrage"', limit: 1 });
+    const product =
+      products.data[0] ??
+      (await stripe.products.create({
+        name: "Ancrage — Journaling illimité",
+        description: "Entrées de journal illimitées, bilans hebdomadaires, et mémoire des sessions précédentes.",
+        metadata: { app: "ancrage" },
+      }));
+
+    const createPrice = (amount: number, interval: "week" | "month" | "year", lookupKey: string, nickname: string) => {
+      return stripe.prices.create({
+        product: product.id,
+        unit_amount: amount,
+        currency: "eur",
+        recurring: { interval },
+        nickname,
+        lookup_key: lookupKey,
+        metadata: { app: "ancrage", plan: lookupKey },
+      });
+    };
+
+    weekly = weekly ?? (await createPrice(499, "week", "ancrage_weekly", "Hebdomadaire — 4,99 €/semaine"));
+    monthly = monthly ?? (await createPrice(999, "month", "ancrage_monthly_999", "Mensuel — 9,99 €/mois"));
+    annual = annual ?? (await createPrice(4999, "year", "ancrage_annual", "Annuel — 49,99 €/an"));
   }
 
-  const product = await stripe.products.create({
-    name: "Ancrage — Journaling illimité",
-    description: "Entrées de journal illimitées, bilans hebdomadaires, et mémoire des sessions précédentes.",
-    metadata: { app: "ancrage" },
-  });
-
-  const [weeklyPrice, monthlyPrice] = await Promise.all([
-    stripe.prices.create({
-      product: product.id,
-      unit_amount: 499,
-      currency: "eur",
-      recurring: { interval: "week" },
-      nickname: "Hebdomadaire — 4,99 €/semaine",
-      metadata: { app: "ancrage", plan: "weekly" },
-    }),
-    stripe.prices.create({
-      product: product.id,
-      unit_amount: 1499,
-      currency: "eur",
-      recurring: { interval: "month" },
-      nickname: "Mensuel — 14,99 €/mois",
-      metadata: { app: "ancrage", plan: "monthly" },
-    }),
-  ]);
-
-  _prices = { weekly: weeklyPrice.id, monthly: monthlyPrice.id };
+  _prices = { weekly: weekly.id, monthly: monthly.id, annual: annual.id };
   return _prices;
 }
 
@@ -64,21 +70,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Stripe non configuré." }, { status: 503 });
     }
 
-    let plan: "weekly" | "monthly" | undefined;
+    let plan: Plan | undefined;
     try {
       ({ plan } = await request.json());
     } catch {
       return NextResponse.json({ error: "Requête invalide." }, { status: 400 });
     }
 
-    if (plan !== "weekly" && plan !== "monthly") {
+    if (plan !== "weekly" && plan !== "monthly" && plan !== "annual") {
       return NextResponse.json({ error: "Plan invalide." }, { status: 400 });
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
     const stripe = getStripe();
     const priceIds = await getPriceIds();
-    const priceId = plan === "weekly" ? priceIds.weekly : priceIds.monthly;
+    const priceId = priceIds[plan];
 
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();

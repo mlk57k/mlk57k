@@ -54,7 +54,8 @@ export default function TermsPage() {
       <p>L&apos;accès illimité à Ancrage est soumis à abonnement :</p>
       <ul>
         <li><strong>Hebdomadaire</strong> — 4,99 € TTC / semaine, renouvelé automatiquement chaque semaine.</li>
-        <li><strong>Mensuel</strong> — 14,99 € TTC / mois, renouvelé automatiquement chaque mois.</li>
+        <li><strong>Mensuel</strong> — 9,99 € TTC / mois, renouvelé automatiquement chaque mois.</li>
+        <li><strong>Annuel</strong> — 49,99 € TTC / an, renouvelé automatiquement chaque année.</li>
       </ul>
       <p>
         Chaque abonnement débute par un essai gratuit de 3 jours. Les prix sont indiqués en

@@ -77,10 +77,11 @@ export default function FaqPage() {
       </Q>
 
       <Q q="Quels sont les tarifs ?">
-        <p>Deux formules d&apos;accès illimité :</p>
+        <p>Trois formules d&apos;accès illimité :</p>
         <ul className="list-disc pl-5 mt-2 space-y-1">
           <li><strong>Hebdomadaire</strong> — 4,99 € / semaine, avec 3 jours d&apos;essai gratuit</li>
-          <li><strong>Mensuel</strong> — 14,99 € / mois, avec 3 jours d&apos;essai gratuit</li>
+          <li><strong>Mensuel</strong> — 9,99 € / mois, avec 3 jours d&apos;essai gratuit</li>
+          <li><strong>Annuel</strong> — 49,99 € / an, avec 3 jours d&apos;essai gratuit</li>
         </ul>
         <p className="mt-2">Les prix sont TTC. Aucun paiement pendant l&apos;essai.</p>
       </Q>

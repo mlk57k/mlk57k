@@ -37,7 +37,6 @@ function JournalContent() {
   const [sending, setSending] = useState(false);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
-  const [quotaError, setQuotaError] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [crisisDetected, setCrisisDetected] = useState(false);
   const [streak, setStreak] = useState(0);
@@ -91,7 +90,7 @@ function JournalContent() {
       body: JSON.stringify({ content: "", mood_score: checkinMood }),
     });
     if (res.status === 402) {
-      setQuotaError(true);
+      router.push("/paywall");
       return null;
     }
     if (!res.ok) {
@@ -107,7 +106,6 @@ function JournalContent() {
   async function sendMessage(content: string) {
     if (!content.trim() || sending) return;
     setSending(true);
-    setQuotaError(false);
     setSendError(null);
 
     try {
@@ -207,16 +205,6 @@ function JournalContent() {
         {bienvenue && (
           <div className="mb-4 rounded-2xl bg-coral-50 border border-coral-200 px-4 py-3 text-sm text-coral-700">
             Bienvenue dans Ancrage. Ton essai gratuit a commencé.
-          </div>
-        )}
-
-        {quotaError && (
-          <div className="mb-4 rounded-2xl bg-stone-900 text-white px-5 py-4 text-sm">
-            <p className="font-semibold mb-1">Tu as utilisé tes 3 entrées gratuites cette semaine.</p>
-            <p className="text-stone-300 mb-3">Passe à l&apos;illimité pour continuer à écrire dès maintenant.</p>
-            <Button asChild size="sm">
-              <Link href="/abonnement">Voir les formules</Link>
-            </Button>
           </div>
         )}
 
