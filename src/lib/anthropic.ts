@@ -145,6 +145,71 @@ export async function generateCoachReply(
   };
 }
 
+// ─── Insights : thèmes récurrents & tendances ───────────────────────────────
+
+const INSIGHTS_SYSTEM_PROMPT = `Tu analyses les entrées de journal d'une personne sur Ancrage pour lui refléter ses tendances. À partir des messages fournis, identifie 2 à 4 thèmes récurrents et une observation bienveillante tournée vers l'action. Ton chaleureux, français, tutoiement. Jamais de diagnostic ni de vocabulaire clinique.`;
+
+const INSIGHTS_TOOL: Anthropic.Tool = {
+  name: "restituer_tendances",
+  description: "Restitue les thèmes récurrents et une observation à partir des entrées de journal",
+  input_schema: {
+    type: "object",
+    properties: {
+      themes: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            titre: { type: "string", description: "Nom court du thème (2-4 mots)" },
+            description: { type: "string", description: "1 à 2 phrases sur ce que révèlent les entrées à ce sujet" },
+          },
+          required: ["titre", "description"],
+        },
+        description: "2 à 4 thèmes récurrents identifiés",
+      },
+      observation: {
+        type: "string",
+        description: "Une observation bienveillante et actionnable (2-3 phrases), sans injonction.",
+      },
+    },
+    required: ["themes", "observation"],
+  },
+};
+
+const insightsSchema = z.object({
+  themes: z.array(z.object({ titre: z.string(), description: z.string() })).min(1).max(6),
+  observation: z.string(),
+});
+
+export interface Insights {
+  themes: { titre: string; description: string }[];
+  observation: string;
+}
+
+export async function generateInsights(
+  entriesText: string,
+  apiKey: string
+): Promise<Insights> {
+  const client = new Anthropic({ apiKey });
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: 800,
+    system: INSIGHTS_SYSTEM_PROMPT,
+    tools: [INSIGHTS_TOOL],
+    tool_choice: { type: "tool", name: "restituer_tendances" },
+    messages: [{ role: "user", content: entriesText }],
+  });
+
+  const toolBlock = response.content.find((b) => b.type === "tool_use");
+  if (!toolBlock || toolBlock.type !== "tool_use") {
+    throw new Error("L'analyse n'a pas pu être générée.");
+  }
+  const parsed = insightsSchema.safeParse(toolBlock.input);
+  if (!parsed.success) throw new Error("Réponse inattendue de l'IA.");
+  return parsed.data;
+}
+
 const WEEKLY_SUMMARY_SYSTEM_PROMPT = `Tu rédiges un bilan hebdomadaire bienveillant pour une personne qui tient un journal sur Ancrage. À partir des entrées de la semaine fournies, identifie 2 à 3 tendances ou motifs récurrents (pas une liste exhaustive de tout ce qui s'est passé). Ton chaleureux, concis, en français, tutoiement. 100 à 150 mots. Ne donne aucun diagnostic, ne fais aucune supposition clinique. Termine par une phrase d'encouragement tournée vers la semaine à venir.`;
 
 export async function generateWeeklySummary(

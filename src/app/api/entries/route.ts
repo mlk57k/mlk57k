@@ -33,6 +33,10 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   const content = typeof body?.content === "string" ? body.content : "";
+  const moodScore =
+    typeof body?.mood_score === "number" && body.mood_score >= 1 && body.mood_score <= 5
+      ? Math.round(body.mood_score)
+      : null;
 
   const { data: initialProfile, error: profileError } = await supabase
     .from("profiles")
@@ -65,7 +69,7 @@ export async function POST(request: Request) {
 
   const { data: entry, error } = await supabase
     .from("journal_entries")
-    .insert({ user_id: user.id, content })
+    .insert({ user_id: user.id, content, ...(moodScore ? { mood_score: moodScore } : {}) })
     .select("id, created_at, updated_at, mood_score, content, is_complete")
     .single();
 

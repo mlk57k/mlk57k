@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Flame, Trophy, BookOpen } from "lucide-react";
+import { ArrowLeft, Flame, Trophy, BookOpen, Sparkles, Loader2 } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 import { computeStreaks, type StreakStats } from "@/lib/streak";
+
+interface Insights {
+  themes: { titre: string; description: string }[];
+  observation: string;
+}
 
 interface WeeklySummary {
   id: string;
@@ -65,7 +70,32 @@ export default function BilanPage() {
   const [summaries, setSummaries] = useState<WeeklySummary[]>([]);
   const [recentMoods, setRecentMoods] = useState<MoodEntry[]>([]);
   const [streaks, setStreaks] = useState<StreakStats>({ current: 0, best: 0, total: 0 });
+  const [insights, setInsights] = useState<Insights | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  async function analyser() {
+    setInsightsLoading(true);
+    setInsightsError(null);
+    try {
+      const res = await fetch("/api/insights", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setInsightsError(
+          data.error === "not_enough_entries"
+            ? `Il faut au moins ${data.minimum ?? 3} entrées pour analyser tes tendances. Continue à écrire !`
+            : "L'analyse n'a pas abouti. Réessaie dans un instant."
+        );
+        return;
+      }
+      setInsights(data.insights);
+    } catch {
+      setInsightsError("L'analyse n'a pas abouti. Réessaie dans un instant.");
+    } finally {
+      setInsightsLoading(false);
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -148,6 +178,60 @@ export default function BilanPage() {
                 <p className="font-display text-2xl font-semibold text-stone-900 leading-none">{streaks.total}</p>
                 <p className="text-[11px] text-stone-400 mt-1.5 leading-tight">entrée{streaks.total > 1 ? "s" : ""}</p>
               </div>
+            </div>
+
+            {/* Tendances IA */}
+            <div className="bg-white border border-cream-200 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-coral-400" />
+                  Tes tendances
+                </p>
+                <button
+                  onClick={analyser}
+                  disabled={insightsLoading}
+                  className="text-xs font-semibold text-coral-500 hover:underline disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {insightsLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                  {insights ? "Actualiser" : "Analyser mes entrées"}
+                </button>
+              </div>
+
+              {insightsError && (
+                <p className="text-sm text-stone-400">{insightsError}</p>
+              )}
+
+              {!insights && !insightsError && !insightsLoading && (
+                <p className="text-sm text-stone-400">
+                  L&apos;IA relit tes dernières entrées et te reflète tes thèmes récurrents — comme un ami qui te connaît bien.
+                </p>
+              )}
+
+              {insights && (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {insights.themes.map((t) => (
+                      <span
+                        key={t.titre}
+                        className="text-xs font-semibold text-coral-600 bg-coral-50 border border-coral-100 px-3 py-1.5 rounded-full"
+                      >
+                        {t.titre}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="space-y-3">
+                    {insights.themes.map((t) => (
+                      <div key={t.titre}>
+                        <p className="text-sm font-semibold text-stone-900">{t.titre}</p>
+                        <p className="text-sm text-stone-500 leading-relaxed">{t.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pt-3 border-t border-cream-200">
+                    <p className="text-sm text-stone-700 leading-relaxed italic">{insights.observation}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Humeurs 7 derniers jours */}

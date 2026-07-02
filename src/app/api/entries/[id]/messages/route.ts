@@ -13,7 +13,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   const { data: entry, error: entryError } = await supabase
     .from("journal_entries")
-    .select("id")
+    .select("id, mood_score")
     .eq("id", params.id)
     .eq("user_id", user.id)
     .single();
@@ -58,7 +58,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
     if (assistantError) throw new Error(assistantError.message);
 
     const entryUpdate: { mood_score?: number; content?: string } = {};
-    if (reply.moodEstimate !== null) entryUpdate.mood_score = reply.moodEstimate;
+    // L'IA estime sur 1-10 ; l'app utilise une échelle 1-5. On ne remplace
+    // jamais une humeur choisie manuellement par l'utilisateur.
+    if (reply.moodEstimate !== null && entry.mood_score === null) {
+      entryUpdate.mood_score = Math.min(5, Math.max(1, Math.round(reply.moodEstimate / 2)));
+    }
     if (reply.titre) entryUpdate.content = reply.titre;
     if (Object.keys(entryUpdate).length > 0) {
       await supabase.from("journal_entries").update(entryUpdate).eq("id", params.id);

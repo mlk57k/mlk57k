@@ -13,7 +13,28 @@ function Complete() {
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
-    router.replace(next);
+    (async () => {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("objectifs")
+            .eq("id", user.id)
+            .single();
+          // Nouveau compte sans onboarding → quiz de personnalisation d'abord
+          if (!profile?.objectifs) {
+            router.replace("/onboarding");
+            return;
+          }
+        }
+      } catch {
+        // en cas d'erreur, on continue vers la destination par défaut
+      }
+      router.replace(next);
+    })();
   }, [next, router]);
 
   return (

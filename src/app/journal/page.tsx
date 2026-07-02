@@ -9,6 +9,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { computeStreaks } from "@/lib/streak";
 import { getDailyQuestion } from "@/lib/prompts";
+import { extractPrenom } from "@/lib/profile";
+
+const CHECKIN_MOODS = [
+  { score: 5, color: "#8FA086", label: "Serein" },
+  { score: 4, color: "#CDA45C", label: "Léger" },
+  { score: 3, color: "#BD6E4C", label: "Mêlé" },
+  { score: 2, color: "#D3917C", label: "Sensible" },
+  { score: 1, color: "#7C8AA0", label: "Lourd" },
+];
 
 interface Message {
   id: string;
@@ -32,6 +41,8 @@ function JournalContent() {
   const [sendError, setSendError] = useState<string | null>(null);
   const [crisisDetected, setCrisisDetected] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [prenom, setPrenom] = useState<string | null>(null);
+  const [checkinMood, setCheckinMood] = useState<number | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -45,12 +56,13 @@ function JournalContent() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.replace("/auth?next=/journal"); return; }
 
-      // Série de jours consécutifs
-      const { data: entryDates } = await supabase
-        .from("journal_entries")
-        .select("created_at")
-        .eq("user_id", user.id);
+      // Série de jours consécutifs + prénom pour l'accueil
+      const [{ data: entryDates }, { data: profileData }] = await Promise.all([
+        supabase.from("journal_entries").select("created_at").eq("user_id", user.id),
+        supabase.from("profiles").select("objectifs").eq("id", user.id).single(),
+      ]);
       if (entryDates) setStreak(computeStreaks(entryDates.map((e) => e.created_at)).current);
+      setPrenom(extractPrenom(profileData?.objectifs));
 
       // Reprendre une entrée existante (lien "Continuer à écrire")
       if (resumeId) {
@@ -76,7 +88,7 @@ function JournalContent() {
     const res = await fetch("/api/entries", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: "" }),
+      body: JSON.stringify({ content: "", mood_score: checkinMood }),
     });
     if (res.status === 402) {
       setQuotaError(true);
@@ -223,8 +235,35 @@ function JournalContent() {
 
         {messages.length === 0 && !sending && (
           <div className="flex-1 flex flex-col items-center justify-center text-center text-stone-400 py-16">
-            <p className="font-display text-xl text-stone-600 mb-2">Comment s&apos;est passée ta journée ?</p>
-            <p className="text-sm mb-8">Écris ou enregistre une note vocale, le coach te répond.</p>
+            <p className="font-display text-xl text-stone-600 mb-2">
+              {prenom ? `${prenom}, comment s'est passée ta journée ?` : "Comment s'est passée ta journée ?"}
+            </p>
+            <p className="text-sm mb-6">Écris ou enregistre une note vocale, le coach te répond.</p>
+
+            {/* Check-in humeur */}
+            <div className="mb-8">
+              <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-3">
+                Là, maintenant, tu te sens…
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {CHECKIN_MOODS.map(({ score, color, label }) => (
+                  <button
+                    key={score}
+                    type="button"
+                    onClick={() => setCheckinMood(checkinMood === score ? null : score)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-sm font-medium transition-all",
+                      checkinMood === score
+                        ? "border-coral-300 bg-coral-50 text-stone-900"
+                        : "border-cream-200 bg-white text-stone-600 hover:border-coral-100"
+                    )}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <button
               type="button"
