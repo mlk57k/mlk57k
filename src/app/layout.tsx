@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
+import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
 const inter = Inter({
@@ -48,6 +49,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: appUrl,
   },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Ancrage",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#FBF7EE",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -57,7 +73,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${inter.variable} ${fraunces.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${fraunces.variable} antialiased`}>
+        <PwaRegister />
+        {children}
+      </body>
     </html>
   );
 }
