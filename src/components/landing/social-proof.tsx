@@ -1,25 +1,30 @@
-const testimonials = [
-  {
-    name: "Léa M.",
-    age: "27 ans",
-    text: "Le seul moment de la journée où je m'arrête vraiment. Ça m'a aidée à mieux dormir sans que je comprenne vraiment pourquoi au début.",
-    color: "#BD6E4C",
-  },
-  {
-    name: "Thomas R.",
-    age: "34 ans",
-    text: "Je pensais que tenir un journal c'était pas pour moi. La voix a tout changé — je parle 2 minutes et ça suffit.",
-    color: "#8FA086",
-  },
-  {
-    name: "Sophie K.",
-    age: "29 ans",
-    text: "J'aime que ça ne me juge pas et ne me donne pas de conseils non demandés. Juste une question qui me fait réfléchir.",
-    color: "#CDA45C",
-  },
-];
+import { testimonials } from "./testimonials";
 
 export function SocialProof() {
+  // Aucun faux témoignage : tant qu'il n'y a pas de vrais retours,
+  // on affiche une section "premiers testeurs" honnête.
+  if (testimonials.length === 0) {
+    return (
+      <section id="temoignages" className="bg-cream-100 py-20 sm:py-28">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
+          <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">
+            Premiers testeurs
+          </p>
+          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-stone-900 mb-5">
+            Rejoins les premiers à tester Ancrage.
+          </h2>
+          <p className="text-stone-500 text-base leading-relaxed max-w-xl mx-auto">
+            Ancrage vient d&apos;ouvrir. Les premiers retours de la bêta arrivent bientôt — en
+            attendant, l&apos;essai est gratuit, sans carte, et tu te fais ton propre avis.
+          </p>
+          <p className="text-center text-sm text-stone-400 mt-8">
+            Ancrage ne remplace pas un suivi médical ou thérapeutique.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="temoignages" className="bg-cream-100 py-20 sm:py-28">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
@@ -39,7 +44,7 @@ export function SocialProof() {
                 </span>
                 <div>
                   <p className="font-semibold text-stone-900 text-sm leading-tight">{name}</p>
-                  <p className="text-xs text-stone-400">{age}</p>
+                  {age && <p className="text-xs text-stone-400">{age}</p>}
                 </div>
               </div>
               <p className="font-display text-base leading-snug text-stone-700 font-medium">

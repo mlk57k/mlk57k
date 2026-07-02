@@ -32,7 +32,7 @@ export default function DataPrivacyPage() {
       await createClient().auth.signOut();
       window.location.assign("/");
     } catch {
-      setError("La suppression a échoué. Réessaie ou contacte-nous à m.nabbachi@icloud.com.");
+      setError("La suppression a échoué. Réessaie ou contacte-nous à contact@ancrage.xyz.");
       setDeleting(false);
     }
   }

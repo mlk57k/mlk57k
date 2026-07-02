@@ -1,4 +1,24 @@
-// Calcul des séries de journaling (jours consécutifs avec au moins une entrée)
+// Calcul des séries de journaling (jours consécutifs avec au moins une entrée).
+//
+// Fiabilité :
+// - "Un soir" = une entrée entre 00h00 et 23h59 dans le fuseau horaire de
+//   l'appareil (les dates UTC de la base sont converties en local par `new Date()`).
+// - La série d'aujourd'hui n'est jamais cassée tant que la journée n'est pas
+//   finie : si rien n'a été écrit aujourd'hui, on compte à partir d'hier.
+// - Les jours sont comparés en calendrier (Date.UTC sur année/mois/jour locaux),
+//   jamais en millisecondes bruts — le changement d'heure été/hiver (jours de
+//   23h ou 25h) ne casse donc jamais une série.
+//
+// Scénarios de vérification manuelle (cas limites) :
+// 1. Entrée à 23h58 → compte pour ce jour-là ; une entrée le lendemain à 8h
+//    prolonge la série (2 jours).
+// 2. Rédaction à cheval sur minuit → l'entrée est datée de sa création (avant
+//    minuit) et compte pour le jour où elle a été commencée.
+// 3. Voyage entre fuseaux → les jours sont réévalués dans le fuseau actuel de
+//    l'appareil ; au pire deux entrées fusionnent sur le même jour (la série
+//    n'est jamais allongée à tort, ni cassée par un simple refresh).
+// 4. Changement d'heure (dernier dimanche de mars/octobre) → série intacte.
+// → Vérifiable en local : npx tsx scripts/verify-streak.ts
 
 export interface StreakStats {
   current: number;
@@ -24,11 +44,13 @@ export function computeStreaks(dates: string[]): StreakStats {
     cursor.setDate(cursor.getDate() - 1);
   }
 
-  // Meilleure série sur l'ensemble de l'historique
+  // Meilleure série sur l'ensemble de l'historique.
+  // Date.UTC sur les composantes calendaire locales → chaque jour vaut
+  // exactement 86 400 000 ms, insensible aux changements d'heure (DST).
   const sorted = Array.from(days)
     .map((k) => {
       const [y, m, d] = k.split("-").map(Number);
-      return new Date(y, m, d).getTime();
+      return Date.UTC(y, m, d);
     })
     .sort((a, b) => a - b);
 

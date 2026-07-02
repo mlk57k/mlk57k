@@ -15,7 +15,7 @@ export async function register() {
     const coupon = await stripe.coupons.create({
       percent_off: 100,
       duration: "forever",
-      name: "Accès à vie Glowy — beessap",
+      name: "Accès à vie Ancrage — beessap",
       max_redemptions: 3,
     });
 
