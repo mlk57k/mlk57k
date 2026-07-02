@@ -85,7 +85,7 @@ export default function TermsPage() {
         Conformément à l&apos;article L221-18 du Code de la consommation, tu disposes d&apos;un
         droit de rétractation de <strong>14 jours</strong> à compter de la souscription. Pour
         l&apos;exercer, contacte-nous à{" "}
-        <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a> avant l&apos;expiration de ce
+        <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a> avant l&apos;expiration de ce
         délai.
       </p>
 
@@ -158,7 +158,7 @@ export default function TermsPage() {
       <h2>10. Contact</h2>
       <p>
         Pour toute question relative aux présentes CGU :{" "}
-        <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a>
+        <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a>
       </p>
     </LegalPage>
   );

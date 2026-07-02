@@ -20,7 +20,7 @@ export default function MentionsLegalesPage() {
         <li><strong>Dénomination sociale :</strong> Ancrage</li>
         <li>
           <strong>Adresse e-mail :</strong>{" "}
-          <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a>
+          <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a>
         </li>
         <li>
           <strong>Directeur de la publication :</strong> Le représentant légal d&apos;Ancrage
@@ -82,7 +82,7 @@ export default function MentionsLegalesPage() {
         et Libertés du 6 janvier 1978 modifiée et au RGPD, tu disposes d&apos;un droit
         d&apos;accès, de rectification et de suppression de tes données, exerçable directement
         depuis la page <a href="/confidentialite-des-donnees">Mes données</a> ou en contactant{" "}
-        <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a>.
+        <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a>.
       </p>
 
       <h2>6. Cookies</h2>
@@ -97,7 +97,7 @@ export default function MentionsLegalesPage() {
         Les informations contenues sur ce site sont aussi précises que possible et le site est
         périodiquement remis à jour. Cependant, il peut contenir des inexactitudes, des
         omissions ou des lacunes. Si tu constates une erreur ou un dysfonctionnement, merci de
-        le signaler par e-mail à <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a>.
+        le signaler par e-mail à <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a>.
       </p>
       <p>
         <strong>
@@ -116,7 +116,7 @@ export default function MentionsLegalesPage() {
 
       <h2>9. Contact</h2>
       <p>
-        Pour toute question : <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a>
+        Pour toute question : <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a>
       </p>
     </LegalPage>
   );

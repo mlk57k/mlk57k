@@ -99,7 +99,7 @@ export default function FaqPage() {
         <p>
           Oui. Tu as <strong>14 jours</strong> à compter de la souscription pour exercer ton
           droit de rétractation, conformément à la loi. Contacte-nous à{" "}
-          <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a> avant l&apos;expiration de ce
+          <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a> avant l&apos;expiration de ce
           délai.
         </p>
       </Q>
@@ -187,7 +187,7 @@ export default function FaqPage() {
 
       <Q q="J&apos;ai un problème, comment vous contacter ?">
         <p>
-          Écris-nous à <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a>. On répond
+          Écris-nous à <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a>. On répond
           généralement sous 24–48h en jours ouvrés.
         </p>
       </Q>
@@ -197,7 +197,7 @@ export default function FaqPage() {
           Rends-toi dans <a href="/journal/historique">Historique</a> — tes 60 dernières
           entrées y sont listées. Si une entrée n&apos;apparaît pas, c&apos;est qu&apos;elle a peut-être été
           créée depuis un autre compte. Contacte-nous à{" "}
-          <a href="mailto:hello@ancrage.xyz">hello@ancrage.xyz</a> avec l&apos;adresse e-mail
+          <a href="mailto:m.nabbachi@icloud.com">m.nabbachi@icloud.com</a> avec l&apos;adresse e-mail
           concernée.
         </p>
       </Q>

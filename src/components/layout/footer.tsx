@@ -42,7 +42,7 @@ export function Footer() {
                 Mes données
               </Link>
               <Link
-                href="mailto:hello@ancrage.xyz"
+                href="mailto:m.nabbachi@icloud.com"
                 className="hover:text-stone-900 transition-colors duration-150"
               >
                 Contact
