@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { generateWeeklySummary } from "@/lib/anthropic";
 import { sendWeeklySummaryEmail } from "@/lib/emails/weekly-summary";
+import { sendPushToUser } from "@/lib/push-server";
 
 export const runtime = "nodejs";
 
@@ -70,6 +71,12 @@ export async function GET(request: Request) {
 
       if (!inserted?.emailed_at) {
         const weekLabel = `${weekStart.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – ${weekEnd.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
+        // Notification push d'abord, email en complément
+        await sendPushToUser(admin, profile.id, {
+          title: "Ton bilan de la semaine est prêt ✨",
+          body: "Découvre tes tendances et ton évolution de la semaine.",
+          url: "/bilan",
+        });
         await sendWeeklySummaryEmail({ to: profile.email, weekLabel, summary, appUrl });
         await admin
           .from("weekly_summaries")

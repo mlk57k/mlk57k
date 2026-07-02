@@ -32,14 +32,40 @@ export async function GET(request: Request) {
   const admin = getAdminClient();
   const now = new Date();
 
-  const { data: profiles } = await admin
+  const { data: allProfiles } = await admin
     .from("profiles")
-    .select("id, email, timezone, reminder_hour")
-    .eq("reminder_enabled", true);
+    .select("id, email, timezone, reminder_hour, reminder_enabled, plan_status, current_period_end, cancel_at_period_end");
 
-  const candidates = (profiles ?? []).filter((p) => localHour(now, p.timezone) === p.reminder_hour);
+  // ─── Échéances d'abonnement : push unique ~3 jours avant la fin ────────────
+  // (essai qui se termine, ou abonnement annulé qui expire) — envoyé à 18h locale
+  let expirySent = 0;
+  for (const p of allProfiles ?? []) {
+    if (!p.current_period_end || localHour(now, p.timezone) !== 18) continue;
+    const remainingDays = (new Date(p.current_period_end).getTime() - now.getTime()) / 86400000;
+    if (remainingDays <= 2 || remainingDays > 3) continue;
+
+    const isTrialEnding = p.plan_status === "trialing";
+    const isCancelExpiring = p.plan_status === "active" && p.cancel_at_period_end;
+    if (!isTrialEnding && !isCancelExpiring) continue;
+
+    try {
+      const sent = await sendPushToUser(admin, p.id, {
+        title: "Ancrage",
+        body: isTrialEnding
+          ? "Ton essai gratuit se termine dans 3 jours. Ton abonnement démarrera ensuite automatiquement."
+          : "Ton accès illimité se termine dans 3 jours. Tu peux te réabonner à tout moment.",
+        url: "/parametres",
+      });
+      expirySent += sent > 0 ? 1 : 0;
+    } catch (err) {
+      console.error("[cron/daily-reminder] push échéance échoué:", p.id, err);
+    }
+  }
+
+  const profiles = (allProfiles ?? []).filter((p) => p.reminder_enabled);
+  const candidates = profiles.filter((p) => localHour(now, p.timezone) === p.reminder_hour);
   if (candidates.length === 0) {
-    return NextResponse.json({ sent: 0 });
+    return NextResponse.json({ sent: 0, expirySent });
   }
 
   const candidateIds = candidates.map((p) => p.id);
@@ -75,5 +101,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent, expirySent });
 }
