@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Outfit } from "next/font/google";
 
@@ -22,9 +23,18 @@ const BENEFITS = [
 ];
 
 export default function PaywallPage() {
+  const router = useRouter();
   const [selected, setSelected] = useState<Plan>("annual");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const { data: { user } } = await createClient().auth.getUser();
+      if (!user) router.replace("/auth?next=/paywall");
+    })();
+  }, [router]);
 
   async function checkout() {
     setLoading(true);

@@ -189,7 +189,7 @@ export default function ParametresPage() {
 
             {!hasSubscription && (
               <Button asChild>
-                <Link href="/abonnement">Passer à l&apos;illimité</Link>
+                <Link href="/paywall">Passer à l&apos;illimité</Link>
               </Button>
             )}
 

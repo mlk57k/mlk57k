@@ -130,7 +130,7 @@ export async function POST(request: Request) {
         metadata: { user_id: user.id },
       },
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/abonnement`,
+      cancel_url: `${appUrl}/paywall`,
       metadata: { user_id: user.id },
     } as Stripe.Checkout.SessionCreateParams);
 
