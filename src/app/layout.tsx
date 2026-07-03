@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
@@ -76,6 +77,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${fraunces.variable} antialiased`}>
         <PwaRegister />
         {children}
+        <Analytics />
       </body>
     </html>
   );
