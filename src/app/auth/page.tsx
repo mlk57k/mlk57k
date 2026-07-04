@@ -67,7 +67,9 @@ function AuthForm() {
         throw new Error("config");
       }
       const supabase = createClient();
-      const origin = window.location.origin;
+      // URL de retour toujours forcée sur le domaine officiel (évite les
+      // retours vers un ancien domaine si la page est ouverte ailleurs)
+      const origin = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
