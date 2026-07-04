@@ -119,7 +119,7 @@ export default function EntryPage() {
                       <div className="w-7 h-7 rounded-lg bg-coral-400 flex-none flex items-center justify-center mt-0.5">
                         <span className="font-display text-white text-xs font-semibold">A</span>
                       </div>
-                      <div className="bg-cream-50 border border-coral-100 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-stone-700">
+                      <div className="bg-cream-50 border border-coral-100 rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed text-stone-700 whitespace-pre-line">
                         {m.content}
                       </div>
                     </div>
