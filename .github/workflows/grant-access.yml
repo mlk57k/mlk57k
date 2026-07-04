@@ -1,0 +1,43 @@
+name: Donner un accès illimité à un compte
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Email du compte à passer en illimité"
+        required: true
+
+jobs:
+  grant:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull service role key from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '"')
+          URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '"')
+          echo "::add-mask::$KEY"
+          echo "SB_KEY=$KEY" >> $GITHUB_ENV
+          echo "SB_URL=$URL" >> $GITHUB_ENV
+
+      - name: Set plan_status=active
+        run: |
+          RESULT=$(curl -sS -X PATCH \
+            "$SB_URL/rest/v1/profiles?email=eq.${{ github.event.inputs.email }}" \
+            -H "apikey: $SB_KEY" \
+            -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            -d '{"plan_status": "active"}')
+          echo "$RESULT" | python3 -c "
+          import json, sys
+          rows = json.load(sys.stdin)
+          if not rows:
+              print('❌ Aucun compte trouvé avec cet email.')
+              exit(1)
+          for r in rows:
+              print(f\"✅ {r['email']} → plan_status = {r['plan_status']}\")
+          "
