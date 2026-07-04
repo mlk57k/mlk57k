@@ -10,21 +10,25 @@ if (!key) {
   process.exit(1);
 }
 
-const reply = await generateCoachReply(
-  [],
-  "Journée épuisante au taf, mon chef m'a encore mis la pression sur le projet et j'ai pas eu une minute pour souffler. J'ai l'impression de courir partout sans jamais rien finir.",
-  {
-    objectifs: "Prénom : Malik\nCe qui l'amène : gérer le stress et l'anxiété",
-    memoryDigest: null,
-    shortTerm: null,
-    longTerm: null,
-  },
-  key
-);
+async function main() {
+  const reply = await generateCoachReply(
+    [],
+    "Journée épuisante au taf, mon chef m'a encore mis la pression sur le projet et j'ai pas eu une minute pour souffler. J'ai l'impression de courir partout sans jamais rien finir.",
+    {
+      objectifs: "Prénom : Malik\nCe qui l'amène : gérer le stress et l'anxiété",
+      memoryDigest: null,
+      shortTerm: null,
+      longTerm: null,
+    },
+    key!
+  );
 
-console.log("=== RÉPONSE DU COACH ===");
-console.log(reply.message);
-console.log("=== FIN ===");
-const paragraphs = reply.message.split(/\n\s*\n/).filter((p) => p.trim());
-console.log(`Nombre de paragraphes : ${paragraphs.length}`);
-console.log(`Titre généré : ${reply.titre}`);
+  console.log("=== RÉPONSE DU COACH ===");
+  console.log(reply.message);
+  console.log("=== FIN ===");
+  const paragraphs = reply.message.split(/\n\s*\n/).filter((p) => p.trim());
+  console.log(`Nombre de paragraphes : ${paragraphs.length}`);
+  console.log(`Titre généré : ${reply.titre}`);
+}
+
+main();
