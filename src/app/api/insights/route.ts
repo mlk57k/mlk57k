@@ -14,6 +14,17 @@ export async function POST() {
     return NextResponse.json({ error: "analyse indisponible" }, { status: 503 });
   }
 
+  // Analyse réservée aux abonnés
+  const { data: planProfile } = await supabase
+    .from("profiles")
+    .select("plan_status")
+    .eq("id", user.id)
+    .single();
+  const isPremium = planProfile?.plan_status === "active" || planProfile?.plan_status === "trialing";
+  if (!isPremium) {
+    return NextResponse.json({ error: "premium_required" }, { status: 403 });
+  }
+
   const { data: entries } = await supabase
     .from("journal_entries")
     .select("id, created_at")

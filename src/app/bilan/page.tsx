@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Flame, Trophy, BookOpen, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Flame, Trophy, BookOpen, Sparkles, Loader2, Lock } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 import { computeStreaks, type StreakStats } from "@/lib/streak";
 
@@ -73,6 +73,7 @@ export default function BilanPage() {
   const [insights, setInsights] = useState<Insights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
 
   async function analyser() {
@@ -104,7 +105,7 @@ export default function BilanPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.replace("/auth?next=/bilan"); return; }
 
-      const [{ data: sums }, { data: moods }, { data: allDates }] = await Promise.all([
+      const [{ data: sums }, { data: moods }, { data: allDates }, { data: planProfile }] = await Promise.all([
         supabase
           .from("weekly_summaries")
           .select("id, week_start, summary_text, mood_trend")
@@ -122,11 +123,17 @@ export default function BilanPage() {
           .from("journal_entries")
           .select("created_at")
           .eq("user_id", user.id),
+        supabase
+          .from("profiles")
+          .select("plan_status")
+          .eq("id", user.id)
+          .single(),
       ]);
 
       setSummaries(sums ?? []);
       setRecentMoods((moods ?? []).filter((m) => m.mood_score !== null).reverse() as MoodEntry[]);
       if (allDates) setStreaks(computeStreaks(allDates.map((e) => e.created_at)));
+      setIsPremium(planProfile?.plan_status === "active" || planProfile?.plan_status === "trialing");
       setLoading(false);
     })();
   }, [router]);
@@ -180,7 +187,41 @@ export default function BilanPage() {
               </div>
             </div>
 
-            {/* Tendances IA */}
+            {/* Tendances IA — réservées aux abonnés */}
+            {!isPremium && (
+              <Link href="/paywall" className="block relative overflow-hidden bg-white border border-cream-200 rounded-2xl p-6">
+                {/* Aperçu flouté (contenu factice) */}
+                <div className="blur-[6px] select-none pointer-events-none" aria-hidden="true">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 flex items-center gap-1.5 mb-4">
+                    <Sparkles className="h-3.5 w-3.5 text-coral-400" />
+                    Tes tendances
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {["Confiance en soi", "Travail", "Sommeil"].map((t) => (
+                      <span key={t} className="text-xs font-semibold text-coral-600 bg-coral-50 border border-coral-100 px-3 py-1.5 rounded-full">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-sm font-semibold text-stone-900">Confiance en soi</p>
+                  <p className="text-sm text-stone-500 leading-relaxed">
+                    Tes entrées montrent une évolution nette ces derniers jours, avec des moments
+                    où tu prends davantage ta place.
+                  </p>
+                </div>
+
+                {/* Cadenas */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/40">
+                  <div className="w-11 h-11 rounded-full bg-stone-900 flex items-center justify-center shadow-lg">
+                    <Lock className="h-5 w-5 text-white" />
+                  </div>
+                  <p className="text-sm font-semibold text-stone-900">Analyse réservée aux abonnés</p>
+                  <p className="text-xs font-semibold text-coral-500">Débloquer →</p>
+                </div>
+              </Link>
+            )}
+
+            {isPremium && (
             <div className="bg-white border border-cream-200 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 flex items-center gap-1.5">
@@ -233,6 +274,7 @@ export default function BilanPage() {
                 </div>
               )}
             </div>
+            )}
 
             {/* Humeurs 7 derniers jours */}
             <div className="bg-white border border-cream-200 rounded-2xl p-6">
