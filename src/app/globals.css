@@ -44,6 +44,33 @@
   }
 }
 
+/* ─── Mode app installée (PWA) : comportement natif ──────────────────────────
+   Quand Ancrage est lancée depuis l'écran d'accueil, on désactive le rebond
+   élastique et le zoom au double-tap — comme une vraie app. Le scroll vertical
+   normal reste actif pour que les pages longues restent entièrement visibles. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    /* supprime le rebond élastique (rubber-band) haut/bas */
+    overscroll-behavior: none;
+    /* pas de zoom au double-tap ; le défilement vertical reste possible */
+    touch-action: pan-y;
+  }
+  body {
+    /* évite la sélection de texte accidentelle façon page web… */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  /* …mais on garde la sélection dans les champs de saisie */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
