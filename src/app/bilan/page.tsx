@@ -118,7 +118,7 @@ export default function BilanPage() {
           .eq("user_id", user.id)
           .not("mood_score", "is", null)
           .order("created_at", { ascending: false })
-          .limit(14),
+          .limit(30),
         supabase
           .from("journal_entries")
           .select("created_at")
@@ -299,6 +299,52 @@ export default function BilanPage() {
                 <p className="text-stone-400 text-sm py-4 text-center">
                   Sélectionne une humeur dans ton journal pour la voir ici.
                 </p>
+              )}
+            </div>
+
+            {/* Humeurs sur 30 jours — réservé aux abonnés */}
+            <div className="bg-white border border-cream-200 rounded-2xl p-6 relative overflow-hidden">
+              <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-5">
+                Ton mois en humeurs
+              </p>
+              {isPremium ? (
+                recentMoods.length > 0 ? (
+                  <div className="flex items-end gap-[3px]" style={{ height: 64 }}>
+                    {recentMoods.map((m, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 rounded-t-md"
+                        title={new Date(m.created_at).toLocaleDateString("fr-FR")}
+                        style={{
+                          height: `${(m.mood_score / 5) * 100}%`,
+                          background: MOOD_COLORS[m.mood_score] ?? "#E7DDCB",
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-stone-400 text-sm py-4 text-center">
+                    Tes humeurs du mois apparaîtront ici au fil de tes entrées.
+                  </p>
+                )
+              ) : (
+                <>
+                  <div className="flex items-end gap-[3px] blur-[5px] select-none" style={{ height: 64 }} aria-hidden="true">
+                    {[3, 4, 2, 5, 4, 3, 5, 2, 4, 5, 3, 4, 5, 4, 2, 3, 4, 5, 4, 3].map((score, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 rounded-t-md"
+                        style={{ height: `${(score / 5) * 100}%`, background: MOOD_COLORS[score] ?? "#E7DDCB" }}
+                      />
+                    ))}
+                  </div>
+                  <Link href="/paywall" className="absolute inset-0 flex items-center justify-center gap-2 bg-white/30">
+                    <span className="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center shadow-lg">
+                      <Lock className="h-4 w-4 text-white" />
+                    </span>
+                    <span className="text-sm font-semibold text-stone-900">Réservé aux abonnés</span>
+                  </Link>
+                </>
               )}
             </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Lock } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 
 interface Entry {
@@ -66,6 +66,7 @@ export default function HistoriquePage() {
   const router = useRouter();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function handleDelete(entry: Entry) {
@@ -93,21 +94,54 @@ export default function HistoriquePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.replace("/auth?next=/journal/historique"); return; }
 
-      const { data } = await supabase
-        .from("journal_entries")
-        .select("id, created_at, content, mood_score")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(60);
+      const [{ data }, { data: planProfile }] = await Promise.all([
+        supabase
+          .from("journal_entries")
+          .select("id, created_at, content, mood_score")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(60),
+        supabase.from("profiles").select("plan_status").eq("id", user.id).single(),
+      ]);
 
       setEntries(data ?? []);
+      setIsPremium(planProfile?.plan_status === "active" || planProfile?.plan_status === "trialing");
       setLoading(false);
     })();
   }, [router]);
 
   const { thisWeek, lastWeek, older } = groupByWeek(entries);
 
+  function isLocked(entry: Entry): boolean {
+    if (isPremium) return false;
+    return Date.now() - new Date(entry.created_at).getTime() > 7 * 86400000;
+  }
+
+  function LockedCard({ entry }: { entry: Entry }) {
+    return (
+      <Link href="/paywall" className="block relative overflow-hidden">
+        <div className="bg-white border border-cream-200 rounded-2xl px-5 py-4 blur-[5px] select-none" aria-hidden="true">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full flex-none" style={{ background: moodColor(entry.mood_score) }} />
+              <span className="font-semibold text-stone-900 text-sm">{formatDay(entry.created_at)}</span>
+            </div>
+            <span className="text-xs text-stone-400">{formatTime(entry.created_at)}</span>
+          </div>
+          <p className="text-stone-500 text-sm leading-relaxed line-clamp-2">{entry.content || "Conversation du soir"}</p>
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-white/30">
+          <span className="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center shadow-lg">
+            <Lock className="h-4 w-4 text-white" />
+          </span>
+          <span className="text-sm font-semibold text-stone-900">Réservé aux abonnés</span>
+        </div>
+      </Link>
+    );
+  }
+
   function EntryCard({ entry }: { entry: Entry }) {
+    if (isLocked(entry)) return <LockedCard entry={entry} />;
     const isDeleting = deletingId === entry.id;
     return (
       <Link href={`/journal/${entry.id}`} className={isDeleting ? "opacity-40 pointer-events-none" : ""}>

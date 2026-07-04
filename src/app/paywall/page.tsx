@@ -17,9 +17,11 @@ const CTA_LABELS: Record<Plan, string> = {
 
 const BENEFITS = [
   "Entrées illimitées, écrites ou vocales",
-  "Ton IA se souvient de tout et repère tes patterns",
+  "Analyse IA de tes tendances et patterns",
+  "Historique complet de ton journal",
+  "Ton mois en humeurs, jour par jour",
+  "Pauses respiration guidées",
   "Résumé de ta semaine chaque dimanche",
-  "Tes données exportables à tout moment, en un clic",
 ];
 
 export default function PaywallPage() {

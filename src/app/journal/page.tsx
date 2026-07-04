@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Mic, Send, Square, History, BarChart3, Settings, Flame, Sparkles, Smartphone, X } from "lucide-react";
+import { Mic, Send, Square, History, BarChart3, Settings, Flame, Sparkles, Smartphone, X, Wind } from "lucide-react";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -202,6 +202,9 @@ function JournalContent() {
                 {streak}
               </span>
             )}
+            <Button asChild size="icon" variant="ghost" aria-label="Pause respiration">
+              <Link href="/respiration"><Wind className="h-4 w-4" /></Link>
+            </Button>
             <Button asChild size="icon" variant="ghost" aria-label="Historique">
               <Link href="/journal/historique"><History className="h-4 w-4" /></Link>
             </Button>
