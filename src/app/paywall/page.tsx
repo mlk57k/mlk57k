@@ -86,6 +86,8 @@ export default function PaywallPage() {
           background: var(--encre);
           color: var(--plume);
           position: relative;
+          overflow-x: hidden;
+          overflow-x: clip;
         }
         .pw-halo {
           position: absolute;
