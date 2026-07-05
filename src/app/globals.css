@@ -45,27 +45,35 @@
 }
 
 /* ─── Mode app installée (PWA) : comportement natif ──────────────────────────
-   Quand Ancrage est lancée depuis l'écran d'accueil, on désactive le rebond
-   élastique et le zoom au double-tap — comme une vraie app. Le scroll vertical
-   normal reste actif pour que les pages longues restent entièrement visibles. */
+   iOS Safari ignore `overscroll-behavior` : pour tuer le rebond élastique on
+   fige html/body et on fait défiler un conteneur interne (#app-shell). Le
+   défilement vertical normal reste actif à l'intérieur — comme une vraie app. */
 @media (display-mode: standalone) {
   html,
   body {
-    /* supprime le rebond élastique (rubber-band) haut/bas */
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
     overscroll-behavior: none;
-    /* pas de zoom au double-tap ; le défilement vertical reste possible */
-    touch-action: pan-y;
   }
-  body {
-    /* évite la sélection de texte accidentelle façon page web… */
+  #app-shell {
+    height: 100%;
+    height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+    /* défilement vertical uniquement ; pas de zoom/pan horizontal */
+    touch-action: pan-y;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
   }
-  /* …mais on garde la sélection dans les champs de saisie */
-  input,
-  textarea,
-  [contenteditable="true"] {
+  /* on garde la sélection possible dans les champs de saisie */
+  #app-shell input,
+  #app-shell textarea,
+  #app-shell [contenteditable="true"] {
     -webkit-user-select: text;
     user-select: text;
   }

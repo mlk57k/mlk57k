@@ -78,7 +78,7 @@ export default function RootLayout({
     <html lang="fr">
       <body className={`${inter.variable} ${fraunces.variable} antialiased`}>
         <PwaRegister />
-        {children}
+        <div id="app-shell">{children}</div>
         <Analytics />
       </body>
     </html>
