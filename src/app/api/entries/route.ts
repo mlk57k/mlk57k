@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { consumeFreeEntry } from "@/lib/quota";
+import { isComped } from "@/lib/comp";
 
 function adminClient() {
   return createSupabaseAdmin(
@@ -9,6 +10,16 @@ function adminClient() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
+}
+
+/** Accorde l'accès complet aux comptes de la liste blanche (une fois). */
+async function ensureCompedAccess(userId: string, email: string | null | undefined, currentPlan: string) {
+  if (!isComped(email) || currentPlan === "active") return "active";
+  if (isComped(email)) {
+    await adminClient().from("profiles").update({ plan_status: "active" }).eq("id", userId);
+    return "active";
+  }
+  return currentPlan;
 }
 
 export async function GET() {
@@ -61,6 +72,9 @@ export async function POST(request: Request) {
     }
     profile = newProfile;
   }
+
+  // Accès offert (liste blanche) : passe le compte en illimité au 1er usage
+  profile.plan_status = await ensureCompedAccess(user.id, user.email, profile.plan_status);
 
   const quota = await consumeFreeEntry(supabase, user.id, profile);
   if (!quota.allowed) {

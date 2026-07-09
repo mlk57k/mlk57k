@@ -27,6 +27,13 @@
 
 @layer base {
   * { @apply border-border; }
+  html, body {
+    /* empêche tout débordement horizontal qui décentre le contenu sur mobile ;
+       `clip` ne casse pas les en-têtes/champs en position sticky (contrairement
+       à overflow-x: hidden) */
+    max-width: 100%;
+    overflow-x: clip;
+  }
   body {
     @apply bg-white text-foreground;
     font-family: var(--font-sans), system-ui, sans-serif;

@@ -19,6 +19,8 @@ function Complete() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          // Accès offert (liste blanche) : activé avant d'entrer dans l'app
+          await fetch("/api/account/sync-access", { method: "POST" }).catch(() => {});
           const { data: profile } = await supabase
             .from("profiles")
             .select("objectifs")
