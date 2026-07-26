@@ -373,9 +373,19 @@ function JournalContent() {
   );
 }
 
+function JournalSplash() {
+  return (
+    <div className="min-h-screen bg-cream-50 flex items-center justify-center">
+      <div className="animate-pulse">
+        <AppLogo size="md" />
+      </div>
+    </div>
+  );
+}
+
 export default function JournalPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<JournalSplash />}>
       <JournalContent />
     </Suspense>
   );

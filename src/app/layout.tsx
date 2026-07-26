@@ -74,8 +74,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL;
   return (
     <html lang="fr">
+      <head>
+        {/* Préconnexion à Supabase : la vérif de session au démarrage part
+            immédiatement au lieu d'attendre la résolution DNS + TLS */}
+        {supabaseHost && (
+          <>
+            <link rel="preconnect" href={supabaseHost} crossOrigin="" />
+            <link rel="dns-prefetch" href={supabaseHost} />
+          </>
+        )}
+      </head>
       <body className={`${inter.variable} ${fraunces.variable} antialiased`}>
         <PwaRegister />
         <div id="app-shell">{children}</div>
