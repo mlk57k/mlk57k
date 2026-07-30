@@ -52,3 +52,18 @@ jobs:
           echo "=================================="
           echo "  ENTRÉES DE JOURNAL ÉCRITES : $ENTRIES"
           echo "=================================="
+
+          echo ""
+          echo "===== LISTE DES INSCRITS ====="
+          curl -sS -X GET \
+            "$SB_URL/rest/v1/profiles?select=email,plan_status,created_at&order=created_at.asc" \
+            -H "apikey: $SB_KEY" \
+            -H "Authorization: Bearer $SB_KEY" \
+          | python3 -c "
+          import json, sys
+          rows = json.load(sys.stdin)
+          for i, r in enumerate(rows, 1):
+              date = (r.get('created_at') or '')[:10]
+              print(f\"{i}. {r.get('email','(sans email)')}  —  {r.get('plan_status','?')}  —  inscrit le {date}\")
+          "
+          echo "=============================="
