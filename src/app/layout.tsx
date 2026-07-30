@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { PwaRegister } from "@/components/pwa-register";
+import { Heartbeat } from "@/components/heartbeat";
 import "./globals.css";
 
 const inter = Inter({
@@ -89,6 +90,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${fraunces.variable} antialiased`}>
         <PwaRegister />
+        <Heartbeat />
         <div id="app-shell">{children}</div>
         <Analytics />
       </body>

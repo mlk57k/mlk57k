@@ -1,0 +1,53 @@
+name: Qui est en ligne
+
+on:
+  workflow_dispatch:
+
+jobs:
+  online:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "SB_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "SB_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Présence
+        run: |
+          curl -sS "$SB_URL/rest/v1/profiles?select=email,last_seen_at&order=last_seen_at.desc.nullslast&limit=50" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+          | python3 - <<'PYEOF'
+          import json, sys
+          from datetime import datetime, timezone
+          rows = json.load(sys.stdin)
+          now = datetime.now(timezone.utc)
+          online, recent, idle = [], [], []
+          for r in rows:
+              ls = r.get("last_seen_at")
+              if not ls:
+                  continue
+              seen = datetime.fromisoformat(ls.replace("Z", "+00:00"))
+              mins = (now - seen).total_seconds() / 60
+              label = r["email"]
+              if mins < 5:      online.append((label, mins))
+              elif mins < 60:   recent.append((label, mins))
+              else:             idle.append((label, mins))
+
+          def ago(m):
+              if m < 1:  return "à l'instant"
+              if m < 60: return f"il y a {int(m)} min"
+              if m < 1440: return f"il y a {int(m/60)} h"
+              return f"il y a {int(m/1440)} j"
+
+          print("🟢 EN LIGNE MAINTENANT (< 5 min)")
+          print("\n".join(f"   {e}  ({ago(m)})" for e, m in online) or "   personne")
+          print("\n🟡 ACTIFS RÉCEMMENT (< 1 h)")
+          print("\n".join(f"   {e}  ({ago(m)})" for e, m in recent) or "   personne")
+          print("\n⚪ VUS AUJOURD'HUI / +")
+          print("\n".join(f"   {e}  ({ago(m)})" for e, m in idle[:10]) or "   personne")
+          PYEOF
