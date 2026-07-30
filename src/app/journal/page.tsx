@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { computeStreaks } from "@/lib/streak";
 import { getDailyQuestion } from "@/lib/prompts";
 import { extractPrenom } from "@/lib/profile";
+import { FREE_MESSAGE_LIMIT } from "@/lib/free-messages";
 
 const CHECKIN_MOODS = [
   { score: 5, color: "#8FA086", label: "Serein" },
@@ -43,6 +44,8 @@ function JournalContent() {
   const [prenom, setPrenom] = useState<string | null>(null);
   const [checkinMood, setCheckinMood] = useState<number | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  // Confidences offertes restantes (null = abonné, illimité)
+  const [remaining, setRemaining] = useState<number | null>(null);
 
   useEffect(() => {
     const standalone =
@@ -69,13 +72,21 @@ function JournalContent() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.replace("/auth?next=/journal"); return; }
 
-      // Série de jours consécutifs + prénom pour l'accueil
-      const [{ data: entryDates }, { data: profileData }] = await Promise.all([
+      // Série de jours consécutifs + prénom + confidences restantes
+      const [{ data: entryDates }, { data: profileData }, { count: usedConfidences }] = await Promise.all([
         supabase.from("journal_entries").select("created_at").eq("user_id", user.id),
-        supabase.from("profiles").select("objectifs").eq("id", user.id).single(),
+        supabase.from("profiles").select("objectifs, plan_status").eq("id", user.id).single(),
+        supabase
+          .from("entry_messages")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("role", "user"),
       ]);
       if (entryDates) setStreak(computeStreaks(entryDates.map((e) => e.created_at)).current);
       setPrenom(extractPrenom(profileData?.objectifs));
+
+      const premium = profileData?.plan_status === "active" || profileData?.plan_status === "trialing";
+      setRemaining(premium ? null : Math.max(0, FREE_MESSAGE_LIMIT - (usedConfidences ?? 0)));
 
       // Reprendre une entrée existante (lien "Continuer à écrire")
       if (resumeId) {
@@ -140,9 +151,21 @@ function JournalContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
       });
+
+      // Confidences offertes épuisées → paywall
+      if (res.status === 402) {
+        setMessages((m) => m.filter((msg) => msg.id !== optimistic.id));
+        setText(content);
+        router.push("/paywall");
+        return;
+      }
+
       const data = await res.json();
       if (data.assistantMessage) {
         setMessages((m) => [...m, data.assistantMessage]);
+      }
+      if (typeof data.remainingConfidences === "number") {
+        setRemaining(data.remainingConfidences);
       }
       if (data.crisisDetected) setCrisisDetected(true);
     } catch (err) {
@@ -241,6 +264,23 @@ function JournalContent() {
               <X className="h-4 w-4" />
             </button>
           </div>
+        )}
+
+        {remaining !== null && (
+          <Link
+            href={remaining === 0 ? "/paywall" : "#"}
+            onClick={(e) => { if (remaining !== 0) e.preventDefault(); }}
+            className="mb-4 rounded-2xl bg-cream-100 border border-cream-200 px-4 py-2.5 flex items-center justify-center gap-1.5 text-sm text-stone-500"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-coral-400 flex-none" />
+            {remaining > 0 ? (
+              <span>
+                Il te reste <span className="font-semibold text-coral-600">{remaining} confidence{remaining > 1 ? "s" : ""}</span> offerte{remaining > 1 ? "s" : ""}
+              </span>
+            ) : (
+              <span className="font-semibold text-coral-600">Tes confidences offertes sont terminées — passe à l&apos;illimité →</span>
+            )}
+          </Link>
         )}
 
         {sendError && (

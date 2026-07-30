@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { consumeFreeEntry } from "@/lib/quota";
 import { isComped } from "@/lib/comp";
 
 function adminClient() {
@@ -76,10 +75,8 @@ export async function POST(request: Request) {
   // Accès offert (liste blanche) : passe le compte en illimité au 1er usage
   profile.plan_status = await ensureCompedAccess(user.id, user.email, profile.plan_status);
 
-  const quota = await consumeFreeEntry(supabase, user.id, profile);
-  if (!quota.allowed) {
-    return NextResponse.json({ error: "quota_exceeded" }, { status: 402 });
-  }
+  // Le quota gratuit s'applique désormais aux confidences (messages au coach),
+  // pas à la création d'entrées — commencer une entrée reste libre.
 
   const { data: entry, error } = await supabase
     .from("journal_entries")
@@ -98,5 +95,5 @@ export async function POST(request: Request) {
     });
   }
 
-  return NextResponse.json({ entry, remaining: quota.remaining });
+  return NextResponse.json({ entry });
 }

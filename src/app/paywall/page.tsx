@@ -264,8 +264,8 @@ export default function PaywallPage() {
           Continue d&apos;écrire, sans <em>limite</em>
         </h1>
         <p className="pw-sub">
-          Tu as utilisé tes 3 entrées gratuites de la semaine. Passe en illimité pour ne rien
-          perdre de ton élan.
+          Tu as utilisé tes 10 confidences offertes. Passe en illimité pour continuer à écrire,
+          sans jamais t&apos;arrêter.
         </p>
 
         <div className="pw-benefits">
