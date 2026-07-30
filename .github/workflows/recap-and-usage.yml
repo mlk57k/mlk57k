@@ -1,0 +1,51 @@
+name: Récap test + usage confidences
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "SB_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "SB_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "CRON=$(grep '^CRON_SECRET=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+          echo "::add-mask::$(grep '^CRON_SECRET=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Déclencher l'email récap de test
+        run: |
+          echo "=== Envoi du récap de test ==="
+          curl -sS "https://ancrage.xyz/api/cron/daily-recap" \
+            -H "Authorization: Bearer $CRON" | python3 -m json.tool || echo "(route pas encore déployée ?)"
+
+      - name: Usage des confidences par client
+        run: |
+          echo ""
+          echo "===== CONFIDENCES UTILISÉES (messages au coach) ====="
+          curl -sS "$SB_URL/rest/v1/profiles?select=id,email,plan_status,created_at&order=created_at.asc" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" > /tmp/profiles.json
+          python3 - <<'PYEOF'
+          import json, os, urllib.request
+          url = os.environ["SB_URL"]; key = os.environ["SB_KEY"]
+          profiles = json.load(open("/tmp/profiles.json"))
+          def count_msgs(uid):
+              req = urllib.request.Request(
+                  f"{url}/rest/v1/entry_messages?select=id&user_id=eq.{uid}&role=eq.user",
+                  headers={"apikey": key, "Authorization": f"Bearer {key}", "Prefer": "count=exact", "Range": "0-0"})
+              with urllib.request.urlopen(req) as r:
+                  cr = r.headers.get("content-range", "0/0")
+                  return int(cr.split("/")[-1])
+          for p in profiles:
+              used = count_msgs(p["id"])
+              premium = p["plan_status"] in ("active", "trialing")
+              status = "illimité" if premium else f"{used}/10 confidences"
+              date = (p.get("created_at") or "")[:10]
+              print(f"{p['email']:32s} {status:22s} (inscrit {date})")
+          PYEOF
