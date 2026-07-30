@@ -110,8 +110,13 @@ const config: Config = {
         "glow-pulse": "glowPulse 3.5s ease-in-out infinite",
         "marquee": "marquee 32s linear infinite",
         "gradient-shift": "gradientShift 8s ease infinite",
+        "breathe": "breathe 3.2s ease-in-out infinite",
       },
       keyframes: {
+        breathe: {
+          "0%, 100%": { boxShadow: "0 4px 22px -8px rgba(196,82,58,0.28)" },
+          "50%": { boxShadow: "0 10px 42px -6px rgba(196,82,58,0.48)" },
+        },
         fadeUp: {
           "0%": { opacity: "0", transform: "translateY(24px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
