@@ -1,0 +1,54 @@
+name: Compter les inscrits
+
+on:
+  workflow_dispatch:
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '"')
+          URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '"')
+          echo "::add-mask::$KEY"
+          echo "SB_KEY=$KEY" >> $GITHUB_ENV
+          echo "SB_URL=$URL" >> $GITHUB_ENV
+
+      - name: Count profiles
+        run: |
+          TOTAL=$(curl -sS -I -X GET \
+            "$SB_URL/rest/v1/profiles?select=id" \
+            -H "apikey: $SB_KEY" \
+            -H "Authorization: Bearer $SB_KEY" \
+            -H "Prefer: count=exact" \
+            -H "Range: 0-0" | grep -i "content-range" | sed 's/.*\///' | tr -d '\r')
+          echo "=================================="
+          echo "  INSCRITS TOTAL : $TOTAL"
+          echo "=================================="
+
+          # Répartition par statut d'abonnement
+          for STATUS in free trialing active canceled past_due; do
+            N=$(curl -sS -I -X GET \
+              "$SB_URL/rest/v1/profiles?select=id&plan_status=eq.$STATUS" \
+              -H "apikey: $SB_KEY" \
+              -H "Authorization: Bearer $SB_KEY" \
+              -H "Prefer: count=exact" \
+              -H "Range: 0-0" | grep -i "content-range" | sed 's/.*\///' | tr -d '\r')
+            echo "  $STATUS : $N"
+          done
+
+          # Nombre total d'entrées écrites
+          ENTRIES=$(curl -sS -I -X GET \
+            "$SB_URL/rest/v1/journal_entries?select=id" \
+            -H "apikey: $SB_KEY" \
+            -H "Authorization: Bearer $SB_KEY" \
+            -H "Prefer: count=exact" \
+            -H "Range: 0-0" | grep -i "content-range" | sed 's/.*\///' | tr -d '\r')
+          echo "=================================="
+          echo "  ENTRÉES DE JOURNAL ÉCRITES : $ENTRIES"
+          echo "=================================="
