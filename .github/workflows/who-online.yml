@@ -20,11 +20,11 @@ jobs:
       - name: Présence
         run: |
           curl -sS "$SB_URL/rest/v1/profiles?select=email,last_seen_at&order=last_seen_at.desc.nullslast&limit=50" \
-            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-          | python3 - <<'PYEOF'
-          import json, sys
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" > /tmp/presence.json
+          python3 - <<'PYEOF'
+          import json
           from datetime import datetime, timezone
-          rows = json.load(sys.stdin)
+          rows = json.load(open("/tmp/presence.json"))
           now = datetime.now(timezone.utc)
           online, recent, idle = [], [], []
           for r in rows:
