@@ -1,0 +1,67 @@
+name: Ajouter ancrage.xyz à Resend
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "RESEND=$(grep '^RESEND_API_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^RESEND_API_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Créer le domaine dans Resend + ajouter les DNS à Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # 1) Créer (ou récupérer) le domaine dans Resend
+          curl -sS -X POST "https://api.resend.com/domains" \
+            -H "Authorization: Bearer $RESEND" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"ancrage.xyz","region":"eu-west-1"}' > /tmp/domain.json
+          cat /tmp/domain.json | python3 -m json.tool || cat /tmp/domain.json
+
+          python3 - <<'PYEOF'
+          import json, os, urllib.request, urllib.error
+
+          data = json.load(open("/tmp/domain.json"))
+          records = data.get("records", [])
+          if not records:
+              print("\n(Domaine déjà existant ou pas de records renvoyés — voir la réponse ci-dessus.)")
+              raise SystemExit(0)
+
+          TOKEN = os.environ["VERCEL_TOKEN"]
+          TEAM = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+
+          def add_record(rec):
+              typ = rec["type"]              # MX / TXT
+              name = rec["name"].replace(".ancrage.xyz", "").rstrip(".")
+              if name == "ancrage.xyz": name = ""
+              value = rec["value"]
+              body = {"type": typ, "name": name, "value": value, "ttl": 3600}
+              if typ == "MX":
+                  body["mxPriority"] = int(rec.get("priority", 10))
+              url = f"https://api.vercel.com/v2/domains/ancrage.xyz/records?teamId={TEAM}"
+              req = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST",
+                        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      print(f"  ✅ ajouté à Vercel DNS : {typ} {name or '@'}")
+              except urllib.error.HTTPError as e:
+                  msg = e.read().decode()[:160]
+                  print(f"  ⚠️ {typ} {name or '@'} → {msg}")
+
+          print("\n=== Enregistrements DNS Resend ===")
+          for rec in records:
+              print(f"{rec['type']:4} | {rec['name']:38} | {rec['value'][:60]}")
+          print("\n=== Ajout automatique dans Vercel DNS ===")
+          for rec in records:
+              add_record(rec)
+          print("\nℹ️ Si des lignes affichent une erreur, le DNS d'ancrage.xyz n'est peut-être pas géré par Vercel — dans ce cas ajoute-les à la main chez ton registrar.")
+          PYEOF
