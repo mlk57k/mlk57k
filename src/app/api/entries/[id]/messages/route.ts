@@ -1,8 +1,40 @@
 import { NextResponse } from "next/server";
+import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { generateCoachReply, type CoachMessage } from "@/lib/anthropic";
 import { buildShortTermMemory, buildLongTermMemory, saveExtractedMemories } from "@/lib/memory";
 import { FREE_MESSAGE_LIMIT, isPremiumStatus, countUsedConfidences } from "@/lib/free-messages";
+import { sendPaywallNudgeEmail } from "@/lib/emails/paywall-nudge";
+import { sendPushToUser } from "@/lib/push-server";
+
+// Relance paywall (email + push), une seule fois, quand les confidences
+// offertes sont épuisées. Ne bloque jamais la réponse HTTP en cas d'erreur.
+async function nudgePaywallOnce(request: Request, userId: string, email: string | null | undefined) {
+  try {
+    const admin = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+    const { data: p } = await admin
+      .from("profiles")
+      .select("paywall_notified_at")
+      .eq("id", userId)
+      .maybeSingle();
+    if (!p || p.paywall_notified_at) return;
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
+    await sendPushToUser(admin, userId, {
+      title: "Continue d'écrire, sans limite 🌙",
+      body: "Tes 10 confidences offertes sont utilisées. 3 jours d'essai offerts pour continuer.",
+      url: "/paywall",
+    });
+    if (email) await sendPaywallNudgeEmail(email, appUrl);
+    await admin.from("profiles").update({ paywall_notified_at: new Date().toISOString() }).eq("id", userId);
+  } catch (err) {
+    console.error("[paywall-nudge] échec:", err);
+  }
+}
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -38,6 +70,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (!premium) {
     const used = await countUsedConfidences(supabase, user.id);
     if (used >= FREE_MESSAGE_LIMIT) {
+      await nudgePaywallOnce(request, user.id, user.email);
       return NextResponse.json(
         { error: "quota_exceeded", remainingConfidences: 0 },
         { status: 402 }
