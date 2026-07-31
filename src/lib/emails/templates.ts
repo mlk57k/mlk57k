@@ -14,13 +14,15 @@ export function emailShell(bodyHtml: string): string {
     <tr>
       <td align="center">
 
-        <!-- En-tête : emblème + nom -->
+        <!-- En-tête : ancre (vrai logo) + nom -->
         <table role="presentation" width="500" cellpadding="0" cellspacing="0" style="max-width:500px;">
           <tr>
             <td align="center" style="padding-bottom:18px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="width:38px;height:38px;background:#BD6E4C;border-radius:50%;text-align:center;vertical-align:middle;font-size:19px;line-height:38px;">⚓</td>
+                  <td style="vertical-align:middle;">
+                    <img src="https://ancrage.xyz/icon" width="34" height="34" alt="" style="display:block;border-radius:9px;" />
+                  </td>
                   <td style="padding-left:10px;font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:600;color:#3a2f28;letter-spacing:.3px;">Ancrage</td>
                 </tr>
               </table>
