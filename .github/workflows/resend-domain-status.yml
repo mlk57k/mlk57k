@@ -1,0 +1,47 @@
+name: Statut domaine Resend
+
+on:
+  workflow_dispatch:
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull RESEND_API_KEY from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          RK=$(grep '^RESEND_API_KEY=' .env.local | cut -d= -f2- | tr -d '"')
+          echo "::add-mask::$RK"
+          echo "RK=$RK" >> $GITHUB_ENV
+
+      - name: Interroger l'API Resend
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request, urllib.error
+
+          RK = os.environ["RK"]
+          def api(path):
+              req = urllib.request.Request(f"https://api.resend.com{path}",
+                        headers={"Authorization": f"Bearer {RK}"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  return {"_error": e.code, "_body": e.read().decode()}
+
+          domains = api("/domains")
+          print("=== DOMAINES ===")
+          print(json.dumps(domains, indent=2)[:1500])
+
+          data = domains.get("data") if isinstance(domains, dict) else None
+          if data:
+              for d in data:
+                  print(f"\n=== DÉTAIL {d.get('name')} (status={d.get('status')}) ===")
+                  detail = api(f"/domains/{d.get('id')}")
+                  for rec in detail.get("records", []):
+                      print(f"  [{rec.get('status'):10s}] {rec.get('type'):5s} {rec.get('name','')} "
+                            f"-> {str(rec.get('value',''))[:70]}")
+          PYEOF
