@@ -1,0 +1,49 @@
+name: Définir l'expéditeur email
+
+on:
+  workflow_dispatch:
+    inputs:
+      value:
+        description: "Valeur RESEND_FROM_EMAIL"
+        required: true
+        default: "Ancrage <bonjour@ancrage.xyz>"
+
+jobs:
+  set:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upsert RESEND_FROM_EMAIL dans Vercel + redeploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          FROM_VALUE: ${{ github.event.inputs.value }}
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, urllib.request, urllib.error
+          TOKEN = os.environ["VERCEL_TOKEN"]; VALUE = os.environ["FROM_VALUE"]
+          PROJECT = "prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ"; TEAM = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+          def api(method, path, body=None):
+              url = f"https://api.vercel.com{path}?teamId={TEAM}"
+              data = json.dumps(body).encode() if body else None
+              req = urllib.request.Request(url, data=data, method=method,
+                        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r: return json.loads(r.read())
+              except urllib.error.HTTPError as e: return json.loads(e.read())
+          envs = api("GET", f"/v9/projects/{PROJECT}/env").get("envs", [])
+          existing = {e["key"]: e["id"] for e in envs}
+          if "RESEND_FROM_EMAIL" in existing:
+              api("PATCH", f"/v10/projects/{PROJECT}/env/{existing['RESEND_FROM_EMAIL']}", {"value": VALUE})
+              print("✅ RESEND_FROM_EMAIL mise à jour:", VALUE)
+          else:
+              api("POST", f"/v10/projects/{PROJECT}/env",
+                  {"key": "RESEND_FROM_EMAIL", "value": VALUE, "type": "encrypted",
+                   "target": ["production", "preview", "development"]})
+              print("✅ RESEND_FROM_EMAIL créée:", VALUE)
+          PYEOF
+
+      - name: Redeploy production
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
