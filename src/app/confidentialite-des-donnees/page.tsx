@@ -161,13 +161,13 @@ export default function DataPrivacyPage() {
         </Card>
 
         {/* Zone dangereuse */}
-        <Card className="border-coral-200 bg-coral-50/40">
+        <Card className="border-coral-300 bg-coral-500/[0.06]">
           <CardHeader>
-            <CardTitle className="text-lg text-coral-600 flex items-center gap-2">
-              <Trash2 className="h-4 w-4" />
+            <CardTitle className="text-lg text-coral-400 flex items-center gap-2">
+              <Trash2 className="h-4 w-4 shrink-0" />
               Supprimer mon compte
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-stone-600">
               Action définitive et immédiate : ton compte, tes entrées et tes bilans sont
               effacés sans délai. Pense à exporter ton journal avant si tu veux le garder.
             </CardDescription>
@@ -177,7 +177,7 @@ export default function DataPrivacyPage() {
             {!confirmDelete ? (
               <Button
                 variant="outline"
-                className="w-full sm:w-auto h-auto py-3 whitespace-normal text-center border-coral-300 text-coral-600 hover:bg-coral-100"
+                className="flex w-full h-auto min-h-11 py-3 whitespace-normal break-words leading-snug text-center border-coral-300 text-coral-400 hover:bg-coral-500/10"
                 onClick={() => setConfirmDelete(true)}
               >
                 <Trash2 className="h-4 w-4 shrink-0" />
