@@ -1,0 +1,96 @@
+name: Corriger le domaine Resend
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull RESEND_API_KEY from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          RK=$(grep '^RESEND_API_KEY=' .env.local | cut -d= -f2- | tr -d '"')
+          echo "::add-mask::$RK"
+          echo "RK=$RK" >> $GITHUB_ENV
+
+      - name: Recréer le bon domaine + DNS
+        env:
+          VT: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request, urllib.error
+
+          RK = os.environ["RK"]; VT = os.environ["VT"]
+          TEAM = "team_Gk17lZmjSWqGtF6aE5W89x9A"; VDOMAIN = "ancrage.xyz"
+          UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+
+          def resend(method, path, body=None):
+              data = json.dumps(body).encode() if body else None
+              req = urllib.request.Request(f"https://api.resend.com{path}", data=data, method=method,
+                        headers={"Authorization": f"Bearer {RK}", "User-Agent": UA,
+                                 "Content-Type": "application/json", "Accept": "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return r.status, json.loads(r.read() or b"{}")
+              except urllib.error.HTTPError as e:
+                  return e.code, {"_body": e.read().decode()}
+
+          def vercel(method, path, body=None):
+              data = json.dumps(body).encode() if body else None
+              req = urllib.request.Request(f"https://api.vercel.com{path}?teamId={TEAM}", data=data, method=method,
+                        headers={"Authorization": f"Bearer {VT}", "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return r.status, json.loads(r.read() or b"{}")
+              except urllib.error.HTTPError as e:
+                  return e.code, {"_body": e.read().decode()}
+
+          def vname(n):
+              n = (n or "").rstrip(".")
+              if n == VDOMAIN: return ""
+              if n.endswith("." + VDOMAIN): return n[:-len("." + VDOMAIN)]
+              return n
+
+          # 1) Supprimer tout domaine Resend qui n'est pas ancrage.xyz
+          code, doms = resend("GET", "/domains")
+          for d in (doms.get("data") or []):
+              if d.get("name") != VDOMAIN:
+                  c, _ = resend("DELETE", f"/domains/{d['id']}")
+                  print(f"🗑️  Supprimé {d.get('name')} -> {c}")
+
+          # 2) Créer ancrage.xyz (ignore l'erreur si déjà présent)
+          code, created = resend("POST", "/domains", {"name": VDOMAIN, "region": "eu-west-1"})
+          print("➕ Création ancrage.xyz ->", code)
+          if code >= 300:
+              # peut-être déjà créé : on le retrouve
+              _, doms = resend("GET", "/domains")
+              created = next((d for d in (doms.get("data") or []) if d.get("name") == VDOMAIN), None)
+              if not created:
+                  print("❌ Impossible de créer/retrouver le domaine:", created); raise SystemExit(0)
+              _, created = resend("GET", f"/domains/{created['id']}")
+
+          dom_id = created["id"]
+          records = created.get("records", [])
+          print(f"📋 {len(records)} enregistrements fournis par Resend\n")
+
+          # 3) Ajouter chaque enregistrement dans Vercel
+          for rec in records:
+              name = vname(rec.get("name"))
+              rtype = rec.get("type")
+              value = rec.get("value")
+              body = {"type": rtype, "name": name, "value": value, "ttl": 60}
+              if rtype == "MX":
+                  body["mxPriority"] = int(rec.get("priority") or 10)
+              c, r = vercel("POST", f"/v2/domains/{VDOMAIN}/records", body)
+              extra = "" if c < 300 else f" ({r.get('_body','')[:80]})"
+              print(f"  [{c}] {rtype:4s} {name or '@':26s} -> {str(value)[:50]}{extra}")
+
+          # 4) Lancer la vérification
+          c, v = resend("POST", f"/domains/{dom_id}/verify")
+          print("\n🔄 Vérification déclenchée ->", c)
+          print("Nom du domaine à utiliser pour l'expéditeur : ancrage.xyz")
+          PYEOF
