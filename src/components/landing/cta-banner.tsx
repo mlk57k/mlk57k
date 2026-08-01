@@ -13,7 +13,7 @@ export function CTABanner() {
         </p>
         <Link
           href="/journal"
-          className="inline-block rounded-full bg-[#FBF7EE] px-8 py-[15px] text-base font-bold text-[#8F4A2C] transition-colors hover:bg-white"
+          className="inline-block rounded-full bg-[#FBF7EE] px-8 py-[15px] text-base font-bold text-[#8F4A2C] transition-colors hover:bg-[#ffffff]"
         >
           Commencer ce soir
         </Link>

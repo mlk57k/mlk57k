@@ -42,7 +42,7 @@ export function Hero() {
       </div>
 
       {/* Carte mockup : aperçu d'une entrée de journal */}
-      <div className="w-full max-w-[620px] mt-5 rounded-[22px] border border-[#33241A]/10 bg-white p-5 sm:p-[26px] text-left flex flex-col gap-[13px] shadow-[0_24px_50px_rgba(51,36,26,0.1)]">
+      <div className="w-full max-w-[620px] mt-5 rounded-[22px] border border-[#33241A]/10 bg-[#ffffff] p-5 sm:p-[26px] text-left flex flex-col gap-[13px] shadow-[0_24px_50px_rgba(51,36,26,0.1)]">
         <div className="flex justify-between text-[11px] tracking-[0.12em] text-[#9A8270]">
           <span>21:42</span>
           <span>JOURNAL DU SOIR · IA</span>

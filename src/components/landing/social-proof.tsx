@@ -21,7 +21,7 @@ export function SocialProof() {
       {hasReal && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[720px] mx-auto mt-9">
           {testimonials.map((t) => (
-            <div key={t.name} className="rounded-[20px] border border-[#33241A]/[0.12] bg-white p-[30px] text-left">
+            <div key={t.name} className="rounded-[20px] border border-[#33241A]/[0.12] bg-[#ffffff] p-[30px] text-left">
               <p className="font-display italic text-[20px] leading-[1.4] text-[#33241A]">
                 « {t.text} »
               </p>
