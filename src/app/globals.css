@@ -61,8 +61,11 @@
 :root { color-scheme: light; }
 html.theme-dark { color-scheme: dark; }
 
-/* fond global de l'app en mode sombre */
+/* fond global + couleur de texte de base en mode sombre (les titres de cartes
+   et autres textes sans classe explicite héritent de cette couleur claire ;
+   la landing garde la sienne, forcée en hex sur son conteneur). */
 html.theme-dark body { background: #16110D; }
+html.theme-dark #app-shell { color: #F2E9DD; }
 
 /* Fonds de page & sections */
 html.theme-dark #app-shell .bg-cream-50  { background-color: #16110D; }
