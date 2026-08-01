@@ -1,0 +1,48 @@
+name: Ajouter les DNS Resend (ancrage.xyz)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ajouter les enregistrements DNS dans Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, urllib.request, urllib.error
+
+          TOKEN  = os.environ["VERCEL_TOKEN"]
+          TEAM   = "team_Gk17lZmjSWqGtF6aE5W89x9A"
+          DOMAIN = "ancrage.xyz"
+
+          # Enregistrements fournis par Resend pour le sous-domaine contact.ancrage.xyz
+          records = [
+            {"type": "TXT", "name": "resend._domainkey.contact",
+             "value": "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCrZrEHNm7kkvqP1vTjsCLZiZLqb8NxXjNso1vXVz2wnstUof7kHeT3PKFSLWxHobuUZ20X0ktOJIod24bPnBBHkBWrnfP0JjZC9gRlDvz2Hk5TXPL6E+trWwwoZse43UjAMnrk88uPD+FhlTwyA0tuXDWkCr1ZYWh1bQ9XBfh1ywIDAQAB",
+             "ttl": 60},
+            {"type": "MX", "name": "send.contact",
+             "value": "feedback-smtp.eu-west-1.amazonses.com", "mxPriority": 10, "ttl": 60},
+            {"type": "TXT", "name": "send.contact",
+             "value": "v=spf1 include:amazonses.com ~all", "ttl": 60},
+            {"type": "TXT", "name": "_dmarc.contact",
+             "value": "v=DMARC1; p=none;", "ttl": 60},
+          ]
+
+          def add(rec):
+              url = f"https://api.vercel.com/v2/domains/{DOMAIN}/records?teamId={TEAM}"
+              req = urllib.request.Request(url, data=json.dumps(rec).encode(), method="POST",
+                        headers={"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return r.status, json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  return e.code, json.loads(e.read())
+
+          for rec in records:
+              code, resp = add(rec)
+              status = resp.get("uid") or resp.get("error", {}).get("message", resp)
+              print(f"{rec['type']:4s} {rec['name']:28s} -> {code}  {status}")
+          PYEOF
