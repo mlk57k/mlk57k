@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, LogOut, BellRing, SunMoon } from "lucide-react";
+import { ArrowLeft, LogOut, BellRing, SunMoon, CreditCard, Target, Clock, ChevronDown, Lock } from "lucide-react";
 import { pushSupported, subscribeToPush, unsubscribeFromPush, isPushSubscribed } from "@/lib/push-client";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface Profile {
@@ -30,10 +30,55 @@ const PLAN_LABELS: Record<string, string> = {
   canceled: "Abonnement annulé",
 };
 
+/* Bloc de paramètre repliable : on ne voit que le titre, on tape pour déplier
+   tout le détail. Un seul bloc peut rester ouvert à la fois (accordéon). */
+function SettingsSection({
+  id,
+  title,
+  icon,
+  openId,
+  onToggle,
+  children,
+}: {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  openId: string | null;
+  onToggle: (id: string) => void;
+  children: React.ReactNode;
+}) {
+  const open = openId === id;
+  return (
+    <Card className="overflow-hidden">
+      <button
+        type="button"
+        onClick={() => onToggle(id)}
+        aria-expanded={open}
+        className="w-full flex items-center gap-3 px-5 sm:px-6 py-5 text-left transition-colors hover:bg-cream-100/70"
+      >
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cream-100 text-coral-400">
+          {icon}
+        </span>
+        <span className="font-display text-lg font-bold text-stone-900 flex-1">{title}</span>
+        <ChevronDown
+          className={`h-5 w-5 shrink-0 text-stone-400 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div
+        className={`grid transition-all duration-300 ease-out ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+      >
+        <div className="overflow-hidden">
+          <div className="px-5 sm:px-6 pb-6 pt-1 border-t border-cream-200">{children}</div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function ParametresPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [objectifs, setObjectifs] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [reminderHour, setReminderHour] = useState(20);
   const [saving, setSaving] = useState(false);
@@ -45,6 +90,10 @@ export default function ParametresPage() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushMessage, setPushMessage] = useState<string | null>(null);
+
+  function toggleSection(id: string) {
+    setOpenId((cur) => (cur === id ? null : id));
+  }
 
   useEffect(() => {
     setPushAvailable(pushSupported());
@@ -114,14 +163,13 @@ export default function ParametresPage() {
         .single();
       if (data) {
         setProfile(data);
-        setObjectifs(data.objectifs ?? "");
         setReminderEnabled(data.reminder_enabled);
         setReminderHour(data.reminder_hour);
       }
     })();
   }, [router]);
 
-  async function handleSavePreferences() {
+  async function handleSaveReminder() {
     setSaving(true);
     setMessage(null);
     const { createClient } = await import("@/lib/supabase/client");
@@ -130,7 +178,7 @@ export default function ParametresPage() {
     if (!user) return;
     await supabase
       .from("profiles")
-      .update({ objectifs, reminder_enabled: reminderEnabled, reminder_hour: reminderHour })
+      .update({ reminder_enabled: reminderEnabled, reminder_hour: reminderHour })
       .eq("id", user.id);
     setSaving(false);
     setMessage("Préférences enregistrées.");
@@ -158,6 +206,7 @@ export default function ParametresPage() {
   }
 
   const hasSubscription = profile.plan_status === "active" || profile.plan_status === "trialing";
+  const objectifs = (profile.objectifs ?? "").trim();
 
   return (
     <div className="min-h-screen bg-cream-50">
@@ -171,27 +220,38 @@ export default function ParametresPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-12 space-y-6">
+      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-12 space-y-3">
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 mb-2">Paramètres</h1>
+        <p className="text-sm text-stone-500 pb-3">Tape sur un bloc pour l&apos;ouvrir et voir le détail.</p>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Mon abonnement</CardTitle>
-            <CardDescription>{profile.email}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-stone-600">{PLAN_LABELS[profile.plan_status] ?? profile.plan_status}</p>
-            {profile.current_period_end && (
-              <p className="text-sm text-stone-500">
-                {profile.cancel_at_period_end ? "Accès jusqu'au " : "Prochain renouvellement le "}
-                {new Date(profile.current_period_end).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
-              </p>
-            )}
+        {/* Mon abonnement */}
+        <SettingsSection id="abonnement" title="Mon abonnement" icon={<CreditCard className="h-4 w-4" />} openId={openId} onToggle={toggleSection}>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-wide text-stone-400">Compte</p>
+              <p className="text-sm font-medium text-stone-800 break-all">{profile.email}</p>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-wide text-stone-400">Formule</p>
+              <p className="text-sm font-medium text-stone-800">{PLAN_LABELS[profile.plan_status] ?? profile.plan_status}</p>
+              {profile.current_period_end && (
+                <p className="text-sm text-stone-500">
+                  {profile.cancel_at_period_end ? "Accès jusqu'au " : "Prochain renouvellement le "}
+                  {new Date(profile.current_period_end).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}.
+                </p>
+              )}
+            </div>
 
             {!hasSubscription && (
-              <Button asChild>
-                <Link href="/paywall">Passer à l&apos;illimité</Link>
-              </Button>
+              <div className="rounded-2xl bg-cream-100 border border-cream-200 p-4 space-y-3">
+                <p className="text-sm text-stone-600">
+                  Débloque les confidences illimitées, l&apos;historique complet et les analyses de ton coach.
+                </p>
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/paywall">Passer à l&apos;illimité</Link>
+                </Button>
+              </div>
             )}
 
             {hasSubscription && !profile.cancel_at_period_end && !confirmCancel && (
@@ -220,90 +280,91 @@ export default function ParametresPage() {
                 Ton abonnement ne sera pas renouvelé. Tu peux te réabonner à tout moment.
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </SettingsSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Mes objectifs</CardTitle>
-            <CardDescription>Ce que tu cherches à travailler — le coach en tient compte dans ses réponses.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <textarea
-              value={objectifs}
-              onChange={(e) => setObjectifs(e.target.value)}
-              rows={4}
-              placeholder="Ex. : mieux gérer mon stress au travail, être plus indulgent·e avec moi-même…"
-              className="w-full rounded-xl border border-cream-200 bg-white p-3 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-coral-400/40"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Rappel quotidien</CardTitle>
-            <CardDescription>Un e-mail doux pour te rappeler d&apos;écrire, seulement si tu n&apos;as pas encore journalisé ce jour-là.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex items-center gap-4">
-            <Checkbox checked={reminderEnabled} onCheckedChange={(v) => setReminderEnabled(v === true)} id="reminder" />
-            <label htmlFor="reminder" className="text-sm text-stone-600">Recevoir un rappel</label>
-            {reminderEnabled && (
-              <select
-                value={reminderHour}
-                onChange={(e) => setReminderHour(Number(e.target.value))}
-                className="ml-auto rounded-lg border border-cream-200 bg-white px-3 py-1.5 text-sm text-stone-700"
-              >
-                {Array.from({ length: 24 }, (_, h) => (
-                  <option key={h} value={h}>{h}h00</option>
-                ))}
-              </select>
+        {/* Mes objectifs — définis à la première configuration, non modifiables ensuite */}
+        <SettingsSection id="objectifs" title="Mes objectifs" icon={<Target className="h-4 w-4" />} openId={openId} onToggle={toggleSection}>
+          <div className="space-y-3 pt-4">
+            <p className="text-sm text-stone-500">
+              Ce que tu cherches à travailler — le coach en tient compte dans ses réponses.
+            </p>
+            {objectifs ? (
+              <div className="rounded-2xl bg-cream-100 border border-cream-200 p-4">
+                <p className="text-sm text-stone-700 whitespace-pre-wrap">{objectifs}</p>
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-cream-100 border border-cream-200 p-4">
+                <p className="text-sm text-stone-500 italic">Aucun objectif défini lors de ta configuration.</p>
+              </div>
             )}
-          </CardContent>
-        </Card>
+            <p className="flex items-center gap-1.5 text-xs text-stone-400">
+              <Lock className="h-3.5 w-3.5" />
+              Défini à ta première configuration — non modifiable ensuite.
+            </p>
+          </div>
+        </SettingsSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <SunMoon className="h-4 w-4 text-coral-400" />
-              Apparence
-            </CardTitle>
-            <CardDescription>Choisis le thème de l&apos;app. « Auto » suit le réglage clair/sombre de ton téléphone.</CardDescription>
-          </CardHeader>
-          <CardContent>
+        {/* Rappel quotidien */}
+        <SettingsSection id="rappel" title="Rappel quotidien" icon={<Clock className="h-4 w-4" />} openId={openId} onToggle={toggleSection}>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-stone-500">
+              Un e-mail doux pour te rappeler d&apos;écrire, seulement si tu n&apos;as pas encore journalisé ce jour-là.
+            </p>
+            <div className="flex items-center gap-4">
+              <Checkbox checked={reminderEnabled} onCheckedChange={(v) => setReminderEnabled(v === true)} id="reminder" />
+              <label htmlFor="reminder" className="text-sm text-stone-600">Recevoir un rappel</label>
+              {reminderEnabled && (
+                <select
+                  value={reminderHour}
+                  onChange={(e) => setReminderHour(Number(e.target.value))}
+                  className="ml-auto rounded-lg border border-cream-200 bg-white px-3 py-1.5 text-sm text-stone-700"
+                >
+                  {Array.from({ length: 24 }, (_, h) => (
+                    <option key={h} value={h}>{h}h00</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <Button disabled={saving} onClick={handleSaveReminder} size="sm">
+              {saving ? "Enregistrement…" : "Enregistrer"}
+            </Button>
+            {message && <p className="text-sm text-stone-500">{message}</p>}
+          </div>
+        </SettingsSection>
+
+        {/* Apparence */}
+        <SettingsSection id="apparence" title="Apparence" icon={<SunMoon className="h-4 w-4" />} openId={openId} onToggle={toggleSection}>
+          <div className="space-y-3 pt-4">
+            <p className="text-sm text-stone-500">
+              Choisis le thème de l&apos;app. « Auto » suit le réglage clair/sombre de ton téléphone.
+            </p>
             <ThemeToggle />
-          </CardContent>
-        </Card>
+          </div>
+        </SettingsSection>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BellRing className="h-4 w-4 text-coral-400" />
-              Notifications push
-            </CardTitle>
-            <CardDescription>
+        {/* Notifications push */}
+        <SettingsSection id="push" title="Notifications push" icon={<BellRing className="h-4 w-4" />} openId={openId} onToggle={toggleSection}>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-stone-500">
               Reçois ton rappel du soir directement sur cet appareil.
               {!pushAvailable && " Sur iPhone : installe d'abord l'app sur ton écran d'accueil (Safari → Partager → Sur l'écran d'accueil) puis ouvre-la."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-3">
-            <Button disabled={!pushAvailable || pushBusy} onClick={handlePushToggle} variant={pushEnabled ? "outline" : "default"}>
-              {pushBusy ? "Un instant…" : pushEnabled ? "Désactiver sur cet appareil" : "Activer sur cet appareil"}
-            </Button>
-            {pushEnabled && (
-              <Button variant="ghost" disabled={pushBusy} onClick={handlePushTest}>
-                Envoyer un test
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button disabled={!pushAvailable || pushBusy} onClick={handlePushToggle} variant={pushEnabled ? "outline" : "default"}>
+                {pushBusy ? "Un instant…" : pushEnabled ? "Désactiver sur cet appareil" : "Activer sur cet appareil"}
               </Button>
-            )}
-            {pushMessage && <p className="text-sm text-stone-500 w-full">{pushMessage}</p>}
-          </CardContent>
-        </Card>
+              {pushEnabled && (
+                <Button variant="ghost" disabled={pushBusy} onClick={handlePushTest}>
+                  Envoyer un test
+                </Button>
+              )}
+              {pushMessage && <p className="text-sm text-stone-500 w-full">{pushMessage}</p>}
+            </div>
+          </div>
+        </SettingsSection>
 
-        {message && <p className="text-sm text-stone-600">{message}</p>}
-
-        <div className="flex items-center justify-between">
-          <Button disabled={saving} onClick={handleSavePreferences}>
-            {saving ? "Enregistrement…" : "Enregistrer"}
-          </Button>
+        <div className="flex items-center justify-end pt-2">
           <Link href="/confidentialite-des-donnees" className="text-sm text-stone-500 hover:text-stone-900 underline">
             Mes données &amp; export
           </Link>
