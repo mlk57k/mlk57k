@@ -138,21 +138,21 @@ export default function DataPrivacyPage() {
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Button asChild variant="secondary" className="w-full justify-start h-auto py-3">
+              <Button asChild variant="secondary" className="w-full justify-start h-auto py-3 whitespace-normal">
                 <a href="/api/export?format=pdf" download>
-                  <FileText className="h-5 w-5" />
-                  <span className="flex flex-col items-start leading-tight">
+                  <FileText className="h-5 w-5 shrink-0" />
+                  <span className="flex min-w-0 flex-1 flex-col items-start leading-tight">
                     <span className="font-semibold">Télécharger en PDF</span>
-                    <span className="text-xs font-normal text-stone-500">Mise en page soignée, à relire ou imprimer.</span>
+                    <span className="text-xs font-normal text-stone-500 break-words">Mise en page soignée, à relire ou imprimer.</span>
                   </span>
                 </a>
               </Button>
-              <Button asChild variant="secondary" className="w-full justify-start h-auto py-3">
+              <Button asChild variant="secondary" className="w-full justify-start h-auto py-3 whitespace-normal">
                 <a href="/api/export?format=txt" download>
-                  <Download className="h-5 w-5" />
-                  <span className="flex flex-col items-start leading-tight">
+                  <Download className="h-5 w-5 shrink-0" />
+                  <span className="flex min-w-0 flex-1 flex-col items-start leading-tight">
                     <span className="font-semibold">Télécharger en .txt</span>
-                    <span className="text-xs font-normal text-stone-500">Texte brut, pour l&apos;archiver ou le réutiliser.</span>
+                    <span className="text-xs font-normal text-stone-500 break-words">Texte brut, pour l&apos;archiver ou le réutiliser.</span>
                   </span>
                 </a>
               </Button>
