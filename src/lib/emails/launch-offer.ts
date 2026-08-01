@@ -49,7 +49,7 @@ export async function sendLaunchOfferEmail(to: string, appUrl: string, idempoten
     </p>
   `);
 
-  await resend.emails.send(
+  const result = await resend.emails.send(
     {
       from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>",
       replyTo: "m.nabbachi@icloud.com",
@@ -59,4 +59,9 @@ export async function sendLaunchOfferEmail(to: string, appUrl: string, idempoten
     },
     idempotencyKey ? { idempotencyKey } : undefined
   );
+  // Le SDK Resend ne lève pas d'erreur : il faut inspecter result.error.
+  if (result.error) {
+    throw new Error(`Resend: ${result.error.message ?? JSON.stringify(result.error)}`);
+  }
+  return result.data?.id;
 }

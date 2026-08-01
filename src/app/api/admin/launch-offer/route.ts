@@ -17,6 +17,18 @@ export async function GET(request: Request) {
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
 
+  // Mode test : ?test=email → envoie un seul mail à cette adresse et renvoie
+  // l'erreur Resend exacte s'il y en a une (debug de délivrabilité).
+  const testEmail = new URL(request.url).searchParams.get("test");
+  if (testEmail) {
+    try {
+      const id = await sendLaunchOfferEmail(testEmail, appUrl); // pas de clé d'idempotence → force l'envoi
+      return NextResponse.json({ test: testEmail, ok: true, id, from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>" });
+    } catch (err) {
+      return NextResponse.json({ test: testEmail, ok: false, error: err instanceof Error ? err.message : String(err), from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>" });
+    }
+  }
+
   const { data: profiles } = await admin.from("profiles").select("id, email, plan_status");
 
   const sent: string[] = [];
