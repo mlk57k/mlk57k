@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X, Check, Sparkles } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { cn } from "@/lib/utils";
 
 type Plan = "weekly" | "annual" | "monthly";
@@ -33,13 +34,20 @@ export default function PaywallPage() {
     (async () => {
       const { createClient } = await import("@/lib/supabase/client");
       const { data: { user } } = await createClient().auth.getUser();
-      if (!user) router.replace("/auth?next=/paywall");
+      if (!user) {
+        router.replace("/auth?next=/paywall");
+        return;
+      }
+      // Étape 1 du funnel : le paywall est réellement vu par un compte connecté.
+      track("paywall_viewed");
     })();
   }, [router]);
 
   async function checkout() {
     setLoading(true);
     setError(null);
+    // Étape 2 : l'utilisateur a cliqué « Commencer » pour le plan choisi.
+    track("paywall_checkout_click", { plan: selected });
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -48,9 +56,14 @@ export default function PaywallPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Erreur lors du paiement.");
+      // Étape 3 : Stripe a bien créé la session, on redirige vers la page de paiement.
+      track("paywall_reached_stripe", { plan: selected });
       window.location.assign(data.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors du paiement.");
+      const message = err instanceof Error ? err.message : "Erreur lors du paiement.";
+      // Échec avant d'atteindre Stripe (route / config) : on le trace pour le voir.
+      track("paywall_checkout_error", { plan: selected, message });
+      setError(message);
       setLoading(false);
     }
   }

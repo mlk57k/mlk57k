@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { AppLogo } from "@/components/ui/logo";
 
 function Success() {
@@ -27,6 +28,8 @@ function Success() {
         const data = await res.json();
 
         if (data.success) {
+          // Étape 4 (finale) : paiement confirmé — conversion réussie.
+          track("checkout_success");
           router.replace("/journal?bienvenue=1");
           return;
         }
