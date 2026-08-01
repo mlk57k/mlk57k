@@ -51,56 +51,54 @@
   }
 }
 
-/* ─── Mode sombre automatique (suit le réglage du téléphone) ─────────────────
+/* ─── Mode sombre ────────────────────────────────────────────────────────────
+   Piloté par la classe `.theme-dark` sur <html> : un petit script inline (dans
+   layout.tsx) la pose avant le paint selon le choix de l'utilisateur (Clair /
+   Sombre / Auto). En « Auto », elle suit le réglage clair/sombre du téléphone.
    S'applique à TOUTE l'app (écrans sous #app-shell) mais PAS à la landing, qui
-   peint ses fonds en couleurs codées en dur (hex). On remappe ici les classes
-   Tailwind réellement utilisées par les écrans produit. Scopé sous #app-shell
-   pour la priorité CSS (pas besoin de !important). Palette chaude nuit, cohérente
+   peint ses fonds en couleurs codées en dur (hex). Palette chaude nuit, cohérente
    avec l'identité crème/terracotta. */
 :root { color-scheme: light; }
+html.theme-dark { color-scheme: dark; }
 
-@media (prefers-color-scheme: dark) {
-  :root { color-scheme: dark; }
+/* fond global de l'app en mode sombre */
+html.theme-dark body { background: #16110D; }
 
-  /* fond global de l'app */
-  body { background: #16110D; }
+/* Fonds de page & sections */
+html.theme-dark #app-shell .bg-cream-50  { background-color: #16110D; }
+html.theme-dark #app-shell .bg-cream-100 { background-color: #1F1812; }
+html.theme-dark #app-shell .bg-cream-200 { background-color: #241C15; }
+html.theme-dark #app-shell .bg-cream-300 { background-color: #2C2219; }
 
-  /* Fonds de page & sections */
-  #app-shell .bg-cream-50  { background-color: #16110D; }
-  #app-shell .bg-cream-100 { background-color: #1F1812; }
-  #app-shell .bg-cream-200 { background-color: #241C15; }
-  #app-shell .bg-cream-300 { background-color: #2C2219; }
+/* Surfaces / cartes (blanc → brun nuit) */
+html.theme-dark #app-shell .bg-white       { background-color: #211A14; }
+html.theme-dark #app-shell .bg-white\/90   { background-color: rgba(33,26,20,0.9); }
+html.theme-dark #app-shell .bg-white\/70   { background-color: rgba(33,26,20,0.7); }
+html.theme-dark #app-shell .bg-white\/40   { background-color: rgba(22,17,13,0.5); }
+html.theme-dark #app-shell .bg-white\/30   { background-color: rgba(22,17,13,0.45); }
 
-  /* Surfaces / cartes (blanc → brun nuit) */
-  #app-shell .bg-white       { background-color: #211A14; }
-  #app-shell .bg-white\/90   { background-color: rgba(33,26,20,0.9); }
-  #app-shell .bg-white\/70   { background-color: rgba(33,26,20,0.7); }
-  #app-shell .bg-white\/40   { background-color: rgba(22,17,13,0.5); }
-  #app-shell .bg-white\/30   { background-color: rgba(22,17,13,0.45); }
+/* Bordures */
+html.theme-dark #app-shell .border-cream-200 { border-color: #382C22; }
+html.theme-dark #app-shell .border-cream-300 { border-color: #43352A; }
+html.theme-dark #app-shell .border-cream-100 { border-color: #2E241C; }
 
-  /* Bordures */
-  #app-shell .border-cream-200 { border-color: #382C22; }
-  #app-shell .border-cream-300 { border-color: #43352A; }
-  #app-shell .border-cream-100 { border-color: #2E241C; }
+/* Texte (stone foncé → crème clair ; muté → beige grisé) */
+html.theme-dark #app-shell .text-stone-900,
+html.theme-dark #app-shell .text-stone-800,
+html.theme-dark #app-shell .text-stone-700,
+html.theme-dark #app-shell .text-foreground { color: #F2E9DD; }
+html.theme-dark #app-shell .text-stone-600 { color: #D9CCBB; }
+html.theme-dark #app-shell .text-stone-500 { color: #B3A491; }
+html.theme-dark #app-shell .text-stone-400 { color: #9A8C7A; }
+html.theme-dark #app-shell .text-stone-300 { color: #7E7264; }
 
-  /* Texte (stone foncé → crème clair ; muté → beige grisé) */
-  #app-shell .text-stone-900,
-  #app-shell .text-stone-800,
-  #app-shell .text-stone-700,
-  #app-shell .text-foreground { color: #F2E9DD; }
-  #app-shell .text-stone-600 { color: #D9CCBB; }
-  #app-shell .text-stone-500 { color: #B3A491; }
-  #app-shell .text-stone-400 { color: #9A8C7A; }
-  #app-shell .text-stone-300 { color: #7E7264; }
+/* Champs de saisie */
+html.theme-dark #app-shell input::placeholder,
+html.theme-dark #app-shell textarea::placeholder { color: #7E7264; }
 
-  /* Champs de saisie */
-  #app-shell input::placeholder,
-  #app-shell textarea::placeholder { color: #7E7264; }
-
-  /* Bannières volontairement sombres (crise, etc.) : on garde le fond foncé
-     mais on éclaircit le texte secondaire pour le contraste. */
-  #app-shell .bg-stone-900 .text-stone-300 { color: #C9BCAB; }
-}
+/* Bannières volontairement sombres (crise, etc.) : on éclaircit le texte
+   secondaire pour le contraste. */
+html.theme-dark #app-shell .bg-stone-900 .text-stone-300 { color: #C9BCAB; }
 
 /* ─── Mode app installée (PWA) : comportement natif ──────────────────────────
    iOS Safari ignore `overscroll-behavior` : pour tuer le rebond élastique on

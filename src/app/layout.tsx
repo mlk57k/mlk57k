@@ -82,6 +82,13 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
+        {/* Thème sombre : pose la classe .theme-dark AVANT le paint (pas de
+            clignotement). Choix utilisateur mémorisé ; "auto" suit le système. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('ancrage-theme');var m=window.matchMedia('(prefers-color-scheme: dark)');var dark=t==='dark'||(t!=='light'&&m.matches);document.documentElement.classList.toggle('theme-dark',dark);if(t!=='light'&&t!=='dark'){m.addEventListener('change',function(e){if(!localStorage.getItem('ancrage-theme'))document.documentElement.classList.toggle('theme-dark',e.matches);});}}catch(e){}})();`,
+          }}
+        />
         {/* Préconnexion à Supabase : la vérif de session au démarrage part
             immédiatement au lieu d'attendre la résolution DNS + TLS */}
         {supabaseHost && (

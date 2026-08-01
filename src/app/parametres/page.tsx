@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, LogOut, BellRing } from "lucide-react";
+import { ArrowLeft, LogOut, BellRing, SunMoon } from "lucide-react";
 import { pushSupported, subscribeToPush, unsubscribeFromPush, isPushSubscribed } from "@/lib/push-client";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -257,6 +258,19 @@ export default function ParametresPage() {
                 ))}
               </select>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <SunMoon className="h-4 w-4 text-coral-400" />
+              Apparence
+            </CardTitle>
+            <CardDescription>Choisis le thème de l&apos;app. « Auto » suit le réglage clair/sombre de ton téléphone.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ThemeToggle />
           </CardContent>
         </Card>
 
