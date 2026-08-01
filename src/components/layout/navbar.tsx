@@ -69,11 +69,6 @@ export function Navbar() {
               Mon journal
             </Link>
           )}
-          {isLoggedIn !== true && (
-            <Link href="/auth" className="hidden sm:inline text-[#6B5545] hover:text-[#33241A] transition-colors">
-              Se connecter
-            </Link>
-          )}
 
           <button
             onClick={handleStartClick}
