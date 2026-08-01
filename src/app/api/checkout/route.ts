@@ -87,6 +87,36 @@ async function getPriceIds(): Promise<Record<Plan, string>> {
   return _prices;
 }
 
+// Le nom affiché sur la page de paiement Stripe = le nom du PRODUIT rattaché au
+// prix. Les prix Ancrage peuvent pendre d'un ancien produit encore nommé
+// « Glowy » : on force donc le renommage du/des produit(s) concerné(s) en
+// « Ancrage ». Idempotent, exécuté une fois par instance serverless.
+const PRODUCT_NAME = "Ancrage — Journaling illimité";
+const PRODUCT_DESCRIPTION =
+  "Entrées de journal illimitées, bilans hebdomadaires, et mémoire des sessions précédentes.";
+let _brandingEnsured = false;
+
+async function ensureAncrageBranding(stripe: ReturnType<typeof getStripe>, priceIds: Record<Plan, string>) {
+  if (_brandingEnsured) return;
+  try {
+    const productIds = new Set<string>();
+    for (const id of Object.values(priceIds)) {
+      const price = await stripe.prices.retrieve(id);
+      if (typeof price.product === "string") productIds.add(price.product);
+    }
+    for (const pid of Array.from(productIds)) {
+      await stripe.products.update(pid, {
+        name: PRODUCT_NAME,
+        description: PRODUCT_DESCRIPTION,
+        metadata: { app: "ancrage" },
+      });
+    }
+    _brandingEnsured = true;
+  } catch (err) {
+    console.error("[/api/checkout] renommage produit échoué:", err);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     if (!process.env.STRIPE_SECRET_KEY) {
@@ -107,6 +137,7 @@ export async function POST(request: Request) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
     const stripe = getStripe();
     const priceIds = await getPriceIds();
+    await ensureAncrageBranding(stripe, priceIds);
     const priceId = priceIds[plan];
 
     const supabase = createClient();
