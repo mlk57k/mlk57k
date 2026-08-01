@@ -45,7 +45,7 @@ export async function sendDailyRecapEmail(data: RecapData) {
   `);
 
   await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>",
+    from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <bonjour@ancrage.xyz>",
     to: data.to,
     subject: `Récap Ancrage — ${data.newSignups} inscrit${data.newSignups > 1 ? "s" : ""}, ${data.newEntries} entrée${data.newEntries > 1 ? "s" : ""}`,
     html,

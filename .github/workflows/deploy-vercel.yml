@@ -95,7 +95,7 @@ jobs:
               ("STRIPE_PRICE_ID_ANNUAL",          annual),
               ("NEXT_PUBLIC_STRIPE_PRICE_ANNUAL", annual),
               ("RESEND_API_KEY",                  env.get("RESEND_API_KEY",                  "")),
-              ("RESEND_FROM_EMAIL",               "Ancrage <noreply@glowy.beauty>"),
+              ("RESEND_FROM_EMAIL",               "Ancrage <bonjour@ancrage.xyz>"),
               ("NEXT_PUBLIC_SUPABASE_URL",        env.get("NEXT_PUBLIC_SUPABASE_URL",        "")),
               ("NEXT_PUBLIC_SUPABASE_ANON_KEY",   env.get("NEXT_PUBLIC_SUPABASE_ANON_KEY",   "")),
               ("SUPABASE_SERVICE_ROLE_KEY",       env.get("SUPABASE_SERVICE_ROLE_KEY",       "")),

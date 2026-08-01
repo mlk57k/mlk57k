@@ -51,7 +51,7 @@ export async function sendLaunchOfferEmail(to: string, appUrl: string, idempoten
 
   const result = await resend.emails.send(
     {
-      from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>",
+      from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <bonjour@ancrage.xyz>",
       replyTo: "m.nabbachi@icloud.com",
       to,
       subject: "Ton premier mois à 1 € 🌙",

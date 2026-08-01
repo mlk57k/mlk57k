@@ -25,7 +25,7 @@ export async function sendWelcomeEmail(to: string, appUrl: string) {
   `);
 
   await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>",
+    from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <bonjour@ancrage.xyz>",
     to,
     subject: "Bienvenue dans Ancrage 🌙",
     html,

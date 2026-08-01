@@ -23,9 +23,9 @@ export async function GET(request: Request) {
   if (testEmail) {
     try {
       const id = await sendLaunchOfferEmail(testEmail, appUrl); // pas de clé d'idempotence → force l'envoi
-      return NextResponse.json({ test: testEmail, ok: true, id, from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>" });
+      return NextResponse.json({ test: testEmail, ok: true, id, from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <bonjour@ancrage.xyz>" });
     } catch (err) {
-      return NextResponse.json({ test: testEmail, ok: false, error: err instanceof Error ? err.message : String(err), from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <noreply@glowy.beauty>" });
+      return NextResponse.json({ test: testEmail, ok: false, error: err instanceof Error ? err.message : String(err), from: process.env.RESEND_FROM_EMAIL ?? "Ancrage <bonjour@ancrage.xyz>" });
     }
   }
 
