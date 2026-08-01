@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, LogOut, BellRing, SunMoon, CreditCard, Target, Clock, ChevronDown, Lock } from "lucide-react";
+import { ArrowLeft, LogOut, BellRing, SunMoon, CreditCard, Target, Clock, Lock } from "lucide-react";
 import { pushSupported, subscribeToPush, unsubscribeFromPush, isPushSubscribed } from "@/lib/push-client";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SettingsSection } from "@/components/settings-section";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface Profile {
@@ -29,51 +29,6 @@ const PLAN_LABELS: Record<string, string> = {
   past_due: "Paiement en retard",
   canceled: "Abonnement annulé",
 };
-
-/* Bloc de paramètre repliable : on ne voit que le titre, on tape pour déplier
-   tout le détail. Un seul bloc peut rester ouvert à la fois (accordéon). */
-function SettingsSection({
-  id,
-  title,
-  icon,
-  openId,
-  onToggle,
-  children,
-}: {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
-  openId: string | null;
-  onToggle: (id: string) => void;
-  children: React.ReactNode;
-}) {
-  const open = openId === id;
-  return (
-    <Card className="overflow-hidden">
-      <button
-        type="button"
-        onClick={() => onToggle(id)}
-        aria-expanded={open}
-        className="w-full flex items-center gap-3 px-5 sm:px-6 py-5 text-left transition-colors hover:bg-cream-100/70"
-      >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cream-100 text-coral-400">
-          {icon}
-        </span>
-        <span className="font-display text-lg font-bold text-stone-900 flex-1">{title}</span>
-        <ChevronDown
-          className={`h-5 w-5 shrink-0 text-stone-400 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      <div
-        className={`grid transition-all duration-300 ease-out ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
-      >
-        <div className="overflow-hidden">
-          <div className="px-5 sm:px-6 pb-6 pt-1 border-t border-cream-200">{children}</div>
-        </div>
-      </div>
-    </Card>
-  );
-}
 
 export default function ParametresPage() {
   const router = useRouter();
