@@ -1,0 +1,23 @@
+name: Campagne 1er mois à 1 €
+
+on:
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull CRON_SECRET from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          CRON=$(grep '^CRON_SECRET=' .env.local | cut -d= -f2- | tr -d '"')
+          echo "::add-mask::$CRON"
+          echo "CRON=$CRON" >> $GITHUB_ENV
+
+      - name: Envoyer la campagne
+        run: |
+          curl -sS "https://ancrage.xyz/api/admin/launch-offer" \
+            -H "Authorization: Bearer $CRON" | python3 -m json.tool
