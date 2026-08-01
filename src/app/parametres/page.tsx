@@ -23,7 +23,7 @@ interface Profile {
 }
 
 const PLAN_LABELS: Record<string, string> = {
-  free: "Formule gratuite (3 entrées / semaine)",
+  free: "Formule gratuite (10 confidences offertes)",
   trialing: "Essai gratuit en cours",
   active: "Abonnement actif",
   past_due: "Paiement en retard",
