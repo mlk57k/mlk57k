@@ -2,6 +2,11 @@ name: Campagne 1er mois à 1 €
 
 on:
   workflow_dispatch:
+    inputs:
+      test:
+        description: 'Adresse de test (envoie 1 seul mail et affiche l’erreur Resend). Vide = vraie campagne.'
+        required: false
+        default: ''
 
 jobs:
   send:
@@ -19,5 +24,8 @@ jobs:
 
       - name: Envoyer la campagne
         run: |
-          curl -sS "https://ancrage.xyz/api/admin/launch-offer" \
-            -H "Authorization: Bearer $CRON" | python3 -m json.tool
+          URL="https://ancrage.xyz/api/admin/launch-offer"
+          if [ -n "${{ github.event.inputs.test }}" ]; then
+            URL="$URL?test=${{ github.event.inputs.test }}"
+          fi
+          curl -sS "$URL" -H "Authorization: Bearer $CRON" | python3 -m json.tool
