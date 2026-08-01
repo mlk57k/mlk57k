@@ -12,7 +12,7 @@ type Plan = "weekly" | "annual" | "monthly";
 const CTA_LABELS: Record<Plan, string> = {
   weekly: "Commencer — 4,99 €/sem",
   annual: "Commencer — 49,99 €/an",
-  monthly: "Commencer — 9,99 €/mois",
+  monthly: "Commencer — 1er mois à 1 €",
 };
 
 const BENEFITS = [
@@ -26,7 +26,7 @@ const BENEFITS = [
 
 export default function PaywallPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState<Plan>("annual");
+  const [selected, setSelected] = useState<Plan>("monthly");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -174,19 +174,27 @@ export default function PaywallPage() {
             </div>
           </div>
 
-          {/* Mensuel — référence */}
-          <div
-            {...planProps("monthly")}
-            className={cn(
-              "flex cursor-pointer items-center gap-3 rounded-2xl border bg-white px-4 py-3.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-coral-400",
-              selected === "monthly" ? "border-coral-400 shadow-soft" : "border-cream-200"
-            )}
-          >
-            <Radio active={selected === "monthly"} />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-stone-800">Mensuel</p>
-              <p className="text-lg font-bold text-stone-900">9,99 €</p>
-              <p className="text-xs text-stone-400">par mois</p>
+          {/* Mensuel — offre de lancement : 1er mois à 1 € */}
+          <div className="relative">
+            <span className="absolute -top-2.5 left-4 z-10 rounded-full bg-gradient-coral px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-glow-coral">
+              1er mois à 1 €
+            </span>
+            <div
+              {...planProps("monthly")}
+              className={cn(
+                "flex cursor-pointer items-center gap-3 rounded-2xl border-2 bg-white px-4 pb-4 pt-5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-coral-400",
+                selected === "monthly" ? "border-coral-400 shadow-glow-coral" : "border-coral-200 shadow-soft"
+              )}
+            >
+              <Radio active={selected === "monthly"} />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-stone-800">Mensuel</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-stone-900">1 €</span>
+                  <span className="text-xs text-stone-400">le 1er mois</span>
+                </div>
+                <p className="text-xs text-stone-400">puis 9,99 € / mois · annulable à tout moment</p>
+              </div>
             </div>
           </div>
         </div>

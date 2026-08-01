@@ -7,7 +7,30 @@ export const runtime = "nodejs";
 
 const TRIAL_PERIOD_DAYS = 3;
 
+// Offre de lancement : 1er mois à 1 € sur le plan mensuel (9,99 €), puis plein tarif.
+// Réalisé via un coupon Stripe « une seule fois » de 8,99 € (9,99 − 1,00 = 8,99).
+const LAUNCH_COUPON_ID = "ancrage_launch_1eur";
+const LAUNCH_DISCOUNT_CENTS = 899;
+
 type Plan = "weekly" | "monthly" | "annual";
+
+async function getLaunchCouponId(stripe: ReturnType<typeof getStripe>): Promise<string> {
+  try {
+    // Existe déjà (les coupons supprimés renvoient une erreur → on tombe dans le catch).
+    await stripe.coupons.retrieve(LAUNCH_COUPON_ID);
+    return LAUNCH_COUPON_ID;
+  } catch {
+    const created = await stripe.coupons.create({
+      id: LAUNCH_COUPON_ID,
+      amount_off: LAUNCH_DISCOUNT_CENTS,
+      currency: "eur",
+      duration: "once",
+      name: "Offre de lancement — 1er mois à 1 €",
+      metadata: { app: "ancrage" },
+    });
+    return created.id;
+  }
+}
 
 let _prices: Record<Plan, string> | null = null;
 
@@ -121,18 +144,25 @@ export async function POST(request: Request) {
         .upsert({ id: user.id, email: user.email ?? "", stripe_customer_id: customerId }, { onConflict: "id" });
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const params: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: {
-        trial_period_days: TRIAL_PERIOD_DAYS,
-        metadata: { user_id: user.id },
-      },
+      subscription_data: { metadata: { user_id: user.id } },
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/paywall`,
       metadata: { user_id: user.id },
-    } as Stripe.Checkout.SessionCreateParams);
+    };
+
+    if (plan === "monthly") {
+      // Mensuel : 1er mois à 1 € (coupon), prélevé tout de suite, puis 9,99 €/mois.
+      params.discounts = [{ coupon: await getLaunchCouponId(stripe) }];
+    } else {
+      // Autres plans : 3 jours d'essai gratuit comme avant.
+      params.subscription_data!.trial_period_days = TRIAL_PERIOD_DAYS;
+    }
+
+    const session = await stripe.checkout.sessions.create(params);
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
