@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, LogOut, BellRing, SunMoon, CreditCard, Target, Clock, Lock } from "lucide-react";
+import { ArrowLeft, LogOut, BellRing, SunMoon, CreditCard, Target, Clock, Lock, Database } from "lucide-react";
 import { pushSupported, subscribeToPush, unsubscribeFromPush, isPushSubscribed } from "@/lib/push-client";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { SettingsSection } from "@/components/settings-section";
+import { SettingsSection, SettingsLink } from "@/components/settings-section";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -319,11 +319,8 @@ export default function ParametresPage() {
           </div>
         </SettingsSection>
 
-        <div className="flex items-center justify-end pt-2">
-          <Link href="/confidentialite-des-donnees" className="text-sm text-stone-500 hover:text-stone-900 underline">
-            Mes données &amp; export
-          </Link>
-        </div>
+        {/* Mes données & export — bloc pleine largeur, renvoie vers la page dédiée */}
+        <SettingsLink href="/confidentialite-des-donnees" title="Mes données & export" icon={<Database className="h-4 w-4" />} />
 
         <div className="pt-4 border-t border-cream-200">
           <Button variant="outline" disabled={signingOut} onClick={handleSignOut}>
