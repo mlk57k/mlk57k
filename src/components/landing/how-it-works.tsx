@@ -1,45 +1,50 @@
+const STEPS = [
+  {
+    n: "01",
+    title: "Tu écris ou tu parles.",
+    body: "Comme ça vient, sans te relire. Au clavier les soirs bavards, à la voix les soirs fatigués.",
+  },
+  {
+    n: "02",
+    title: "Ancrage te répond.",
+    body: "Un reflet bienveillant et une question douce. Jamais de jugement, jamais un diagnostic.",
+  },
+  {
+    n: "03",
+    title: "Tout reste privé.",
+    body: "Chiffré, exportable, effaçable quand tu veux. Tes écrits ne servent jamais à entraîner un modèle.",
+  },
+];
+
 export function HowItWorks() {
-  const steps = [
-    {
-      n: "1",
-      title: "Tu écris ou tu parles.",
-      body: "Comme ça vient, sans te relire. Au clavier les soirs bavards, à la voix les soirs fatigués.",
-    },
-    {
-      n: "2",
-      title: "Ancrage te répond.",
-      body: "Un reflet bienveillant et une question douce. Jamais de jugement, jamais un diagnostic.",
-    },
-    {
-      n: "3",
-      title: "Tout reste privé.",
-      body: "Chiffré, exportable, effaçable quand tu veux. Tes écrits ne servent jamais à entraîner un modèle.",
-    },
-  ];
-
   return (
-    <section id="how" className="bg-cream-50 py-20 sm:py-28">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6">
-        <div className="text-center mb-14">
-          <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">Comment ça marche</p>
-          <h2 className="font-display text-3xl sm:text-4xl font-semibold text-stone-900">
-            Tu déposes,<br className="hidden sm:block" /> Ancrage reflète.
-          </h2>
-        </div>
+    <section id="how" className="bg-[#F3EBDC] px-5 sm:px-8 lg:px-14 py-16 sm:py-[76px]">
+      <div className="text-center mb-10 sm:mb-[52px]">
+        <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.16em] text-[#B4694A]">
+          Comment ça marche
+        </span>
+        <h2 className="font-display font-normal text-[#33241A] text-[2rem] sm:text-[42px] leading-[1.12] mt-3.5">
+          Tu déposes, Ancrage reflète.
+        </h2>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {steps.map(({ n, title, body }) => (
-            <div key={n} className="bg-white border border-cream-200 rounded-2xl p-6 flex gap-4">
-              <div className="w-10 h-10 rounded-xl bg-coral-50 flex-none flex items-center justify-center font-display text-lg font-semibold text-coral-500">
-                {n}
-              </div>
-              <div>
-                <p className="font-semibold text-stone-900 text-sm mb-1.5">{title}</p>
-                <p className="text-stone-500 text-sm leading-relaxed">{body}</p>
-              </div>
+      <div className="max-w-[640px] mx-auto flex flex-col">
+        {STEPS.map((step, i) => (
+          <div
+            key={step.n}
+            className={`flex gap-5 sm:gap-6 py-6 border-t border-[#33241A]/[0.12] ${
+              i === STEPS.length - 1 ? "border-b" : ""
+            }`}
+          >
+            <span className="font-display text-[26px] sm:text-[30px] text-[#C0714F] w-9 sm:w-11 flex-none leading-none">
+              {step.n}
+            </span>
+            <div className="flex flex-col gap-1.5">
+              <strong className="text-[17px] sm:text-lg font-semibold text-[#33241A]">{step.title}</strong>
+              <span className="text-[15px] leading-[1.6] text-[#6B5545]">{step.body}</span>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </section>
   );

@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { AppLogo } from "@/components/ui/logo";
 
 async function getUser() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
@@ -24,7 +23,7 @@ export function Navbar() {
 
   function handleStartClick() {
     // On va toujours vers /journal : le middleware redirige vers /auth si l'utilisateur
-    // n'est pas connecté, et laisse passer s'il l'est. Pas de course à l'état client.
+    // n'est pas connecté, et laisse passer s'il l'est.
     router.push("/journal");
   }
 
@@ -44,61 +43,44 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full glass border-b border-cream-200/50">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="cursor-pointer transition-transform duration-200 hover:scale-[1.03]">
-          <AppLogo size="md" />
+    <header className="border-b border-[#33241A]/[0.08]">
+      <div className="flex items-center justify-between px-5 sm:px-8 lg:px-14 py-4 sm:py-[22px]">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/icon-512.png"
+            alt="Ancrage"
+            width={44}
+            height={44}
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-[10px]"
+          />
+          <span className="font-display text-lg sm:text-xl font-semibold text-[#33241A]">Ancrage</span>
         </Link>
-        <nav className="hidden sm:flex items-center gap-8 text-sm font-medium text-stone-500">
-          <Link href="#how" className="relative hover:text-stone-900 transition-colors duration-150 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-coral-400 after:transition-all hover:after:w-full">
+
+        <div className="flex items-center gap-4 sm:gap-[26px] text-sm">
+          <Link href="#how" className="hidden sm:inline text-[#6B5545] hover:text-[#33241A] transition-colors">
             Comment ça marche
           </Link>
-          <Link href="#faq" className="relative hover:text-stone-900 transition-colors duration-150 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-coral-400 after:transition-all hover:after:w-full">
+          <Link href="/faq" className="hidden sm:inline text-[#6B5545] hover:text-[#33241A] transition-colors">
             FAQ
           </Link>
-        </nav>
-        <div className="flex items-center gap-2">
+
           {isLoggedIn === true && (
-            <>
-              <Button
-                asChild
-                size="sm"
-                variant="ghost"
-                className="rounded-full px-4 text-stone-600 hover:text-stone-900"
-              >
-                <Link href="/journal">Mon journal</Link>
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="rounded-full px-4 text-stone-500 hover:text-stone-900"
-                onClick={async () => {
-                  const { createClient } = await import("@/lib/supabase/client");
-                  await createClient().auth.signOut();
-                  window.location.assign("/");
-                }}
-              >
-                Se déconnecter
-              </Button>
-            </>
+            <Link href="/journal" className="hidden sm:inline text-[#6B5545] hover:text-[#33241A] transition-colors">
+              Mon journal
+            </Link>
           )}
           {isLoggedIn !== true && (
-            <Button
-              asChild
-              size="sm"
-              variant="ghost"
-              className="rounded-full px-4 text-stone-600 hover:text-stone-900"
-            >
-              <Link href="/auth">Se connecter</Link>
-            </Button>
+            <Link href="/auth" className="hidden sm:inline text-[#6B5545] hover:text-[#33241A] transition-colors">
+              Se connecter
+            </Link>
           )}
-          <Button
-            size="sm"
-            className="rounded-full px-5 bg-coral-400 hover:bg-coral-500 text-white border-none shadow-md shadow-coral-200"
+
+          <button
             onClick={handleStartClick}
+            className="rounded-full bg-[#33241A] px-4 sm:px-[18px] py-2.5 text-[13px] sm:text-sm font-semibold text-[#FBF7EE] transition-opacity hover:opacity-90"
           >
-            Commencer mon journal
-          </Button>
+            Commencer<span className="hidden sm:inline"> mon journal</span>
+          </button>
         </div>
       </div>
     </header>
