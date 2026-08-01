@@ -175,8 +175,12 @@ export default function DataPrivacyPage() {
           <CardContent>
             {error && <p className="text-sm text-coral-500 mb-3">{error}</p>}
             {!confirmDelete ? (
-              <Button variant="outline" className="border-coral-300 text-coral-600 hover:bg-coral-100" onClick={() => setConfirmDelete(true)}>
-                <Trash2 className="h-4 w-4" />
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto h-auto py-3 whitespace-normal text-center border-coral-300 text-coral-600 hover:bg-coral-100"
+                onClick={() => setConfirmDelete(true)}
+              >
+                <Trash2 className="h-4 w-4 shrink-0" />
                 Supprimer définitivement mon compte
               </Button>
             ) : (
