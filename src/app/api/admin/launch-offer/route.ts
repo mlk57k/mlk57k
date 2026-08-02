@@ -52,7 +52,10 @@ export async function GET(request: Request) {
     }
 
     try {
-      await sendLaunchOfferEmail(p.email, appUrl, `launch-offer-1eur-${p.id}`);
+      // clé d'idempotence datée : un renvoi un autre jour part bien, mais deux
+      // exécutions le même jour ne font pas de doublon.
+      const today = new Date().toISOString().slice(0, 10);
+      await sendLaunchOfferEmail(p.email, appUrl, `launch-offer-1eur-${p.id}-${today}`, p.id);
       sent.push(p.email);
     } catch (err) {
       console.error("[launch-offer] échec:", p.id, err);

@@ -1,0 +1,48 @@
+name: Clics de la relance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clicks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "SB_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "SB_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Qui a cliqué
+        run: |
+          curl -sS "$SB_URL/rest/v1/email_clicks?select=user_id,campaign,clicked_at&order=clicked_at.desc" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" > /tmp/clicks.json
+          curl -sS "$SB_URL/rest/v1/profiles?select=id,email,plan_status" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" > /tmp/profiles.json
+          python3 - <<'PYEOF'
+          import json
+          clicks = json.load(open("/tmp/clicks.json"))
+          profiles = {p["id"]: p for p in json.load(open("/tmp/profiles.json"))}
+          print("=" * 60)
+          print("  CLICS SUR LA RELANCE")
+          print("=" * 60)
+          if not clicks:
+              print("  Aucun clic enregistré pour l'instant.")
+          else:
+              seen = set()
+              for c in clicks:
+                  key = (c["user_id"], c["campaign"])
+                  if key in seen:  # un seul affichage par personne/campagne (1er clic)
+                      continue
+                  seen.add(key)
+                  p = profiles.get(c["user_id"], {})
+                  email = p.get("email", c["user_id"])
+                  status = p.get("plan_status", "?")
+                  when = (c["clicked_at"] or "")[:16].replace("T", " ")
+                  print(f"  ✅ {email:34s} [{status:6s}] a cliqué le {when} ({c['campaign']})")
+          print("=" * 60)
+          PYEOF

@@ -29,7 +29,7 @@ async function nudgePaywallOnce(request: Request, userId: string, email: string 
       body: "Tes 10 confidences offertes sont utilisées. Ton 1er mois à 1 € pour continuer.",
       url: "/paywall",
     });
-    if (email) await sendLaunchOfferEmail(email, appUrl, `launch-offer-1eur-${userId}`);
+    if (email) await sendLaunchOfferEmail(email, appUrl, `launch-offer-1eur-${userId}`, userId);
     await admin.from("profiles").update({ paywall_notified_at: new Date().toISOString() }).eq("id", userId);
   } catch (err) {
     console.error("[paywall-nudge] échec:", err);

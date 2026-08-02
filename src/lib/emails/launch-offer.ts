@@ -4,9 +4,13 @@ import { emailShell } from "@/lib/emails/templates";
 // Relance « offre de lancement » : 1er mois à 1 € pour les comptes gratuits qui
 // ont épuisé leurs 10 confidences. `idempotencyKey` évite tout doublon si la
 // campagne est relancée par erreur (déduplication côté Resend).
-export async function sendLaunchOfferEmail(to: string, appUrl: string, idempotencyKey?: string) {
+export async function sendLaunchOfferEmail(to: string, appUrl: string, idempotencyKey?: string, userId?: string) {
   const resend = getResend();
   if (!resend) return;
+
+  // Lien traçable maison : on sait exactement qui clique (via /r/launch),
+  // puis redirection vers le paywall. Sans userId, lien direct.
+  const ctaHref = userId ? `${appUrl}/r/launch?u=${userId}` : `${appUrl}/paywall`;
 
   const html = emailShell(`
     <p style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#262019;margin:0 0 18px;line-height:1.3;">
@@ -36,7 +40,7 @@ export async function sendLaunchOfferEmail(to: string, appUrl: string, idempoten
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
       <tr>
         <td style="border-radius:999px;background:#C4523A;">
-          <a href="${appUrl}/paywall" style="display:inline-block;padding:14px 30px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:999px;">
+          <a href="${ctaHref}" style="display:inline-block;padding:14px 30px;font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:999px;">
             Continuer pour 1&nbsp;€
           </a>
         </td>
