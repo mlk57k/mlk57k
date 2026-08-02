@@ -21,6 +21,8 @@ function Complete() {
         if (user) {
           // Accès offert (liste blanche) : activé avant d'entrer dans l'app
           await fetch("/api/account/sync-access", { method: "POST" }).catch(() => {});
+          // Attribution influenceur (si l'utilisateur est arrivé via un lien ?ref=)
+          await fetch("/api/account/attribute-ref", { method: "POST" }).catch(() => {});
           const { data: profile } = await supabase
             .from("profiles")
             .select("objectifs")

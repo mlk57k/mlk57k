@@ -1,0 +1,61 @@
+name: Tracker influenceurs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "SB_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "SB_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Relevé par influenceur
+        run: |
+          curl -sS "$SB_URL/rest/v1/profiles?select=id,plan_status,referred_by&order=referred_by.asc" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" > /tmp/profiles.json
+          python3 - <<'PYEOF'
+          import json, os, urllib.request
+          url = os.environ["SB_URL"]; key = os.environ["SB_KEY"]
+          profiles = json.load(open("/tmp/profiles.json"))
+
+          def confidences(uid):
+              req = urllib.request.Request(
+                  f"{url}/rest/v1/entry_messages?select=id&user_id=eq.{uid}&role=eq.user",
+                  headers={"apikey": key, "Authorization": f"Bearer {key}",
+                           "Prefer": "count=exact", "Range": "0-0"})
+              with urllib.request.urlopen(req) as r:
+                  return int(r.headers.get("content-range", "0/0").split("/")[-1])
+
+          groups = {}
+          for p in profiles:
+              ref = p.get("referred_by")
+              if not ref:
+                  continue
+              g = groups.setdefault(ref, {"signups": 0, "paid": 0, "paywall": 0})
+              g["signups"] += 1
+              if p["plan_status"] in ("active", "trialing"):
+                  g["paid"] += 1
+              if confidences(p["id"]) >= 10:
+                  g["paywall"] += 1
+
+          print("=" * 56)
+          print("  TRACKER INFLUENCEURS")
+          print("=" * 56)
+          if not groups:
+              print("  Aucune inscription attribuée à un influenceur pour l'instant.")
+              print("  (Donne des liens ancrage.xyz/?ref=NOM et attends les visites.)")
+          else:
+              print(f"  {'INFLUENCEUR':22s} {'INSCRITS':>9s} {'PAYWALL':>8s} {'PAYÉS':>6s}")
+              print("  " + "-" * 50)
+              for ref, g in sorted(groups.items(), key=lambda kv: -kv[1]["signups"]):
+                  print(f"  {ref:22s} {g['signups']:>9d} {g['paywall']:>8d} {g['paid']:>6d}")
+          print("=" * 56)
+          PYEOF
