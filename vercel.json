@@ -2,7 +2,6 @@
   "crons": [
     { "path": "/api/cron/daily-reminder", "schedule": "0 18 * * *" },
     { "path": "/api/cron/weekly-summary", "schedule": "0 18 * * 0" },
-    { "path": "/api/cron/daily-recap", "schedule": "0 20 * * *" },
-    { "path": "/api/cron/inactive-reminder", "schedule": "0 17 * * *" }
+    { "path": "/api/cron/daily-recap", "schedule": "0 20 * * *" }
   ]
 }
