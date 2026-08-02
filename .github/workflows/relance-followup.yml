@@ -1,0 +1,48 @@
+name: Suivi relance 1 euro
+
+on:
+  workflow_dispatch:
+
+jobs:
+  followup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "SB_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "SB_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Qui est revenu après la relance
+        run: |
+          curl -sS "$SB_URL/rest/v1/profiles?select=email,plan_status,last_seen_at&order=last_seen_at.desc" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" > /tmp/p.json
+          python3 - <<'PYEOF'
+          import json
+          from datetime import datetime, timezone
+          rows = json.load(open("/tmp/p.json"))
+          # Destinataires de la campagne "1 euro" (nuit du 1->2 aout)
+          sent = {"pereira_cathia@hotmail.fr","pacchiana.jade28@gmail.com","manon.delcampe@gmail.com",
+                  "sauleaulya@gmail.com","liloum2017@gmail.com","lucasds71400@gmail.com",
+                  "badnxko18@gmail.com","loukafort369@gmail.com"}
+          # Heure d'envoi de la campagne
+          send_ts = datetime(2026,8,2,0,1,tzinfo=timezone.utc)
+          def parse(ts):
+              if not ts: return None
+              return datetime.fromisoformat(ts.replace("Z","+00:00"))
+          print("="*60)
+          print("  RELANCE 1 EUR — qui est revenu depuis l'envoi (2 aout 00h01) ?")
+          print("="*60)
+          for r in rows:
+              if r["email"] not in sent: continue
+              ls = parse(r.get("last_seen_at"))
+              back = ls and ls > send_ts
+              mark = "revenu APRES" if back else "pas revenu"
+              when = ls.strftime("%d/%m %H:%M") if ls else "jamais vu"
+              print(f"  {r['email']:34s} {r['plan_status']:8s} {mark:14s} (derniere activite {when})")
+          print("="*60)
+          PYEOF
