@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateCoachReply, type CoachMessage } from "@/lib/anthropic";
 import { buildShortTermMemory, buildLongTermMemory, saveExtractedMemories } from "@/lib/memory";
 import { FREE_MESSAGE_LIMIT, isPremiumStatus, countUsedConfidences } from "@/lib/free-messages";
-import { sendPaywallNudgeEmail } from "@/lib/emails/paywall-nudge";
+import { sendLaunchOfferEmail } from "@/lib/emails/launch-offer";
 import { sendPushToUser } from "@/lib/push-server";
 
 // Relance paywall (email + push), une seule fois, quand les confidences
@@ -26,10 +26,10 @@ async function nudgePaywallOnce(request: Request, userId: string, email: string 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
     await sendPushToUser(admin, userId, {
       title: "Continue d'écrire, sans limite 🌙",
-      body: "Tes 10 confidences offertes sont utilisées. 3 jours d'essai offerts pour continuer.",
+      body: "Tes 10 confidences offertes sont utilisées. Ton 1er mois à 1 € pour continuer.",
       url: "/paywall",
     });
-    if (email) await sendPaywallNudgeEmail(email, appUrl);
+    if (email) await sendLaunchOfferEmail(email, appUrl, `launch-offer-1eur-${userId}`);
     await admin.from("profiles").update({ paywall_notified_at: new Date().toISOString() }).eq("id", userId);
   } catch (err) {
     console.error("[paywall-nudge] échec:", err);
