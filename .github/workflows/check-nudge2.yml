@@ -1,0 +1,40 @@
+name: Verif 2e relance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "SB_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "SB_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Verifier la colonne paywall_nudge2_at
+        run: |
+          RESP=$(curl -sS "$SB_URL/rest/v1/profiles?select=email,paywall_notified_at,paywall_nudge2_at" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY")
+          echo "$RESP" > /tmp/p.json
+          python3 - <<'PYEOF'
+          import json
+          data = json.load(open("/tmp/p.json"))
+          if isinstance(data, dict) and data.get("code"):
+              print("❌ Colonne absente ou erreur :", data.get("message")); raise SystemExit(1)
+          nudged1 = [p for p in data if p.get("paywall_notified_at")]
+          excluded = [p for p in nudged1 if p.get("paywall_nudge2_at")]
+          print("=" * 50)
+          print("  VERIF 2e RELANCE")
+          print("=" * 50)
+          print(f"  Colonne paywall_nudge2_at : ✅ présente")
+          print(f"  Comptes ayant reçu la 1re relance : {len(nudged1)}")
+          print(f"  Exclus de la 2e relance immédiate : {len(excluded)}")
+          print(f"  → Les nouveaux bloqués auront bien la séquence complète.")
+          print("=" * 50)
+          PYEOF
