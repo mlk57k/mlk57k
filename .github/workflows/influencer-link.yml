@@ -1,0 +1,42 @@
+name: Lien dashboard influenceur
+
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "Code de l'influenceur (ex: junkette)"
+        required: true
+
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull CRON_SECRET from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          CRON=$(grep '^CRON_SECRET=' .env.local | cut -d= -f2- | tr -d '"')
+          echo "::add-mask::$CRON"
+          echo "CRON=$CRON" >> $GITHUB_ENV
+
+      - name: Générer le lien
+        env:
+          CODE: ${{ github.event.inputs.code }}
+        run: |
+          python3 - <<'PYEOF'
+          import hmac, hashlib, os
+          cron = os.environ["CRON"]
+          code = os.environ["CODE"].strip().lower()
+          token = hmac.new(cron.encode(), code.encode(), hashlib.sha256).hexdigest()[:32]
+          print("=" * 60)
+          print(f"  DASHBOARD PRIVÉ DE : {code}")
+          print("=" * 60)
+          print(f"  Lien à partager avec son audience :")
+          print(f"    https://ancrage.xyz/?ref={code}")
+          print()
+          print(f"  Lien de SON tableau de bord (privé, à lui donner) :")
+          print(f"    https://ancrage.xyz/i/{code}?token={token}")
+          print("=" * 60)
+          PYEOF
