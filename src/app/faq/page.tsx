@@ -71,19 +71,19 @@ export default function FaqPage() {
 
       <Q q="C&apos;est gratuit ?">
         <p>
-          Tu peux écrire <strong>3 entrées par semaine</strong> gratuitement, sans carte
-          bancaire. Pour un accès illimité, tu peux souscrire un abonnement.
+          Tu commences gratuitement : <strong>10 confidences offertes</strong> avec ton coach,
+          sans carte bancaire. Pour un accès illimité, tu peux souscrire un abonnement.
         </p>
       </Q>
 
       <Q q="Quels sont les tarifs ?">
-        <p>Trois formules d&apos;accès illimité :</p>
+        <p>Pour passer à l&apos;illimité, <strong>ton premier mois est à 1 €</strong> :</p>
         <ul className="list-disc pl-5 mt-2 space-y-1">
-          <li><strong>Hebdomadaire</strong> — 4,99 € / semaine, avec 3 jours d&apos;essai gratuit</li>
-          <li><strong>Mensuel</strong> — 9,99 € / mois, avec 3 jours d&apos;essai gratuit</li>
-          <li><strong>Annuel</strong> — 49,99 € / an, avec 3 jours d&apos;essai gratuit</li>
+          <li><strong>Mensuel</strong> — 1 € le premier mois, puis 9,99 € / mois</li>
+          <li><strong>Hebdomadaire</strong> — 4,99 € / semaine</li>
+          <li><strong>Annuel</strong> — 49,99 € / an (soit 4,17 € / mois)</li>
         </ul>
-        <p className="mt-2">Les prix sont TTC. Aucun paiement pendant l&apos;essai.</p>
+        <p className="mt-2">Les prix sont TTC. Annulable en un clic, à tout moment.</p>
       </Q>
 
       <Q q="Comment résilier ?">

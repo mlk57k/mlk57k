@@ -41,8 +41,8 @@ export async function sendPaywallNudgeEmail(to: string, appUrl: string) {
     </table>
 
     <p style="margin:0;font-size:13px;color:#8a8078;line-height:1.6;">
-      <strong style="color:#5c5048;">3 jours d'essai gratuit</strong> — tu ne paies rien si tu
-      changes d'avis. Annulable en un clic, quand tu veux.
+      <strong style="color:#5c5048;">1 € le premier mois</strong>, puis 9,99 €/mois. Annulable
+      en un clic, quand tu veux.
     </p>
   `);
 

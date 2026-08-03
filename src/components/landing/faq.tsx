@@ -14,8 +14,8 @@ const FAQS = [
     a: "Oui. Tes entrées sont chiffrées en transit et au repos. Elles ne sont jamais utilisées pour entraîner un modèle d'IA. Tu peux les exporter ou les effacer à tout moment depuis Mes données.",
   },
   {
-    q: "Comment fonctionne l'essai gratuit ?",
-    a: "Tu as accès à 3 entrées par semaine en version gratuite, sans carte bancaire. Si tu veux passer à illimité, un essai de 7 jours est inclus à l'abonnement payant. Tu peux annuler en un clic, à tout moment.",
+    q: "Combien ça coûte ?",
+    a: "Tu commences gratuitement : 10 confidences offertes avec ton coach, sans carte bancaire. Pour continuer en illimité, ton premier mois est à 1 €, puis 9,99 €/mois. Annulable en un clic, à tout moment.",
   },
   {
     q: "Puis-je utiliser la voix à la place du texte ?",

@@ -40,8 +40,9 @@ export default function TermsPage() {
       <h2>3. Accès au service</h2>
       <p>
         La création d&apos;un compte (par e-mail ou Google) est nécessaire pour utiliser
-        Ancrage. Chaque semaine, <strong>3 entrées de journal sont gratuites</strong>. Au-delà,
-        l&apos;accès illimité nécessite un abonnement.
+        Ancrage. Écrire dans son journal est libre ; les échanges avec le coach IA sont
+        offerts à hauteur de <strong>10 confidences</strong>. Au-delà, l&apos;accès illimité
+        nécessite un abonnement.
       </p>
       <p>
         L&apos;utilisateur doit avoir au moins <strong>16 ans</strong> pour utiliser Ancrage.
@@ -58,9 +59,10 @@ export default function TermsPage() {
         <li><strong>Annuel</strong> — 49,99 € TTC / an, renouvelé automatiquement chaque année.</li>
       </ul>
       <p>
-        Chaque abonnement débute par un essai gratuit de 3 jours. Les prix sont indiqués en
-        euros toutes taxes comprises. L&apos;éditeur se réserve le droit de modifier ses tarifs
-        avec un préavis d&apos;au moins 30 jours.
+        L&apos;abonnement mensuel débute par un <strong>premier mois à 1 €</strong>, puis
+        9,99 € TTC / mois. Les prix sont indiqués en euros toutes taxes comprises.
+        L&apos;éditeur se réserve le droit de modifier ses tarifs avec un préavis d&apos;au
+        moins 30 jours.
       </p>
 
       <h3>4.2 Paiement</h3>

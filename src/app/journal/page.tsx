@@ -244,7 +244,7 @@ function JournalContent() {
       <main className="flex-1 flex flex-col mx-auto w-full max-w-2xl px-4 sm:px-6 py-6">
         {bienvenue && (
           <div className="mb-4 rounded-2xl bg-coral-50 border border-coral-200 px-4 py-3 text-sm text-coral-700">
-            Bienvenue dans Ancrage. Ton essai gratuit a commencé.
+            Bienvenue dans l&apos;illimité ! Ton accès est actif — écris autant que tu veux. 💛
           </div>
         )}
 
