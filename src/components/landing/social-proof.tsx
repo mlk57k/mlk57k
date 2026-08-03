@@ -13,7 +13,7 @@ export function SocialProof() {
       </h2>
       <p className="text-[15.5px] leading-[1.65] text-[#6B5545] max-w-[58ch] mx-auto">
         Ancrage vient d&apos;ouvrir. Les premiers retours de la bêta arrivent bientôt — en
-        attendant, l&apos;essai est gratuit, sans carte, et tu te fais ton propre avis.
+        attendant, ton premier mois est à 1&nbsp;€, sans engagement, et tu te fais ton propre avis.
       </p>
 
       {/* Vrais témoignages uniquement (aucun faux avis). La carte n'apparaît
