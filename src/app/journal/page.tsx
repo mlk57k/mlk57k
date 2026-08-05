@@ -145,6 +145,8 @@ function JournalContent() {
       };
       setMessages((m) => [...m, optimistic]);
       setText("");
+      // Petit retour tactile sur mobile — l'envoi devient un geste satisfaisant
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(12);
 
       const res = await fetch(`/api/entries/${id}/messages`, {
         method: "POST",
@@ -358,8 +360,10 @@ function JournalContent() {
             <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
               <div
                 className={cn(
-                  "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line",
-                  m.role === "user" ? "bg-coral-400 text-white" : "bg-white border border-cream-200 text-stone-700"
+                  "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line animate-message-in",
+                  m.role === "user"
+                    ? "origin-bottom-right bg-coral-400 text-white shadow-[0_6px_18px_-6px_rgba(196,82,58,0.55)]"
+                    : "origin-bottom-left bg-white border border-cream-200 text-stone-700 shadow-sm"
                 )}
               >
                 {m.content}
@@ -367,8 +371,12 @@ function JournalContent() {
             </div>
           ))}
           {sending && (
-            <div className="flex justify-start">
-              <div className="rounded-2xl px-4 py-3 bg-white border border-cream-200 text-stone-400 text-sm">…</div>
+            <div className="flex justify-start animate-message-in origin-bottom-left">
+              <div className="flex items-center gap-1.5 rounded-2xl px-4 py-3.5 bg-white border border-cream-200">
+                <span className="w-2 h-2 rounded-full bg-coral-300 animate-dot-bounce" />
+                <span className="w-2 h-2 rounded-full bg-coral-300 animate-dot-bounce [animation-delay:0.18s]" />
+                <span className="w-2 h-2 rounded-full bg-coral-300 animate-dot-bounce [animation-delay:0.36s]" />
+              </div>
             </div>
           )}
           <div ref={bottomRef} />
@@ -404,7 +412,12 @@ function JournalContent() {
           >
             {recording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
-          <Button type="submit" size="icon" disabled={!text.trim() || sending}>
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!text.trim() || sending}
+            className="transition-all duration-200 active:scale-90 disabled:scale-90 disabled:opacity-40 enabled:shadow-[0_4px_14px_-4px_rgba(196,82,58,0.6)]"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </form>

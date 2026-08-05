@@ -111,8 +111,24 @@ const config: Config = {
         "marquee": "marquee 32s linear infinite",
         "gradient-shift": "gradientShift 8s ease infinite",
         "breathe": "breathe 3.2s ease-in-out infinite",
+        "message-in": "messageIn 0.42s cubic-bezier(0.34,1.56,0.64,1) both",
+        "dot-bounce": "dotBounce 1.3s ease-in-out infinite",
+        "send-pop": "sendPop 0.4s cubic-bezier(0.34,1.56,0.64,1)",
       },
       keyframes: {
+        messageIn: {
+          "0%": { opacity: "0", transform: "translateY(12px) scale(0.96)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        dotBounce: {
+          "0%, 70%, 100%": { transform: "translateY(0)", opacity: "0.35" },
+          "35%": { transform: "translateY(-5px)", opacity: "1" },
+        },
+        sendPop: {
+          "0%": { transform: "scale(1)" },
+          "40%": { transform: "scale(0.82)" },
+          "100%": { transform: "scale(1)" },
+        },
         breathe: {
           "0%, 100%": { boxShadow: "0 4px 22px -8px rgba(196,82,58,0.28)" },
           "50%": { boxShadow: "0 10px 42px -6px rgba(196,82,58,0.48)" },
