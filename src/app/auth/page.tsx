@@ -232,9 +232,9 @@ function GoogleIcon() {
 
 export default function AuthPage() {
   return (
-    <div className="grain relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-cream-50 to-coral-50/30">
-      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full bg-coral-100/40 blur-[120px]" />
-      <header className="relative px-4 h-14 flex items-center justify-center border-b border-cream-200/50 glass">
+    <div className="grain relative min-h-screen overflow-hidden bg-cream-50">
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full bg-coral-400/20 blur-[120px]" />
+      <header className="relative px-4 h-14 flex items-center justify-center border-b border-cream-200 bg-white/70 backdrop-blur-xl">
         <Link href="/">
           <AppLogo size="md" />
         </Link>
