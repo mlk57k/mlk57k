@@ -46,6 +46,8 @@ function JournalContent() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   // Confidences offertes restantes (null = abonné, illimité)
   const [remaining, setRemaining] = useState<number | null>(null);
+  // Message du coach en train de s'écrire (effet machine à écrire)
+  const [typingId, setTypingId] = useState<string | null>(null);
 
   useEffect(() => {
     const standalone =
@@ -107,6 +109,10 @@ function JournalContent() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  function scrollToBottom() {
+    bottomRef.current?.scrollIntoView({ block: "end" });
+  }
+
   async function ensureEntry(): Promise<string | null> {
     if (entryId) return entryId;
     const res = await fetch("/api/entries", {
@@ -165,6 +171,7 @@ function JournalContent() {
       const data = await res.json();
       if (data.assistantMessage) {
         setMessages((m) => [...m, data.assistantMessage]);
+        setTypingId(data.assistantMessage.id);
       }
       if (typeof data.remainingConfidences === "number") {
         setRemaining(data.remainingConfidences);
@@ -366,7 +373,16 @@ function JournalContent() {
                     : "origin-bottom-left bg-white border border-cream-200 text-stone-700 shadow-sm"
                 )}
               >
-                {m.content}
+                {m.role === "assistant" ? (
+                  <CoachText
+                    content={m.content}
+                    animate={m.id === typingId}
+                    onTick={scrollToBottom}
+                    onDone={() => setTypingId((id) => (id === m.id ? null : id))}
+                  />
+                ) : (
+                  m.content
+                )}
               </div>
             </div>
           ))}
@@ -423,6 +439,63 @@ function JournalContent() {
         </form>
       </main>
     </div>
+  );
+}
+
+// Révèle la réponse du coach mot à mot — effet « machine à écrire ».
+// Rendu instantané si l'utilisateur a désactivé les animations, ou pour
+// les anciens messages (animate=false).
+function CoachText({
+  content,
+  animate,
+  onTick,
+  onDone,
+}: {
+  content: string;
+  animate: boolean;
+  onTick?: () => void;
+  onDone?: () => void;
+}) {
+  const [shown, setShown] = useState(animate ? "" : content);
+  const done = shown.length >= content.length;
+
+  useEffect(() => {
+    if (!animate) {
+      setShown(content);
+      return;
+    }
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setShown(content);
+      onDone?.();
+      return;
+    }
+    // On révèle en gardant les espaces pour reconstruire le texte exact.
+    const tokens = content.split(/(\s+)/);
+    let i = 0;
+    setShown("");
+    const timer = setInterval(() => {
+      i += 1;
+      setShown(tokens.slice(0, i).join(""));
+      onTick?.();
+      if (i >= tokens.length) {
+        clearInterval(timer);
+        onDone?.();
+      }
+    }, 26);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content, animate]);
+
+  return (
+    <>
+      {shown}
+      {animate && !done && (
+        <span className="inline-block w-[2px] h-[1.05em] -mb-[0.15em] ml-0.5 bg-coral-400 animate-pulse" />
+      )}
+    </>
   );
 }
 
