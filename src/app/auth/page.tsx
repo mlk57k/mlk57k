@@ -155,12 +155,12 @@ function AuthForm() {
         </div>
 
         {error && (
-          <p className="text-sm text-coral-600 bg-coral-50 rounded-xl p-3">
+          <p className="text-sm text-coral-500 bg-coral-500/10 border border-coral-400/30 rounded-xl p-3">
             {error}
           </p>
         )}
         {message && (
-          <p className="text-sm text-green-700 bg-green-50 rounded-xl p-3">
+          <p className="text-sm text-emerald-600 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
             {message}
           </p>
         )}
