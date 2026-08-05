@@ -484,7 +484,7 @@ function CoachText({
         clearInterval(timer);
         onDone?.();
       }
-    }, 26);
+    }, 55);
     return () => clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, animate]);
