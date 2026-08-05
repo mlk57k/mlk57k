@@ -110,6 +110,13 @@ function JournalContent() {
   }, [messages]);
 
   function scrollToBottom() {
+    // On ne suit la frappe que si l'utilisateur est déjà en bas de l'écran,
+    // pour ne pas l'arracher à sa lecture s'il a remonté.
+    const el = document.scrollingElement;
+    if (el) {
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 160;
+      if (!nearBottom) return;
+    }
     bottomRef.current?.scrollIntoView({ block: "end" });
   }
 
@@ -472,20 +479,35 @@ function CoachText({
       onDone?.();
       return;
     }
-    // On révèle en gardant les espaces pour reconstruire le texte exact.
-    const tokens = content.split(/(\s+)/);
-    let i = 0;
-    setShown("");
-    const timer = setInterval(() => {
-      i += 1;
-      setShown(tokens.slice(0, i).join(""));
-      onTick?.();
-      if (i >= tokens.length) {
-        clearInterval(timer);
+
+    // Révélation caractère par caractère, pilotée par le temps réel
+    // (requestAnimationFrame) pour un rendu fluide, sans saccade.
+    const CHARS_PER_SEC = 24; // ~24 caractères/seconde, rythme posé
+    let raf = 0;
+    let start = 0;
+    let lastCount = -1;
+
+    const step = (now: number) => {
+      if (!start) start = now;
+      const target = Math.min(
+        content.length,
+        Math.floor(((now - start) / 1000) * CHARS_PER_SEC)
+      );
+      if (target !== lastCount) {
+        lastCount = target;
+        setShown(content.slice(0, target));
+        onTick?.();
+      }
+      if (target < content.length) {
+        raf = requestAnimationFrame(step);
+      } else {
         onDone?.();
       }
-    }, 55);
-    return () => clearInterval(timer);
+    };
+
+    setShown("");
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, animate]);
 
