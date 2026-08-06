@@ -24,7 +24,7 @@ export const DAILY_QUESTIONS = [
   "Qu'est-ce qui te manque en ce moment ?",
   "Quelle limite aimerais-tu poser, et à qui ?",
   "Qu'est-ce qui t'apaise quand tout va trop vite ?",
-  "De quoi as-tu besoin ce soir, là, maintenant ?",
+  "De quoi as-tu besoin là, maintenant ?",
   "Quel souvenir récent te réchauffe encore ?",
   "Qu'est-ce que tu fais uniquement pour faire plaisir aux autres ?",
   "Si demain était entièrement libre, tu en ferais quoi ?",
