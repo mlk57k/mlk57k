@@ -111,13 +111,14 @@ const config: Config = {
         "marquee": "marquee 32s linear infinite",
         "gradient-shift": "gradientShift 8s ease infinite",
         "breathe": "breathe 3.2s ease-in-out infinite",
-        "message-in": "messageIn 0.42s cubic-bezier(0.34,1.56,0.64,1) both",
+        "message-in": "messageIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
         "dot-bounce": "dotBounce 1.3s ease-in-out infinite",
         "send-pop": "sendPop 0.4s cubic-bezier(0.34,1.56,0.64,1)",
       },
       keyframes: {
         messageIn: {
-          "0%": { opacity: "0", transform: "translateY(12px) scale(0.96)" },
+          "0%": { opacity: "0", transform: "translateY(20px) scale(0.9)" },
+          "60%": { opacity: "1" },
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
         dotBounce: {

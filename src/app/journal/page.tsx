@@ -231,26 +231,26 @@ function JournalContent() {
       <header className="sticky top-0 z-40 border-b border-cream-200 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto max-w-2xl px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link href="/"><AppLogo size="sm" /></Link>
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-0.5">
             {streak > 0 && (
               <span
-                className="flex items-center gap-1 mr-1 px-2.5 py-1 rounded-full bg-coral-50 border border-coral-100 text-coral-600 text-xs font-semibold"
+                className="flex items-center gap-1 mr-1.5 px-2 py-0.5 rounded-full bg-coral-50 border border-coral-100 text-coral-600 text-xs font-semibold"
                 title={`${streak} jour${streak > 1 ? "s" : ""} d'affilée`}
               >
                 <Flame className="h-3.5 w-3.5" />
                 {streak}
               </span>
             )}
-            <Button asChild size="icon" variant="ghost" aria-label="Pause respiration">
+            <Button asChild size="icon" variant="ghost" aria-label="Pause respiration" className="h-9 w-9">
               <Link href="/respiration"><Wind className="h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="icon" variant="ghost" aria-label="Historique">
+            <Button asChild size="icon" variant="ghost" aria-label="Historique" className="h-9 w-9">
               <Link href="/journal/historique"><History className="h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="icon" variant="ghost" aria-label="Bilan">
+            <Button asChild size="icon" variant="ghost" aria-label="Bilan" className="h-9 w-9">
               <Link href="/bilan"><BarChart3 className="h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="icon" variant="ghost" aria-label="Paramètres">
+            <Button asChild size="icon" variant="ghost" aria-label="Paramètres" className="h-9 w-9">
               <Link href="/parametres"><Settings className="h-4 w-4" /></Link>
             </Button>
           </nav>
