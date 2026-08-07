@@ -12,6 +12,7 @@ import { computeStreaks } from "@/lib/streak";
 import { getDailyQuestion } from "@/lib/prompts";
 import { extractPrenom } from "@/lib/profile";
 import { FREE_MESSAGE_LIMIT } from "@/lib/free-messages";
+import { subscribeToPush, pushSupported } from "@/lib/push-client";
 
 const CHECKIN_MOODS = [
   { score: 5, color: "#8FA086", label: "Serein" },
@@ -45,6 +46,10 @@ function JournalContent() {
   const [prenom, setPrenom] = useState<string | null>(null);
   const [checkinMood, setCheckinMood] = useState<number | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  // Invite à activer les notifications (rattrapage : la plupart des inscrits
+  // n'ont jamais eu de vrai rappel, seulement des emails qui tombent en spam).
+  const [showPushNudge, setShowPushNudge] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
   // Confidences offertes restantes (null = abonné, illimité)
   const [remaining, setRemaining] = useState<number | null>(null);
   // Message du coach en train de s'écrire (effet machine à écrire)
@@ -64,6 +69,31 @@ function JournalContent() {
   function dismissInstallBanner() {
     localStorage.setItem("ancrage-install-dismissed", "1");
     setShowInstallBanner(false);
+  }
+
+  useEffect(() => {
+    // On propose d'activer les notifs seulement là où c'est réellement
+    // possible (push supporté : Android/desktop, ou iOS installé en PWA),
+    // si la permission n'a pas déjà été accordée/refusée, et pas déjà masqué.
+    if (!pushSupported()) return;
+    const perm = typeof Notification !== "undefined" ? Notification.permission : "denied";
+    const dismissed = localStorage.getItem("ancrage-push-dismissed") === "1";
+    if (perm === "default" && !dismissed) setShowPushNudge(true);
+  }, []);
+
+  async function enablePush() {
+    setPushBusy(true);
+    try {
+      const res = await subscribeToPush();
+      if (res.ok) setShowPushNudge(false);
+    } finally {
+      setPushBusy(false);
+    }
+  }
+
+  function dismissPushNudge() {
+    localStorage.setItem("ancrage-push-dismissed", "1");
+    setShowPushNudge(false);
   }
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -286,6 +316,32 @@ function JournalContent() {
             <button
               type="button"
               onClick={dismissInstallBanner}
+              aria-label="Masquer"
+              className="text-stone-300 hover:text-stone-500 flex-none p-1 -m-1"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {showPushNudge && !showInstallBanner && (
+          <div className="mb-4 rounded-2xl bg-coral-50 border border-coral-200 px-4 py-3 flex items-center gap-3">
+            <Sparkles className="h-5 w-5 text-coral-400 flex-none" />
+            <div className="flex-1 text-sm text-stone-700 leading-snug">
+              <span className="font-semibold">Reçois ton rappel du soir</span>
+              <span className="text-stone-500"> — une notification douce pour ne pas perdre le fil.</span>
+            </div>
+            <button
+              type="button"
+              onClick={enablePush}
+              disabled={pushBusy}
+              className="flex-none rounded-full bg-coral-400 px-3.5 py-1.5 text-xs font-semibold text-white transition-transform active:scale-95 disabled:opacity-60"
+            >
+              {pushBusy ? "…" : "Activer"}
+            </button>
+            <button
+              type="button"
+              onClick={dismissPushNudge}
               aria-label="Masquer"
               className="text-stone-300 hover:text-stone-500 flex-none p-1 -m-1"
             >

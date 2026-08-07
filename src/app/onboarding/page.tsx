@@ -6,6 +6,7 @@ import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildObjectifsText } from "@/lib/profile";
+import { subscribeToPush, pushSupported } from "@/lib/push-client";
 
 const OBJECTIFS = [
   { emoji: "🌊", label: "Gérer le stress et l'anxiété" },
@@ -255,9 +256,31 @@ export default function OnboardingPage() {
 
             {!reminderEnabled && <div className="mb-8" />}
 
-            <Button size="lg" className="w-full" onClick={() => setStep(5)}>
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={async () => {
+                // Moment idéal pour demander la permission : la personne vient
+                // d'accepter le rappel. Sans ça, le rappel du soir ne pourrait
+                // partir que par email. On n'attend pas indéfiniment ni ne bloque
+                // le parcours si c'est refusé ou non supporté (ex : iOS non installé).
+                if (reminderEnabled && pushSupported()) {
+                  try {
+                    await subscribeToPush();
+                  } catch {
+                    // ignoré : l'email reste le canal de secours
+                  }
+                }
+                setStep(5);
+              }}
+            >
               {reminderEnabled ? "Activer le rappel" : "Continuer sans rappel"}
             </Button>
+            {reminderEnabled && (
+              <p className="text-center text-xs text-stone-400 mt-3">
+                On te demandera l&apos;autorisation d&apos;envoyer des notifications.
+              </p>
+            )}
           </div>
         )}
 

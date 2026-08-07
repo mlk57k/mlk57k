@@ -89,8 +89,8 @@ export async function GET(request: Request) {
     try {
       // Push d'abord (si l'utilisateur a un appareil abonné), email en plus.
       const pushed = await sendPushToUser(admin, profile.id, {
-        title: "Ancrage",
-        body: "Comment s'est passée ta journée ? Trois minutes pour la déposer.",
+        title: "Ancrage 🌙",
+        body: "Ta soirée t'attend. Dépose ce que tu as sur le cœur, je t'écoute.",
         url: "/journal",
       });
       await sendDailyReminderEmail(profile.email, appUrl);
