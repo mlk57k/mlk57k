@@ -9,7 +9,7 @@ import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { computeStreaks } from "@/lib/streak";
-import { getDailyQuestion } from "@/lib/prompts";
+import { getDailyQuestion, pickDailyQuestion } from "@/lib/prompts";
 import { extractPrenom } from "@/lib/profile";
 import { FREE_MESSAGE_LIMIT } from "@/lib/free-messages";
 import { subscribeToPush, pushSupported } from "@/lib/push-client";
@@ -50,6 +50,9 @@ function JournalContent() {
   // n'ont jamais eu de vrai rappel, seulement des emails qui tombent en spam).
   const [showPushNudge, setShowPushNudge] = useState(false);
   const [pushBusy, setPushBusy] = useState(false);
+  // Question du jour : valeur déterministe au 1er rendu (SSR-safe), puis
+  // remplacée après montage par une question non répétée propre à l'appareil.
+  const [dailyQuestion, setDailyQuestion] = useState<string>(() => getDailyQuestion());
   // Confidences offertes restantes (null = abonné, illimité)
   const [remaining, setRemaining] = useState<number | null>(null);
   // Message du coach en train de s'écrire (effet machine à écrire)
@@ -79,6 +82,10 @@ function JournalContent() {
     const perm = typeof Notification !== "undefined" ? Notification.permission : "denied";
     const dismissed = localStorage.getItem("ancrage-push-dismissed") === "1";
     if (perm === "default" && !dismissed) setShowPushNudge(true);
+  }, []);
+
+  useEffect(() => {
+    setDailyQuestion(pickDailyQuestion());
   }, []);
 
   async function enablePush() {
@@ -415,11 +422,10 @@ function JournalContent() {
             <button
               type="button"
               onClick={() => {
-                const question = getDailyQuestion();
                 setMessages([{
                   id: `question-${Date.now()}`,
                   role: "assistant",
-                  content: question,
+                  content: dailyQuestion,
                   created_at: new Date().toISOString(),
                 }]);
               }}
@@ -429,7 +435,7 @@ function JournalContent() {
                 <Sparkles className="h-3.5 w-3.5" />
                 Question du jour
               </span>
-              <span className="block text-sm text-stone-700 leading-relaxed">{getDailyQuestion()}</span>
+              <span className="block text-sm text-stone-700 leading-relaxed">{dailyQuestion}</span>
               <span className="block mt-2.5 text-xs font-medium text-coral-400 group-hover:underline">
                 Y répondre →
               </span>
