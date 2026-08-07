@@ -94,6 +94,26 @@ export default function PaywallPage() {
     </span>
   );
 
+  const ApplePayMark = () => (
+    <span className="inline-flex items-center gap-1 rounded-md border border-cream-300 bg-white px-1.5 py-0.5 text-[11px] font-semibold text-stone-700">
+      <svg viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor" aria-hidden>
+        <path d="M11.05 8.53c-.02-1.5 1.22-2.22 1.28-2.26-.7-1.02-1.78-1.16-2.17-1.18-.92-.09-1.8.54-2.27.54-.47 0-1.19-.53-1.96-.51-1 .01-1.94.59-2.46 1.49-1.05 1.82-.27 4.51.76 5.99.5.72 1.1 1.53 1.88 1.5.76-.03 1.05-.49 1.96-.49.91 0 1.17.49 1.97.47.81-.01 1.33-.73 1.83-1.46.58-.84.82-1.65.83-1.69-.02-.01-1.59-.61-1.61-2.42zM9.62 4.2c.42-.5.7-1.2.62-1.9-.6.02-1.33.4-1.76.9-.39.44-.73 1.15-.64 1.83.67.05 1.36-.34 1.78-.83z"/>
+      </svg>
+      Pay
+    </span>
+  );
+  const GooglePayMark = () => (
+    <span className="inline-flex items-center gap-1 rounded-md border border-cream-300 bg-white px-1.5 py-0.5 text-[11px] font-semibold text-stone-700">
+      <svg viewBox="0 0 24 24" className="h-3 w-3" aria-hidden>
+        <path fill="#4285F4" d="M23 12.25c0-.79-.07-1.54-.2-2.25H12v4.26h6.16a5.27 5.27 0 0 1-2.28 3.46v2.87h3.69C21.7 18.6 23 15.7 23 12.25z"/>
+        <path fill="#34A853" d="M12 24c3.08 0 5.66-1.02 7.55-2.77l-3.69-2.87c-1.02.69-2.33 1.1-3.86 1.1-2.97 0-5.48-2-6.38-4.7H1.7v2.96A11.4 11.4 0 0 0 12 24z"/>
+        <path fill="#FBBC05" d="M5.62 14.76A6.86 6.86 0 0 1 5.62 9.24V6.28H1.7a11.4 11.4 0 0 0 0 11.44l3.92-2.96z"/>
+        <path fill="#EA4335" d="M12 4.75c1.67 0 3.17.57 4.35 1.7l3.26-3.26C17.66 1.2 15.08 0 12 0 7.5 0 3.62 2.58 1.7 6.28l3.92 2.96C6.52 6.75 9.03 4.75 12 4.75z"/>
+      </svg>
+      Pay
+    </span>
+  );
+
   return (
     <div className="min-h-screen bg-cream-50">
       {/* Halo doux en haut, façon lampe de chevet */}
@@ -216,6 +236,14 @@ export default function PaywallPage() {
             {loading ? "Redirection…" : CTA_LABELS[selected]}
           </button>
           {error && <p className="mt-2 text-center text-sm text-red-500">{error}</p>}
+
+          {/* Rassurance paiement : 1 tap avec les wallets, sans saisir de carte */}
+          <div className="mt-3 flex items-center justify-center gap-2 text-stone-500">
+            <ApplePayMark />
+            <GooglePayMark />
+            <span className="text-[12px] font-medium">Paye en 1 tap, sans saisir ta carte</span>
+          </div>
+
           <p className="mt-2.5 text-center text-[11.5px] leading-relaxed text-stone-400">
             Annulable en 1 clic depuis ton compte · Aucun prélèvement caché
             <br />
