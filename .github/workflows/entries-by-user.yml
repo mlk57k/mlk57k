@@ -1,0 +1,54 @@
+name: Entrées par utilisateur
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull keys from Vercel
+        run: |
+          npm install -g vercel@latest
+          mkdir -p .vercel
+          printf '{"projectId":"prj_3upPIEWu1x6wzrwU4AlLVKKGXdcJ","orgId":"team_Gk17lZmjSWqGtF6aE5W89x9A"}' > .vercel/project.json
+          vercel env pull .env.local --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "SB_KEY=$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "SB_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' .env.local | cut -d= -f2- | tr -d '\"')" >> $GITHUB_ENV
+          echo "::add-mask::$(grep '^SUPABASE_SERVICE_ROLE_KEY=' .env.local | cut -d= -f2- | tr -d '\"')"
+
+      - name: Entrées écrites par utilisateur (hors comptes fondateur)
+        run: |
+          curl -sS "$SB_URL/rest/v1/profiles?select=id,email&order=created_at.asc" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" > /tmp/profiles.json
+          python3 - <<'PYEOF'
+          import json, os, urllib.request
+          url = os.environ["SB_URL"]; key = os.environ["SB_KEY"]
+          profiles = json.load(open("/tmp/profiles.json"))
+          EXCLUDE = {"badnxko18@gmail.com", "glowy57360@gmail.com"}
+          def count_entries(uid):
+              req = urllib.request.Request(
+                  f"{url}/rest/v1/journal_entries?select=id&user_id=eq.{uid}",
+                  headers={"apikey": key, "Authorization": f"Bearer {key}",
+                           "Prefer": "count=exact", "Range": "0-0"})
+              with urllib.request.urlopen(req) as r:
+                  return int(r.headers.get("content-range", "0/0").split("/")[-1])
+          total_all = 0
+          total_real = 0
+          print("="*56)
+          print("  ENTRÉES ÉCRITES PAR UTILISATEUR")
+          print("="*56)
+          for p in profiles:
+              n = count_entries(p["id"])
+              total_all += n
+              email = p.get("email") or p["id"]
+              tag = "  (FONDATEUR, exclu)" if email in EXCLUDE else ""
+              if email not in EXCLUDE:
+                  total_real += n
+              if n > 0:
+                  print(f"  {n:3d}  {email}{tag}")
+          print("="*56)
+          print(f"  TOTAL (tous comptes)          : {total_all}")
+          print(f"  TOTAL hors badnxko + glowy    : {total_real}")
+          print("="*56)
+          PYEOF
