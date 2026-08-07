@@ -122,6 +122,10 @@ export async function POST(request: Request) {
     }
   } catch (err) {
     console.error("[webhook/stripe] erreur traitement:", err);
+    // On avait posé un verrou d'idempotence avant de traiter. Si le traitement
+    // échoue, on le retire : sinon le retry de Stripe serait vu comme un
+    // doublon et l'évènement serait perdu à jamais. On laisse Stripe réessayer.
+    await admin.from("stripe_events").delete().eq("id", event.id);
     return NextResponse.json({ error: "Erreur interne." }, { status: 500 });
   }
 
