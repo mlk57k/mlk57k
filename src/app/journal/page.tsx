@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mic, Send, Square, History, BarChart3, Settings, Flame, Sparkles, Smartphone, X, Wind } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { AppLogo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,9 @@ function JournalContent() {
   const [remaining, setRemaining] = useState<number | null>(null);
   // Message du coach en train de s'écrire (effet machine à écrire)
   const [typingId, setTypingId] = useState<string | null>(null);
+  // Fin des confidences offertes : on montre une transition douce dans la
+  // conversation (au lieu d'éjecter brutalement vers le paywall).
+  const [softPaywall, setSoftPaywall] = useState(false);
 
   useEffect(() => {
     const standalone =
@@ -109,6 +113,10 @@ function JournalContent() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (softPaywall) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [softPaywall]);
+
   function scrollToBottom() {
     // On ne suit la frappe que si l'utilisateur est déjà en bas de l'écran,
     // pour ne pas l'arracher à sa lecture s'il a remonté.
@@ -167,11 +175,15 @@ function JournalContent() {
         body: JSON.stringify({ content }),
       });
 
-      // Confidences offertes épuisées → paywall
+      // Confidences offertes épuisées → transition douce (pas d'éjection sèche).
+      // On garde le message de la personne dans le champ : il partira dès qu'elle
+      // continue en illimité.
       if (res.status === 402) {
         setMessages((m) => m.filter((msg) => msg.id !== optimistic.id));
         setText(content);
-        router.push("/paywall");
+        setRemaining(0);
+        setSoftPaywall(true);
+        track("paywall_soft_shown");
         return;
       }
 
@@ -402,6 +414,40 @@ function JournalContent() {
               </div>
             </div>
           )}
+
+          {/* Transition douce en fin de confidences offertes : le coach “parle”
+              une dernière fois, puis l'offre apparaît dans le fil. */}
+          {softPaywall && (
+            <div className="animate-message-in origin-bottom-left space-y-3">
+              <div className="flex justify-start">
+                <div className="max-w-[88%] rounded-2xl rounded-tl-sm bg-white border border-coral-100 px-4 py-3 text-sm leading-relaxed text-stone-700 shadow-sm space-y-2.5">
+                  <p>
+                    {prenom ? `${prenom}, on` : "On"} arrive au bout de tes 10 confidences
+                    offertes — et j&apos;aimerais vraiment continuer à t&apos;écouter.
+                  </p>
+                  <p>
+                    Ton premier mois est à <strong className="text-coral-600">1 €</strong>. Tu gardes
+                    tout : notre historique, ta mémoire, tes bilans du dimanche. Ton message est prêt,
+                    il partira dès qu&apos;on continue.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-coral-200 bg-coral-50/60 p-3.5">
+                <Link
+                  href="/paywall"
+                  onClick={() => track("paywall_soft_cta")}
+                  className="block w-full rounded-xl bg-gradient-coral py-3.5 text-center text-sm font-bold text-white shadow-glow-coral transition-transform active:scale-[0.98]"
+                >
+                  Continuer en illimité — 1er mois à 1 €
+                </Link>
+                <p className="mt-2 text-center text-[11.5px] text-stone-400">
+                  Apple&nbsp;Pay · Google&nbsp;Pay · annulable en 1 clic
+                </p>
+              </div>
+            </div>
+          )}
+
           <div ref={bottomRef} />
         </div>
 
