@@ -39,6 +39,12 @@ export function Hero() {
           Commencer ce soir
         </Link>
         <span className="text-[13px] text-[#9A8270]">10 confidences offertes à l&apos;inscription</span>
+        <Link
+          href="/cocon"
+          className="text-sm font-semibold text-[#B4694A] underline underline-offset-4 decoration-[#B4694A]/40 hover:text-[#96543A]"
+        >
+          ✨ Analyse ta chambre gratuitement →
+        </Link>
       </div>
 
       {/* Carte mockup : aperçu d'une entrée de journal */}

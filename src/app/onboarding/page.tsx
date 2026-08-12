@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildObjectifsText } from "@/lib/profile";
 import { subscribeToPush, pushSupported } from "@/lib/push-client";
+import { CoconAnalyzer } from "@/components/cocon-analyzer";
 
 const OBJECTIFS = [
   { emoji: "🌊", label: "Gérer le stress et l'anxiété" },
@@ -27,7 +28,7 @@ const ETATS = [
 
 const REMINDER_HOURS = [19, 20, 21, 22];
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function OnboardingPage() {
   const [etat, setEtat] = useState<string | null>(null);
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [reminderHour, setReminderHour] = useState(21);
+  const [coconDone, setCoconDone] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -127,10 +129,43 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 2 — Objectifs (multi) */}
+        {/* Step 2 — Cocon (photo de la chambre) */}
         {step === 2 && (
           <div className="animate-fade-up">
-            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">2 · Ton intention</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">2 · Ton cocon</p>
+            <h1 className="font-display text-3xl font-semibold text-stone-900 leading-tight mb-3">
+              Avant d&apos;écrire,<br />crée ton refuge.
+            </h1>
+            <p className="text-stone-500 text-base leading-relaxed mb-2">
+              Ancrage commence par ton espace. Prends ta chambre en photo — on en fait un cocon
+              plus propice au calme et au sommeil, là où tu poseras tes soirs.
+            </p>
+
+            <CoconAnalyzer
+              photoLabel="Prendre ma chambre en photo"
+              onResult={() => setCoconDone(true)}
+              renderFooter={() => (
+                <Button size="lg" className="w-full mt-5" onClick={() => setStep(3)}>
+                  Continuer
+                </Button>
+              )}
+            />
+
+            {!coconDone && (
+              <button
+                onClick={() => setStep(3)}
+                className="block mx-auto mt-4 text-sm text-stone-400 hover:text-stone-600"
+              >
+                Passer cette étape
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Step 3 — Objectifs (multi) */}
+        {step === 3 && (
+          <div className="animate-fade-up">
+            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">3 · Ton intention</p>
             <h1 className="font-display text-3xl font-semibold text-stone-900 leading-tight mb-3">
               Qu&apos;est-ce qui<br />t&apos;amène ici ?
             </h1>
@@ -156,16 +191,16 @@ export default function OnboardingPage() {
               ))}
             </div>
 
-            <Button size="lg" className="w-full" disabled={objectifs.length === 0} onClick={() => setStep(3)}>
+            <Button size="lg" className="w-full" disabled={objectifs.length === 0} onClick={() => setStep(4)}>
               Continuer
             </Button>
           </div>
         )}
 
-        {/* Step 3 — État actuel */}
-        {step === 3 && (
+        {/* Step 4 — État actuel */}
+        {step === 4 && (
           <div className="animate-fade-up">
-            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">3 · Ton point de départ</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">4 · Ton point de départ</p>
             <h1 className="font-display text-3xl font-semibold text-stone-900 leading-tight mb-3">
               Comment tu te sens<br />ces derniers temps ?
             </h1>
@@ -191,16 +226,16 @@ export default function OnboardingPage() {
               ))}
             </div>
 
-            <Button size="lg" className="w-full" disabled={!etat} onClick={() => setStep(4)}>
+            <Button size="lg" className="w-full" disabled={!etat} onClick={() => setStep(5)}>
               Continuer
             </Button>
           </div>
         )}
 
-        {/* Step 4 — Rituel */}
-        {step === 4 && (
+        {/* Step 5 — Rituel */}
+        {step === 5 && (
           <div className="animate-fade-up">
-            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">4 · Ton rituel</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">5 · Ton rituel</p>
             <h1 className="font-display text-3xl font-semibold text-stone-900 leading-tight mb-3">
               Un rappel,<br />tout en douceur.
             </h1>
@@ -271,7 +306,7 @@ export default function OnboardingPage() {
                     // ignoré : l'email reste le canal de secours
                   }
                 }
-                setStep(5);
+                setStep(6);
               }}
             >
               {reminderEnabled ? "Activer le rappel" : "Continuer sans rappel"}
@@ -284,10 +319,10 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 5 — Fonctionnement */}
-        {step === 5 && (
+        {/* Step 6 — Fonctionnement */}
+        {step === 6 && (
           <div className="animate-fade-up">
-            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">5 · Comment ça marche</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-coral-500 mb-4">6 · Comment ça marche</p>
             <h1 className="font-display text-3xl font-semibold text-stone-900 leading-tight mb-7">
               {prenom.trim() ? `${prenom.trim()}, tu déposes.` : "Tu déposes,"}<br />Ancrage reflète.
             </h1>

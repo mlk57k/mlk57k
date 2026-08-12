@@ -440,6 +440,13 @@ function JournalContent() {
                 Y répondre →
               </span>
             </button>
+
+            <Link
+              href="/cocon"
+              className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-coral-500 hover:underline"
+            >
+              🛏️ Analyse ton cocon
+            </Link>
           </div>
         )}
 
