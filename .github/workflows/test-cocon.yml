@@ -1,0 +1,49 @@
+name: Test Cocon (analyse chambre)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyser une vraie photo de chambre via l'endpoint live
+        run: |
+          python3 - <<'PYEOF'
+          import base64, json, urllib.request
+
+          # Photo de chambre libre (Unsplash)
+          img_url = "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1024&q=80"
+          ua = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"}
+          img = urllib.request.urlopen(urllib.request.Request(img_url, headers=ua)).read()
+          print(f"Image téléchargée : {len(img)} octets")
+
+          data_url = "data:image/jpeg;base64," + base64.b64encode(img).decode()
+          payload = json.dumps({"image": data_url}).encode()
+
+          req = urllib.request.Request(
+              "https://ancrage.xyz/api/cocon",
+              data=payload,
+              headers={"Content-Type": "application/json", "User-Agent": ua["User-Agent"]},
+              method="POST",
+          )
+          try:
+              resp = urllib.request.urlopen(req, timeout=60)
+              out = json.loads(resp.read())
+          except urllib.error.HTTPError as e:
+              print(f"HTTP {e.code}")
+              print(e.read().decode())
+              raise
+
+          a = out.get("analysis", {})
+          print("=" * 56)
+          print(f"  SCORE COCON : {a.get('score')}/10")
+          print("=" * 56)
+          print(f"Ambiance   : {a.get('ambiance')}")
+          print(f"Point fort : {a.get('pointFort')}")
+          print("\nAjustements :")
+          for i, c in enumerate(a.get("changements", []), 1):
+              print(f"  {i}. {c.get('titre')} — {c.get('detail')}")
+          print(f"\nPhrase finale : {a.get('phraseFinale')}")
+          print("=" * 56)
+          PYEOF
