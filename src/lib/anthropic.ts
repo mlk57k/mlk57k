@@ -343,15 +343,6 @@ const ROOM_TOOL: Anthropic.Tool = {
   },
 };
 
-const roomSchema = z.object({
-  lisible: z.boolean(),
-  score: z.number().min(1).max(10),
-  ambiance: z.string(),
-  point_fort: z.string(),
-  changements: z.array(z.object({ titre: z.string(), detail: z.string() })).max(6),
-  phrase_finale: z.string(),
-});
-
 export interface RoomAnalysis {
   lisible: boolean;
   score: number;
@@ -389,18 +380,26 @@ export async function generateRoomAnalysis(
   if (!toolBlock || toolBlock.type !== "tool_use") {
     throw new Error("L'analyse n'a pas pu être générée.");
   }
-  const parsed = roomSchema.safeParse(toolBlock.input);
-  if (!parsed.success) throw new Error("Réponse inattendue de l'IA.");
+
+  // Parsing tolérant : les modèles varient parfois (null, nombre en texte,
+  // champ manquant). On lit défensivement plutôt que de tout rejeter.
+  const raw = (toolBlock.input ?? {}) as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  const scoreNum = Number(raw.score);
+  const changementsRaw = Array.isArray(raw.changements) ? raw.changements : [];
 
   return {
-    lisible: parsed.data.lisible,
-    score: Math.min(10, Math.max(1, Math.round(parsed.data.score))),
-    ambiance: parsed.data.ambiance.trim(),
-    pointFort: parsed.data.point_fort.trim(),
-    changements: parsed.data.changements
-      .map((c) => ({ titre: c.titre.trim(), detail: c.detail.trim() }))
+    lisible: raw.lisible !== false, // vrai par défaut, faux seulement si explicite
+    score: Number.isFinite(scoreNum) ? Math.min(10, Math.max(1, Math.round(scoreNum))) : 6,
+    ambiance: str(raw.ambiance),
+    pointFort: str(raw.point_fort),
+    changements: changementsRaw
+      .map((c) => {
+        const o = (c ?? {}) as Record<string, unknown>;
+        return { titre: str(o.titre), detail: str(o.detail) };
+      })
       .filter((c) => c.titre && c.detail)
       .slice(0, 5),
-    phraseFinale: parsed.data.phrase_finale.trim(),
+    phraseFinale: str(raw.phrase_finale),
   };
 }
