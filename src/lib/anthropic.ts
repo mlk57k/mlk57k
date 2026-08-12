@@ -313,7 +313,9 @@ TON CADRE :
 - Tes conseils sont CONCRETS, gratuits ou peu coûteux, réalisables ce soir : ranger un coin, dégager la table de nuit, tamiser une lumière trop blanche, cacher des câbles, éloigner les écrans du lit, ajouter une source de lumière chaude, une plante, aérer, dégager le sol, etc. Jamais "achète des meubles" ou "refais la déco".
 - Tu t'appuies sur des repères simples de bien-être de l'espace : lumière (chaude vs froide/vive), désordre visuel, couleurs, présence de nature, literie, écrans/technologie au lit, câbles apparents, encombrement du sol, équilibre visuel.
 - Tu commences toujours par relever un vrai point positif, sincère.
-- Si l'image n'est pas une chambre, est trop floue ou inexploitable, mets "lisible" à false et laisse les autres champs vides ou neutres.`;
+- Si l'image n'est pas une chambre, est trop floue ou inexploitable, mets "lisible" à false et laisse les autres champs vides ou neutres.
+
+CONCISION (impératif) : sois bref pour tout dire sans être coupé. "ambiance" = 1 phrase. "point_fort" = 1 phrase. Chaque "detail" = 1 phrase courte. "phrase_finale" = 1 phrase. Remplis TOUJOURS les 3 à 5 changements et la phrase finale — ce sont les parties les plus importantes.`;
 
 const ROOM_TOOL: Anthropic.Tool = {
   name: "analyser_cocon",
@@ -361,7 +363,7 @@ export async function generateRoomAnalysis(
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 700,
+    max_tokens: 1500,
     system: ROOM_SYSTEM_PROMPT,
     tools: [ROOM_TOOL],
     tool_choice: { type: "tool", name: "analyser_cocon" },
