@@ -302,3 +302,105 @@ export async function generateWeeklySummary(
   }
   return textBlock.text.trim();
 }
+
+// ─── Cocon : analyse d'une photo de chambre (hameçon d'acquisition) ──────────
+
+const ROOM_SYSTEM_PROMPT = `Tu es le regard d'Ancrage sur l'espace du soir. On te montre la photo d'une chambre, et tu proposes des ajustements doux et concrets pour en faire un vrai cocon — un lieu propice au calme, à la détente et au sommeil.
+
+TON CADRE :
+- Français, tutoiement, chaleureux, jamais culpabilisant ni moralisateur.
+- AUCUNE allégation médicale ou psychologique : tu ne parles jamais d'anxiété, de dépression ou de trouble comme d'un diagnostic. Tu parles d'ambiance "plus apaisante", "plus propice au calme et au sommeil".
+- Tes conseils sont CONCRETS, gratuits ou peu coûteux, réalisables ce soir : ranger un coin, dégager la table de nuit, tamiser une lumière trop blanche, cacher des câbles, éloigner les écrans du lit, ajouter une source de lumière chaude, une plante, aérer, dégager le sol, etc. Jamais "achète des meubles" ou "refais la déco".
+- Tu t'appuies sur des repères simples de bien-être de l'espace : lumière (chaude vs froide/vive), désordre visuel, couleurs, présence de nature, literie, écrans/technologie au lit, câbles apparents, encombrement du sol, équilibre visuel.
+- Tu commences toujours par relever un vrai point positif, sincère.
+- Si l'image n'est pas une chambre, est trop floue ou inexploitable, mets "lisible" à false et laisse les autres champs vides ou neutres.`;
+
+const ROOM_TOOL: Anthropic.Tool = {
+  name: "analyser_cocon",
+  description: "Analyse la photo d'une chambre et propose des ajustements apaisants",
+  input_schema: {
+    type: "object",
+    properties: {
+      lisible: { type: "boolean", description: "true si l'image est bien une chambre exploitable" },
+      score: { type: "number", description: "À quel point la chambre est déjà un cocon apaisant, de 1 (à revoir) à 10 (parfait cocon)." },
+      ambiance: { type: "string", description: "Une phrase courte qui décrit l'ambiance actuelle de la pièce." },
+      point_fort: { type: "string", description: "Un élément déjà réussi, formulé avec sincérité." },
+      changements: {
+        type: "array",
+        description: "3 à 5 ajustements doux et concrets, du plus impactant au moins impactant.",
+        items: {
+          type: "object",
+          properties: {
+            titre: { type: "string", description: "Titre très court (2 à 5 mots)." },
+            detail: { type: "string", description: "Une phrase concrète expliquant quoi faire et pourquoi ça apaise." },
+          },
+          required: ["titre", "detail"],
+        },
+      },
+      phrase_finale: { type: "string", description: "Une phrase d'encouragement douce, tournée vers le rituel du soir." },
+    },
+    required: ["lisible", "score", "ambiance", "point_fort", "changements", "phrase_finale"],
+  },
+};
+
+const roomSchema = z.object({
+  lisible: z.boolean(),
+  score: z.number().min(1).max(10),
+  ambiance: z.string(),
+  point_fort: z.string(),
+  changements: z.array(z.object({ titre: z.string(), detail: z.string() })).max(6),
+  phrase_finale: z.string(),
+});
+
+export interface RoomAnalysis {
+  lisible: boolean;
+  score: number;
+  ambiance: string;
+  pointFort: string;
+  changements: { titre: string; detail: string }[];
+  phraseFinale: string;
+}
+
+export async function generateRoomAnalysis(
+  imageBase64: string,
+  mediaType: "image/jpeg" | "image/png" | "image/webp",
+  apiKey: string
+): Promise<RoomAnalysis> {
+  const client = new Anthropic({ apiKey });
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: 700,
+    system: ROOM_SYSTEM_PROMPT,
+    tools: [ROOM_TOOL],
+    tool_choice: { type: "tool", name: "analyser_cocon" },
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: mediaType, data: imageBase64 } },
+          { type: "text", text: "Voici ma chambre. Dis-moi comment en faire un cocon plus apaisant pour le soir." },
+        ],
+      },
+    ],
+  });
+
+  const toolBlock = response.content.find((b) => b.type === "tool_use");
+  if (!toolBlock || toolBlock.type !== "tool_use") {
+    throw new Error("L'analyse n'a pas pu être générée.");
+  }
+  const parsed = roomSchema.safeParse(toolBlock.input);
+  if (!parsed.success) throw new Error("Réponse inattendue de l'IA.");
+
+  return {
+    lisible: parsed.data.lisible,
+    score: Math.min(10, Math.max(1, Math.round(parsed.data.score))),
+    ambiance: parsed.data.ambiance.trim(),
+    pointFort: parsed.data.point_fort.trim(),
+    changements: parsed.data.changements
+      .map((c) => ({ titre: c.titre.trim(), detail: c.detail.trim() }))
+      .filter((c) => c.titre && c.detail)
+      .slice(0, 5),
+    phraseFinale: parsed.data.phrase_finale.trim(),
+  };
+}
