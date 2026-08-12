@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, Loader2, Check, RefreshCw } from "lucide-react";
+import { Camera, Loader2, Check, RefreshCw, Share2 } from "lucide-react";
 import type { RoomAnalysis } from "@/lib/anthropic";
 import { downscaleImage } from "@/lib/image";
+import { shareCoconScore } from "@/lib/cocon-share";
 
 function ScoreRing({ score }: { score: number }) {
   const r = 34;
@@ -46,6 +47,19 @@ export function CoconAnalyzer({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RoomAnalysis | null>(null);
+  const [sharing, setSharing] = useState(false);
+
+  async function share() {
+    if (!result) return;
+    setSharing(true);
+    try {
+      await shareCoconScore(result);
+    } catch {
+      // ignoré
+    } finally {
+      setSharing(false);
+    }
+  }
 
   async function handleFile(file: File) {
     setError(null);
@@ -142,6 +156,15 @@ export function CoconAnalyzer({
               </p>
             )}
           </div>
+
+          <button
+            onClick={share}
+            disabled={sharing}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-coral-200 bg-white py-3.5 text-sm font-bold text-coral-600 transition-transform active:scale-[0.98] disabled:opacity-60"
+          >
+            <Share2 className="h-4 w-4" />
+            {sharing ? "Préparation…" : "Partager mon score"}
+          </button>
 
           {renderFooter?.({ analysis: result, reset })}
 
